@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>汎用TRPGサポート</title>
+    <title>BUFCON</title>
     <style>
         :root {
             --primary-color: #2d2d2e;
@@ -40,6 +40,7 @@
             --font-size-md: 14px;
             --font-size-lg: 16px;
             --font-size-xl: 18px;
+            --font-size-xxl: 30px;
         }
         * {
             margin: 0;
@@ -65,9 +66,20 @@
         .header {
             background: var(--primary-color);
             color: white;
-            padding: var(--spacing-L);
+            padding-top: var(--spacing-m);
+            padding-bottom: 0;
             text-align: center;
-            font-size: var(--font-size-xl);
+            font-size: var(--font-size-xxl);
+            font-weight: 800;
+        }
+
+        .header2 {
+            background: var(--primary-color);
+            color: white;
+            padding-top: 0;
+            padding-bottom: var(--spacing-L);
+            text-align: center;
+            font-size: var(--font-size-xs);
             font-weight: 600;
         }
         
@@ -166,7 +178,7 @@
             color: var(--add-hover);
         }
 
-        /* アコーディオン内容の表示切替（ブラウザ互換な実装） */
+        /* 追加フォーム */
         details > :not(summary) {
             max-height: 0;
             opacity: 0;
@@ -637,7 +649,7 @@
             cursor: pointer;
         }
 
-        /* ---------- ユーティリティクラス（インライン置換用） ---------- */
+        /* ---ユーティリティクラス--- */
         .full-width { width: 100%; }
         .hidden { display: none; }
         .mt-8 { margin-top: 8px; }
@@ -661,7 +673,8 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">汎用TRPGサポート</div>
+        <div class="header">BUFCON</div>
+        <div class="header2">TRPG戦闘サポートツール</div>
         <div class="content">
             <div class="section">
                 <div class="section-header collapsed" data-section="import-export">
