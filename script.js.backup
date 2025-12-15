@@ -154,8 +154,8 @@ function loadData() {
     
     renderStats();
     renderBuffs();
-    renderPackage('judge');
-    renderPackage('attack');
+    renderJudges();
+    renderAttacks();
     updateStatSelects();
     updateBuffTargetDropdown();
 }
@@ -254,8 +254,8 @@ function importData() {
         
         renderStats();
         renderBuffs();
-        renderPackage('judge');
-        renderPackage('attack');
+        renderJudges();
+        renderAttacks();
         updateStatSelects();
         updateBuffTargetDropdown();
         saveData();
@@ -378,31 +378,23 @@ function updateBuffTargetDropdown() {
     
     let options = [
         { value: 'all-judge', label: 'すべての判定' },
-        { value: 'all-attack', label: 'すべての攻撃' },
-        { value: '', label: '--判定--', isCategory: true },
+        { value: 'all-attack', label: 'すべての攻撃' }
     ];
     
     judges.forEach(j => {
         options.push({ value: 'judge:' + j.name, label: escapeHtml(j.name) + ' (判定)' });
     });
     
-    options.push({ value: '', label: '---攻撃---', isCategory: true });
-    
     attacks.forEach(a => {
         options.push({ value: 'attack:' + a.name, label: escapeHtml(a.name) + ' (攻撃)' });
     });
     
-    dropdown.innerHTML = options.map(opt => {
-        if (opt.isCategory) {
-            return `<div style="padding: 6px 8px; font-weight: 600; color: #999; font-size: 12px; pointer-events: none; user-select: none;">${opt.label}</div>`;
-        }
-        return `
-            <label class="multi-select-option">
-                <input type="checkbox" value="${escapeHtml(opt.value)}" ${selectedBuffTargets.includes(opt.value) ? 'checked' : ''}>
-                ${opt.label}
-            </label>
-        `;
-    }).join('');
+    dropdown.innerHTML = options.map(opt => `
+        <label class="multi-select-option">
+            <input type="checkbox" value="${escapeHtml(opt.value)}" ${selectedBuffTargets.includes(opt.value) ? 'checked' : ''}>
+            ${opt.label}
+        </label>
+    `).join('');
     
     dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         cb.addEventListener('change', () => {
@@ -427,17 +419,6 @@ function updateBuffTargetDisplay() {
     } else {
         display.textContent = `${selectedBuffTargets.length}個選択`;
     }
-}
-
-/**
- * 対象の表示名を取得
- */
-function getTargetText(target) {
-    if (target === 'all-judge') return 'すべての判定';
-    if (target === 'all-attack') return 'すべての攻撃';
-    if (target.startsWith('judge:')) return target.substring(6);
-    if (target.startsWith('attack:')) return target.substring(7);
-    return target;
 }
 
 // ========================================
@@ -483,8 +464,8 @@ function addBuff() {
     updateBuffTargetDropdown();
     
     renderBuffs();
-    updatePackageOutput('judge');
-    updatePackageOutput('attack');
+    updateJudgeOutput();
+    updateAttackOutput();
     saveData();
 }
 
@@ -535,8 +516,8 @@ function bulkAdd(type) {
             },
             afterAdd: () => {
                 renderBuffs();
-                updatePackageOutput('judge');
-                updatePackageOutput('attack');
+                updateJudgeOutput();
+                updateAttackOutput();
             }
         },
         'judge': {
@@ -553,7 +534,7 @@ function bulkAdd(type) {
                 return { name, roll, stat };
             },
             afterAdd: () => {
-                renderPackage('judge');
+                renderJudges();
                 updateBuffTargetDropdown();
             }
         },
@@ -571,7 +552,7 @@ function bulkAdd(type) {
                 return { name, roll, stat };
             },
             afterAdd: () => {
-                renderPackage('attack');
+                renderAttacks();
                 updateBuffTargetDropdown();
             }
         }
@@ -619,8 +600,8 @@ function toggleBuff(index) {
         buffs[index].turn = buffs[index].originalTurn;
     }
     renderBuffs();
-    updatePackageOutput('judge');
-    updatePackageOutput('attack');
+    updateJudgeOutput();
+    updateAttackOutput();
     saveData();
 }
 
@@ -629,8 +610,8 @@ function removeBuff(index) {
     
     buffs.splice(index, 1);
     renderBuffs();
-    updatePackageOutput('judge');
-    updatePackageOutput('attack');
+    updateJudgeOutput();
+    updateAttackOutput();
     saveData();
 }
 
@@ -648,8 +629,8 @@ function progressTurn() {
     
     if (changed) {
         renderBuffs();
-        updatePackageOutput('judge');
-        updatePackageOutput('attack');
+        updateJudgeOutput();
+        updateAttackOutput();
         saveData();
         showToast('ターンを経過させました', 'success');
     } else {
@@ -729,6 +710,63 @@ function attachBuffEvents() {
     });
 }
 
+/**
+ * 汎用アイテムイベントアタッチ関数
+ */
+function attachItemEvents(type, callbacks = {}) {
+    const typeConfig = {
+        'judge': {
+            listId: 'judgeList',
+            onSelect: selectJudge,
+            onRemove: removeJudge
+        },
+        'attack': {
+            listId: 'attackList',
+            onSelect: selectAttack,
+            onRemove: removeAttack
+        }
+    };
+    
+    const config = typeConfig[type];
+    if (!config) return;
+    
+    const listElement = document.getElementById(config.listId);
+    if (!listElement) return;
+    
+    listElement.querySelectorAll(`[data-type="${type}"]`).forEach(el => {
+        const i = parseInt(el.getAttribute('data-index'));
+        if (isNaN(i)) return;
+        
+        el.addEventListener('click', () => config.onSelect(i));
+        el.addEventListener('dragstart', (e) => handleDragStart(e, i, type));
+        el.addEventListener('dragover', handleDragOver);
+        el.addEventListener('dragleave', handleDragLeave);
+        el.addEventListener('drop', (e) => handleDrop(e, i, type));
+        el.addEventListener('dragend', handleDragEnd);
+    });
+    
+    listElement.querySelectorAll(`[data-remove-type="${type}"]`).forEach(btn => {
+        const i = parseInt(btn.getAttribute('data-remove'));
+        if (isNaN(i)) return;
+        
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            config.onRemove(i);
+        });
+    });
+}
+
+/**
+ * 対象の表示名を取得
+ */
+function getTargetText(target) {
+    if (target === 'all-judge') return 'すべての判定';
+    if (target === 'all-attack') return 'すべての攻撃';
+    if (target.startsWith('judge:')) return target.substring(6);
+    if (target.startsWith('attack:')) return target.substring(7);
+    return target;
+}
+
 // ========================================
 // ドラッグ&ドロップ
 // ========================================
@@ -790,11 +828,11 @@ function handleDrop(e, targetIndex, type) {
     arr.splice(insertIndex, 0, item);
     
     if (type === 'buff') renderBuffs();
-    else if (type === 'judge') renderPackage('judge');
-    else if (type === 'attack') renderPackage('attack');
+    else if (type === 'judge') renderJudges();
+    else if (type === 'attack') renderAttacks();
     
-    updatePackageOutput('judge');
-    updatePackageOutput('attack');
+    updateJudgeOutput();
+    updateAttackOutput();
     saveData();
 }
 
@@ -805,7 +843,7 @@ function handleDragEnd(e) {
 }
 
 // ========================================
-// 判定・攻撃パッケージ管理
+// 判定パッケージ管理
 // ========================================
 
 function addJudge() {
@@ -822,7 +860,7 @@ function addJudge() {
     document.getElementById('judgeName').value = '';
     document.getElementById('judgeRoll').value = '';
     
-    renderPackage('judge');
+    renderJudges();
     updateBuffTargetDropdown();
     saveData();
 }
@@ -831,61 +869,18 @@ function removeJudge(index) {
     if (index < 0 || index >= judges.length) return;
     
     judges.splice(index, 1);
+    renderJudges();
+    updateBuffTargetDropdown();
+    updateJudgeOutput();
+    saveData();
+}
+
+function renderJudges() {
     renderPackage('judge');
-    updateBuffTargetDropdown();
-    updatePackageOutput('judge');
-    saveData();
 }
 
-function addAttack() {
-    const name = document.getElementById('attackName').value.trim();
-    const roll = document.getElementById('attackRoll').value.trim();
-    const stat = document.getElementById('attackStat').value;
-    
-    if (!name || !roll) {
-        showToast('攻撃名と攻撃ロールを入力してください', 'error');
-        return;
-    }
-    
-    attacks.push({ name: name, roll: roll, stat: stat });
-    document.getElementById('attackName').value = '';
-    document.getElementById('attackRoll').value = '';
-    
+function renderAttacks() {
     renderPackage('attack');
-    updateBuffTargetDropdown();
-    saveData();
-}
-
-function removeAttack(index) {
-    if (index < 0 || index >= attacks.length) return;
-    
-    attacks.splice(index, 1);
-    renderPackage('attack');
-    updateBuffTargetDropdown();
-    updatePackageOutput('attack');
-    saveData();
-}
-
-function selectJudge(index) {
-    selectPackage(index, 'judge');
-}
-
-function selectAttack(index) {
-    selectPackage(index, 'attack');
-}
-
-/**
- * 汎用選択関数（判定・攻撃パッケージ）
- */
-function selectPackage(index, type) {
-    const array = type === 'judge' ? judges : attacks;
-    
-    if (index < 0 || index >= array.length) return;
-    
-    document.querySelectorAll(`[data-type="${type}"]`).forEach(el => el.classList.remove('selected'));
-    const target = document.querySelector(`[data-type="${type}"][data-index="${index}"]`);
-    if (target) target.classList.add('selected');
-    updatePackageOutput(type, index);
 }
 
 /**
@@ -929,50 +924,100 @@ function renderPackage(type) {
     attachItemEvents(type);
 }
 
+function selectJudge(index) {
+    selectPackage(index, 'judge');
+}
+
+function selectAttack(index) {
+    selectPackage(index, 'attack');
+}
+
 /**
- * 汎用アイテムイベントアタッチ関数
+ * 汎用選択関数（判定・攻撃パッケージ）
  */
-function attachItemEvents(type) {
-    const typeConfig = {
-        'judge': {
-            listId: 'judgeList',
-            onSelect: selectJudge,
-            onRemove: removeJudge
-        },
-        'attack': {
-            listId: 'attackList',
-            onSelect: selectAttack,
-            onRemove: removeAttack
+function selectPackage(index, type) {
+    const array = type === 'judge' ? judges : attacks;
+    const outputFunc = type === 'judge' ? updateJudgeOutput : updateAttackOutput;
+    
+    if (index < 0 || index >= array.length) return;
+    
+    document.querySelectorAll(`[data-type="${type}"]`).forEach(el => el.classList.remove('selected'));
+    const target = document.querySelector(`[data-type="${type}"][data-index="${index}"]`);
+    if (target) target.classList.add('selected');
+    outputFunc(index);
+}
+
+    if (selectedIndex === null) {
+        const selected = document.querySelector('[data-type="judge"].selected');
+        if (!selected) {
+            document.getElementById('judgeOutput').textContent = '判定パッケージを選択してください';
+            return;
         }
-    };
+        selectedIndex = parseInt(selected.getAttribute('data-index'));
+    }
     
-    const config = typeConfig[type];
-    if (!config) return;
+    if (selectedIndex < 0 || selectedIndex >= judges.length) return;
     
-    const listElement = document.getElementById(config.listId);
-    if (!listElement) return;
+    const judge = judges[selectedIndex];
+    const targetType = document.querySelector('input[name="targetType"]:checked')?.value || 'none';
+    const targetValue = document.getElementById('targetValue').value.trim();
     
-    listElement.querySelectorAll(`[data-type="${type}"]`).forEach(el => {
-        const i = parseInt(el.getAttribute('data-index'));
-        if (isNaN(i)) return;
-        
-        el.addEventListener('click', () => config.onSelect(i));
-        el.addEventListener('dragstart', (e) => handleDragStart(e, i, type));
-        el.addEventListener('dragover', handleDragOver);
-        el.addEventListener('dragleave', handleDragLeave);
-        el.addEventListener('drop', (e) => handleDrop(e, i, type));
-        el.addEventListener('dragend', handleDragEnd);
+    let command = judge.roll;
+    
+    if (judge.stat) {
+        command += '+{' + judge.stat + '}';
+    }
+    
+    const activeBuffs = buffs.filter(b => 
+        b.active && 
+        b.effect &&
+        (b.targets.includes('all-judge') || b.targets.includes('judge:' + judge.name))
+    );
+    
+    activeBuffs.forEach(buff => {
+        command += buff.effect;
     });
     
-    listElement.querySelectorAll(`[data-remove-type="${type}"]`).forEach(btn => {
-        const i = parseInt(btn.getAttribute('data-remove'));
-        if (isNaN(i)) return;
-        
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            config.onRemove(i);
-        });
-    });
+    if (targetType === 'gte' && targetValue) {
+        command += `>=${targetValue}`;
+    } else if (targetType === 'lte' && targetValue) {
+        command += `=<${targetValue}`;
+    }
+    
+    document.getElementById('judgeOutput').textContent = command;
+}
+
+// ========================================
+// 攻撃パッケージ管理
+// ========================================
+
+function addAttack() {
+    const name = document.getElementById('attackName').value.trim();
+    const roll = document.getElementById('attackRoll').value.trim();
+    const stat = document.getElementById('attackStat').value;
+    
+    if (!name || !roll) {
+        showToast('攻撃名と攻撃ロールを入力してください', 'error');
+        return;
+    }
+    
+    attacks.push({ name: name, roll: roll, stat: stat });
+    document.getElementById('attackName').value = '';
+    document.getElementById('attackRoll').value = '';
+    
+    renderAttacks();
+    updateBuffTargetDropdown();
+    saveData();
+}
+
+function removeAttack(index) {
+    if (index < 0 || index >= attacks.length) return;
+    
+    attacks.splice(index, 1);
+    renderAttacks();
+    updateBuffTargetDropdown();
+    updateAttackOutput();
+    saveData();
 }
 
 /**
