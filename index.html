@@ -166,35 +166,19 @@
             color: var(--add-hover);
         }
 
-        details {
-        /* --------アコーディオンの中身のスタイル-------- */
-        &::details-content {
-            transition:
-            height 0.4s,
-            opacity 0.4s,
-            content-visibility 0.4s allow-discrete;
-            height: 0;
+        /* アコーディオン内容の表示切替（ブラウザ互換な実装） */
+        details > :not(summary) {
+            max-height: 0;
             opacity: 0;
-            overflow: clip;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.4s ease;
         }
-
-        /* --------アコーディオンの中身のスタイル（開いている時）-------- */
-        &[open]::details-content {
+        details[open] > :not(summary) {
+            max-height: 1000px;
             opacity: 1;
             overflow: visible;
         }
-        }
-        /* height:0（数値型） → auto（文字型） のアニメーションを可能にするための指定 */
-        @supports (interpolate-size: allow-keywords) {
-            
-        :root {
-            interpolate-size: allow-keywords; 
-        }
-        details[open]::details-content {
-            height: auto;
-        }
-        }
-        
+
         .add-area {
             display: flex;
             gap: 6px;
@@ -652,6 +636,27 @@
         .multi-select-option input[type="checkbox"] {
             cursor: pointer;
         }
+
+        /* ---------- ユーティリティクラス（インライン置換用） ---------- */
+        .full-width { width: 100%; }
+        .hidden { display: none; }
+        .mt-8 { margin-top: 8px; }
+        .mt-6 { margin-top: 6px; }
+        .mb-12 { margin-bottom: 12px; }
+        .pt-12 { padding-top: 12px; }
+        .bt-top { border-top: 2px solid var(--border-color-dark); }
+        .textarea-mono { width: 100%; padding: 8px; border: 1px solid var(--border-color-light); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; }
+        .row-controls { display: flex; gap: 6px; margin-top: 6px; }
+        .flex-1 { flex: 1; }
+        .btn--secondary { background: var(--add-color); }
+        .btn--muted { background: var(--text-muted); }
+        .btn--info { background: var(--info-color); }
+        .btn--danger { background: var(--danger-color); }
+        .small-text { font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
+        .label-muted { font-size: 12px; font-weight: 600; color: #555; display: block; margin-bottom: 6px; }
+        .input-narrow { width: 70px; flex: 0 0 70px; }
+        .input-color { width: 16px; flex: 0 0 16px; min-width: 36px; }
+        .input-compact { width: 60px; padding: 4px 6px; border: 1px solid var(--border-color-light); border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -664,16 +669,16 @@
                     <span class="arrow">▼</span>
                 </div>
                 <div class="section-body collapsed">
-                    <div style="margin-bottom: 12px;">
-                        <button class="add-btn" id="exportToClipboard" style="width: 100%; background: var(--info-color);">📋 設定をクリップボードにコピー</button>
+                    <div class="mb-12">
+                        <button class="add-btn btn--info full-width" id="exportToClipboard">📋 設定をクリップボードにコピー</button>
                     </div>
                     <div>
-                        <label style="font-size: 12px; font-weight: 600; color: #555; display: block; margin-bottom: 6px;">JSONを貼り付けて読み込み:</label>
-                        <textarea id="importText" placeholder='{"stats":[...],"buffs":[...],...}' style="width: 100%; height: 120px; padding: 8px; border: 1px solid var(--border-color-light); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical;"></textarea>
-                        <button class="add-btn" id="importConfirm" style="width: 100%; margin-top: 6px; background: var(--add-color);">読み込み実行</button>
+                        <label class="label-muted">JSONを貼り付けて読み込み:</label>
+                        <textarea id="importText" placeholder='{"stats":[...],"buffs":[...],...}' class="textarea-mono" style="height:120px;"></textarea>
+                        <button class="add-btn full-width mt-6" id="importConfirm">読み込み実行</button>
                     </div>
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 2px solid var(--border-color-dark);">
-                        <button class="add-btn" id="resetBtn" style="width: 100%; background: var(--danger-color);">🔄 すべて初期化</button>
+                    <div class="mt-12 pt-12 bt-top">
+                        <button class="add-btn btn--danger full-width" id="resetBtn">🔄 すべて初期化</button>
                     </div>
                 </div>
             </div>
@@ -686,7 +691,7 @@
                 <div class="section-body">
                     <details class="add-area-container" open>
                         <summary>追加フォーム</summary>
-                        <div class="add-area" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                        <div class="add-area no-border-bottom" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
                             <div class="add-area-inputs">
                                 <input type="text" id="statName" placeholder="ステータス名 (,区切りで複数追加可)">
                             </div>
@@ -720,8 +725,8 @@
                                 </div>
                                 <input type="text" id="buffDescription" placeholder="説明">
                                 <input type="text" id="buffEffect" placeholder="効果">
-                                <input type="number" id="buffTurn" placeholder="ターン" style="width: 70px; flex: 0 0 70px;">
-                                <input type="color" id="buffColor" value="#0079FF" list="buffColor-list" style="width: 16px; flex: 0 0 16px; min-width: 36px;">
+                                <input type="number" id="buffTurn" placeholder="ターン" class="input-narrow">
+                                <input type="color" id="buffColor" value="#0079FF" list="buffColor-list" class="input-color">
                                 <datalist id="buffColor-list">
                                     <option value="#0079FF"></option>
                                     <option value="#953D96"></option>
@@ -737,15 +742,15 @@
                             </div>
                             <button class="add-btn" id="addBuffBtn">+</button>
                         </div>
-                        <div style="margin-top: 8px;">
-                            <button class="add-btn" id="bulkAddBtn" style="width: 100%; background: var(--secondary-color);">📋 一括追加　▼</button>
-                            <div id="bulkAddArea" style="display: none; margin-top: 8px;">
-                                <textarea id="bulkAddText" placeholder="例: マッスルベアー|すべての攻撃|筋力ボーナスUP|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" style="width: 100%; height: 100px; padding: 8px; border: 1px solid var(--border-color-light); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical;"></textarea>
-                                <div style="display: flex; gap: 6px; margin-top: 6px;">
-                                    <button class="add-btn" id="bulkAddConfirm" style="flex: 1; background: var(--add-color);">追加を実行</button>
-                                    <button class="add-btn" id="bulkAddCancel" style="flex: 1; background: var(--text-muted);">キャンセル</button>
+                        <div class="mt-8">
+                            <button class="add-btn btn--secondary full-width" id="bulkAddBtn">📋 一括追加　▼</button>
+                            <div id="bulkAddArea" class="hidden mt-8">
+                                <textarea id="bulkAddText" placeholder="例: マッスルベアー|すべての攻撃|筋力ボーナスUP|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
+                                <div class="row-controls">
+                                    <button class="add-btn flex-1" id="bulkAddConfirm">追加を実行</button>
+                                    <button class="add-btn btn--muted flex-1" id="bulkAddCancel">キャンセル</button>
                                 </div>
-                                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;">形式: バフ名|効果先1,効果先2|説明|効果|ターン|カラーコード<br>※カラーコードは省略可(省略時: #0079FF)</div>
+                                <div class="small-text">形式: バフ名|効果先1,効果先2|説明|効果|ターン|カラーコード<br>※カラーコードは省略可(省略時: #0079FF)</div>
                             </div>
                         </div>
                     </details>
@@ -770,27 +775,27 @@
                             <div class="add-area-inputs">
                                 <input type="text" id="judgeName" placeholder="判定名">
                                 <input type="text" id="judgeRoll" placeholder="判定ロール (例: 1d20)">
-                                <select id="judgeStat" style="width: 120px; flex: 0 0 120px;">
+                                <select id="judgeStat" class="input-narrow">
                                     <option value="">なし</option>
                                 </select>
                             </div>
                             <button class="add-btn" id="addJudgeBtn">+</button>
                         </div>
-                        <div style="margin-top: 8px;">
-                            <button class="add-btn" id="bulkAddJudgeBtn" style="width: 100%; background: var(--secondary-color);">📋 一括追加　▼</button>
-                            <div id="bulkAddJudgeArea" style="display: none; margin-top: 8px;">
-                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1|器用度&#10;回避判定|1d20|DEX" style="width: 100%; height: 80px; padding: 8px; border: 1px solid var(--border-color-light); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical;"></textarea>
-                                <div style="display: flex; gap: 6px; margin-top: 6px;">
-                                    <button class="add-btn" id="bulkAddJudgeConfirm" style="flex: 1; background: var(--add-color);">追加を実行</button>
-                                    <button class="add-btn" id="bulkAddJudgeCancel" style="flex: 1; background: var(--text-muted);">キャンセル</button>
+                        <div class="mt-8">
+                            <button class="add-btn btn--secondary full-width" id="bulkAddJudgeBtn">📋 一括追加　▼</button>
+                            <div id="bulkAddJudgeArea" class="hidden mt-8">
+                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1|器用度&#10;回避判定|1d20|DEX" class="textarea-mono" style="height:80px;"></textarea>
+                                <div class="row-controls">
+                                    <button class="add-btn flex-1" id="bulkAddJudgeConfirm">追加を実行</button>
+                                    <button class="add-btn btn--muted flex-1" id="bulkAddJudgeCancel">キャンセル</button>
                                 </div>
-                                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;">形式: 判定名|判定ロール|ステータス名<br>※ステータス名は省略可</div>
+                                <div class="small-text">形式: 判定名|判定ロール|ステータス名<br>※ステータス名は省略可</div>
                             </div>
                         </div>
                     </details>
                     <div class="item-list" id="judgeList"></div>
                     <div class="target-options">
-                        <label style="font-size: 12px; font-weight: 600; color: #555;">目標値:</label>
+                        <label class="label-muted">目標値:</label>
                         <div class="radio-option">
                             <input type="radio" name="targetType" id="targetNone" value="none" checked>
                             <label for="targetNone">なし</label>
@@ -803,7 +808,7 @@
                             <input type="radio" name="targetType" id="targetLte" value="lte">
                             <label for="targetLte">=&lt;</label>
                         </div>
-                        <input type="number" id="targetValue" placeholder="値" style="width: 60px; padding: 4px 6px; border: 1px solid var(--border-color-light); border-radius: 4px;">
+                        <input type="number" id="targetValue" placeholder="値" class="input-compact">
                     </div>
                     <div class="output-box">
                         <div class="output-label">ココフォリア用コマンド</div>
@@ -825,21 +830,21 @@
                             <div class="add-area-inputs">
                                 <input type="text" id="attackName" placeholder="攻撃名">
                                 <input type="text" id="attackRoll" placeholder="攻撃ロール (例: 2d6,K20@10)">
-                                <select id="attackStat" style="width: 120px; flex: 0 0 120px;">
+                                <select id="attackStat" class="input-narrow">
                                     <option value="">なし</option>
                                 </select>
                             </div>
                             <button class="add-btn" id="addAttackBtn">+</button>
                         </div>
-                        <div style="margin-top: 8px;">
-                            <button class="add-btn" id="bulkAddAttackBtn" style="width: 100%; background: var(--secondary-color);">📋 一括追加　▼</button>
-                            <div id="bulkAddAttackArea" style="display: none; margin-top: 8px;">
-                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10|筋力B&#10;ファイアボール|1d6+3|INT" style="width: 100%; height: 80px; padding: 8px; border: 1px solid var(--border-color-light); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical;"></textarea>
-                                <div style="display: flex; gap: 6px; margin-top: 6px;">
-                                    <button class="add-btn" id="bulkAddAttackConfirm" style="flex: 1; background: var(--add-color);">追加を実行</button>
-                                    <button class="add-btn" id="bulkAddAttackCancel" style="flex: 1; background: var(--text-muted);">キャンセル</button>
+                        <div class="mt-8">
+                            <button class="add-btn btn--secondary full-width" id="bulkAddAttackBtn">📋 一括追加　▼</button>
+                            <div id="bulkAddAttackArea" class="hidden mt-8">
+                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10|筋力B&#10;ファイアボール|1d6+3|INT" class="textarea-mono" style="height:80px;"></textarea>
+                                <div class="row-controls">
+                                    <button class="add-btn flex-1" id="bulkAddAttackConfirm">追加を実行</button>
+                                    <button class="add-btn btn--muted flex-1" id="bulkAddAttackCancel">キャンセル</button>
                                 </div>
-                                <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;">形式: 攻撃名|攻撃ロール|ステータス名<br>※ステータス名は省略可</div>
+                                <div class="small-text">形式: 攻撃名|攻撃ロール|ステータス名<br>※ステータス名は省略可</div>
                             </div>
                         </div>
                     </details>
@@ -856,4 +861,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-                
