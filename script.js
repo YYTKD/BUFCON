@@ -449,7 +449,6 @@ function addBuff() {
     document.getElementById('buffTurn').value = '';
     
     selectedBuffTargets = [];
-    updateBuffTargetDisplay();
     updateBuffTargetDropdown();
     
     renderBuffs();
@@ -836,13 +835,6 @@ function removeAttack(index) {
     saveData();
 }
 
-function selectJudge(index) {
-    selectPackage(index, 'judge');
-}
-
-function selectAttack(index) {
-    selectPackage(index, 'attack');
-}
 
 /**
  * 汎用選択関数（判定・攻撃パッケージ）
@@ -906,12 +898,12 @@ function attachItemEvents(type) {
     const typeConfig = {
         'judge': {
             listId: 'judgeList',
-            onSelect: selectJudge,
+            onSelect: (i) => selectPackage(i, 'judge'),
             onRemove: removeJudge
         },
         'attack': {
             listId: 'attackList',
-            onSelect: selectAttack,
+            onSelect: (i) => selectPackage(i, 'attack'),
             onRemove: removeAttack
         }
     };
@@ -945,9 +937,7 @@ function attachItemEvents(type) {
     });
 }
 
-/**
- * 汎用出力関数（判定・攻撃パッケージ）
- */
+/* 汎用出力関数（判定・攻撃パッケージ）*/
 function updatePackageOutput(type, selectedIndex = null) {
     const array = type === 'judge' ? judges : attacks;
     const outputId = type === 'judge' ? 'judgeOutput' : 'attackOutput';
@@ -997,14 +987,6 @@ function updatePackageOutput(type, selectedIndex = null) {
     }
     
     document.getElementById(outputId).textContent = command;
-}
-
-function updateJudgeOutput(selectedIndex = null) {
-    updatePackageOutput('judge', selectedIndex);
-}
-
-function updateAttackOutput(selectedIndex = null) {
-    updatePackageOutput('attack', selectedIndex);
 }
 
 // ========================================
@@ -1066,9 +1048,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // 判定パッケージ
     document.getElementById('addJudgeBtn')?.addEventListener('click', addJudge);
     document.querySelectorAll('input[name="targetType"]').forEach(radio => {
-        radio.addEventListener('change', () => updateJudgeOutput());
+        radio.addEventListener('change', () => updatePackageOutput('judge'));
     });
-    document.getElementById('targetValue')?.addEventListener('input', () => updateJudgeOutput());
+    document.getElementById('targetValue')?.addEventListener('input', () => updatePackageOutput('judge'));
     
     document.getElementById('bulkAddJudgeBtn')?.addEventListener('click', () => {
         const area = document.getElementById('bulkAddJudgeArea');

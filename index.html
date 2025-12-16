@@ -247,13 +247,13 @@
         }
         
         .add-btn {
-            padding: 8px 16px;
+            padding: 4px 8px;
             background: var(--add-color);
             color: white;
             border: none;
             border-radius: 4px;
             font-size: 14px;
-            font-weight: 800;
+            font-weight: 500;
             cursor: pointer;
             white-space: nowrap;
             align-self: stretch;
@@ -629,11 +629,11 @@
         <div class="header2">TRPG戦闘サポートツール</div>
         <div class="content">
             <div class="section">
-                <div class="section-header collapsed" data-section="import-export">
+                <div class="section-header collapsed">
                     <span>📁 データ管理</span>
                     <span class="arrow">▼</span>
                 </div>
-                <div class="section-body collapsed">
+                <div class="section-body">
                     <div class="mb-12">
                         <button class="add-btn btn--info full-width" id="exportToClipboard">📋 設定をクリップボードにコピー</button>
                     </div>
@@ -649,25 +649,24 @@
             </div>
             
             <div class="section">
-                <div class="section-header" data-section="stats">
+                <div class="section-header">
                     <span>📊 ステータス</span>
                     <span class="arrow">▼</span>
                 </div>
                 <div class="section-body">
-                        <div class="add-area no-border-bottom" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
                             <div class="add-area-inputs">
                                 <input type="text" id="statName" placeholder="ステータス名 (,区切りで複数追加可)">
                             </div>
-                            <button class="add-btn" id="addStatBtn">+</button>
+                            <button class="add-btn" id="addStatBtn">✚</button>
                         </div>
                     <div class="stat-tags" id="statList">
                         <div class="empty-message">ステータスを追加してください</div>
                     </div>
                 </div>
-            </div>
+            
             
             <div class="section">
-                <div class="section-header" data-section="buffs">
+                <div class="section-header">
                     <span>✨ バフ/デバフ</span>
                     <span class="arrow">▼</span>
                 </div>
@@ -698,7 +697,7 @@
                                     <option value="#595959"></option>
                                 </datalist>
                             </div>
-                            <button class="add-btn" id="addBuffBtn">+</button>
+                            <button class="add-btn" id="addBuffBtn">✚</button>
                         </div>
                         <div class="mt-8">
                             <button class="add-btn btn--secondary full-width" id="bulkAddBtn">📋 一括追加　▼</button>
@@ -722,7 +721,7 @@
             </div>
             
             <div class="section">
-                <div class="section-header" data-section="judge">
+                <div class="section-header">
                     <span>🎯 判定</span>
                     <span class="arrow">▼</span>
                 </div>
@@ -737,7 +736,7 @@
                                     <option value="">なし</option>
                                 </select>
                             </div>
-                            <button class="add-btn" id="addJudgeBtn">+</button>
+                            <button class="add-btn" id="addJudgeBtn">✚</button>
                         </div>
                         <div class="mt-8">
                             <button class="add-btn btn--secondary full-width" id="bulkAddJudgeBtn">📋 一括追加　▼</button>
@@ -769,7 +768,7 @@
                         <input type="number" id="targetValue" placeholder="値" class="input-compact">
                     </div>
                     <div class="output-box">
-                        <div class="output-label">ココフォリア用コマンド</div>
+                        <div class="output-label">コピペ用コマンド</div>
                         <div class="output-text" id="judgeOutput">判定を選択してください</div>
                         <button class="copy-btn" data-target="judgeOutput">コピー</button>
                     </div>
@@ -777,7 +776,7 @@
             </div>
             
             <div class="section">
-                <div class="section-header" data-section="attack">
+                <div class="section-header">
                     <span>⚔️ 攻撃</span>
                     <span class="arrow">▼</span>
                 </div>
@@ -792,7 +791,7 @@
                                     <option value="">なし</option>
                                 </select>
                             </div>
-                            <button class="add-btn" id="addAttackBtn">+</button>
+                            <button class="add-btn" id="addAttackBtn">✚</button>
                         </div>
                         <div class="mt-8">
                             <button class="add-btn btn--secondary full-width" id="bulkAddAttackBtn">📋 一括追加　▼</button>
@@ -808,7 +807,7 @@
                     </details>
                     <div class="item-list" id="attackList"></div>
                     <div class="output-box">
-                        <div class="output-label">ココフォリア用コマンド</div>
+                        <div class="output-label">コピペ用コマンド</div>
                         <div class="output-text" id="attackOutput">攻撃を選択してください</div>
                         <button class="copy-btn" data-target="attackOutput">コピー</button>
                     </div>
