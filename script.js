@@ -383,13 +383,13 @@ function updateBuffTargetDropdown() {
     ];
     
     judges.forEach(j => {
-        options.push({ value: 'judge:' + j.name, label: escapeHtml(j.name) + ' (判定)' });
+        options.push({ value: 'judge:' + j.name, label: escapeHtml(j.name) + '' });
     });
     
     options.push({ value: '', label: '---攻撃---', isCategory: true });
     
     attacks.forEach(a => {
-        options.push({ value: 'attack:' + a.name, label: escapeHtml(a.name) + ' (攻撃)' });
+        options.push({ value: 'attack:' + a.name, label: escapeHtml(a.name) + '' });
     });
     
     dropdown.innerHTML = options.map(opt => {
@@ -684,7 +684,7 @@ function renderBuffs() {
                 ${buff.description ? `<span class="item-description">${escapeHtml(buff.description)}</span>` : ''}
                 ${buff.effect ? `<span class="item-effect">${escapeHtml(buff.effect)}</span>` : ''}
                 ${turnDisplay}
-                <button class="toggle-btn ${buff.active ? 'active' : ''}" data-toggle="${i}" data-toggle-type="buff"></button>
+               <button class="toggle-btn ${buff.active ? 'active' : ''}" data-toggle="${i}" data-toggle-type="buff"></button>
                 <button class="remove-btn" data-remove="${i}" data-remove-type="buff">×</button>
             </div>
         `;
