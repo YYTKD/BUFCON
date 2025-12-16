@@ -178,18 +178,30 @@
             color: var(--add-hover);
         }
 
-        /* 追加フォーム */
-        details > :not(summary) {
-            max-height: 0;
+        /* 展開/格納ボタン */
+        details {
+            &::details-content {
+            max-height: 600px;
+            height: 0;
             opacity: 0;
-            overflow: hidden;
-            transition: height 0.4s ease, opacity 0.4s ease;
+            content-visibility 0.4s allow-discrete;
+            overflow: clip;
+            transition: height 0.4s ease, opacity 0.4s ease, overflow 0.8s;
         }
-        details[open] > :not(summary) {
-            max-height: 1000px;
+        /* 開いた状態 */
+        &[open]::details-content {
             opacity: 1;
             overflow: visible;
-            transition: max-height 0.4s ease, opacity 0.4s ease;
+        }
+        }
+        @supports (interpolate-size: allow-keywords) {
+            
+        :root {
+            interpolate-size: allow-keywords; 
+        }
+        details[open]::details-content {
+            height: auto;
+        }
         }
 
         .add-area {
@@ -214,7 +226,7 @@
         .add-area input, .add-area select {
             padding: 6px 8px;
             border: 1px solid var(--border-color-light);
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 13px;
             min-width: 20px;
         }
@@ -225,7 +237,7 @@
             min-width: 20px;
         }
 
-        .add-area-inputs .multi-select {
+        .add-area-inputs {
             flex: 2;
             min-width: 120px;
         }
@@ -236,7 +248,7 @@
         }
         
         .add-area input[type="color"] {
-            width: 44px;
+            width: 38px;
             height: 38px;
             padding: 2px;
             cursor: pointer;
@@ -254,7 +266,7 @@
             white-space: nowrap;
             align-self: stretch;
             flex-shrink: 0;
-            box-shadow: inset 0 -2px rgba(0,0,0,0.1);
+            box-shadow: inset 0 -1px rgba(0,0,0,0.1);
         }
         
         .add-btn:hover {
@@ -304,8 +316,8 @@
             opacity: 40%;
             outline: 1px solid var(--add-color);
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            background: #e7f3ff !important;
-            overflow: visible;
+            height: auto;
+            overflow: clip;
         }
         
         .item.drag-over-top::before {
@@ -482,7 +494,7 @@
         .target-options {
             display: flex;
             gap: 12px;
-            margin-top: var(--spacing-m);
+            margin-top: var(--spacing-ms);
             margin-bottom: var(--spacing-m);
             align-items: center;
             flex-wrap: wrap;
@@ -572,7 +584,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
-            margin-bottom: 12px;
+            margin-top: var(--spacing-sm);
         }
         
         .stat-tag {
@@ -595,70 +607,6 @@
             font-size: 14px;
             padding: 0;
             line-height: 1;
-        }
-
-        .multi-select {
-            position: relative;
-            width: 150px;
-            flex: 0 0 150px;
-        }
-        
-        .multi-select-display {
-            display: flex;
-            padding: 6px 8px;
-            height: 100%;
-            border: 1px solid var(--border-color-light);
-            border-radius: 4px;
-            font-size: 13px;
-            cursor: pointer;
-            background: white;
-            justify-content: space-between;
-            align-items: center;
-
-        }
-        
-        .multi-select-display:hover {
-            border-color: var(--add-color);
-        }
-        
-        .multi-select-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: white;
-            border: 1px solid var(--border-color-light);
-            border-radius: 4px;
-            margin-top: 2px;
-            width: auto;
-            height: auto;
-            max-height: none;
-            overflow-y: visible !important;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .multi-select-dropdown.open {
-            display: block;
-        }
-        
-        .multi-select-option {
-            padding: 6px 8px;
-            cursor: pointer;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            justify-self: flex-start;
-        }
-        
-        .multi-select-option:hover {
-            background: #f0f0f0;
-        }
-        
-        .multi-select-option input[type="checkbox"] {
-            cursor: pointer;
         }
 
         /* ---ユーティリティクラス--- */
@@ -738,13 +686,9 @@
                         <div class="add-area">
                             <div class="add-area-inputs">
                                 <input type="text" id="buffName" placeholder="バフ名">
-                                <div class="multi-select" id="buffTargetMulti">
-                                    <div class="multi-select-display">
-                                        <span id="buffTargetDisplay">効果先</span>
-                                        <span>▼</span>
-                                    </div>
-                                    <div class="multi-select-dropdown" id="buffTargetDropdown"></div>
-                                </div>
+                                <select id="buffTargetSelect" multiple size="1" style="flex: 0 0 150px;">
+                                    <option disabled selected>効果先を選択</option>
+                                </select>
                                 <input type="text" id="buffDescription" placeholder="説明">
                                 <input type="text" id="buffEffect" placeholder="効果">
                                 <input type="number" id="buffTurn" placeholder="ターン" class="input-narrow">

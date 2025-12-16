@@ -353,80 +353,50 @@ function updateStatSelects() {
 // ========================================
 
 function initMultiSelect() {
-    const display = document.querySelector('.multi-select-display');
-    const dropdown = document.getElementById('buffTargetDropdown');
+    const select = document.getElementById('buffTargetSelect');
+    if (!select) return;
     
-    if (!display || !dropdown) return;
-    
-    display.addEventListener('click', (e) => {
-        e.stopPropagation();
-        dropdown.classList.toggle('open');
-    });
-    
-    document.addEventListener('click', () => {
-        dropdown.classList.remove('open');
-    });
-    
-    dropdown.addEventListener('click', (e) => {
-        e.stopPropagation();
+    select.addEventListener('change', () => {
+        selectedBuffTargets = Array.from(select.selectedOptions).map(opt => opt.value);
     });
 }
 
 function updateBuffTargetDropdown() {
-    const dropdown = document.getElementById('buffTargetDropdown');
-    if (!dropdown) return;
+    const select = document.getElementById('buffTargetSelect');
+    if (!select) return;
     
-    let options = [
-        { value: 'all-judge', label: 'すべての判定' },
-        { value: 'all-attack', label: 'すべての攻撃' },
-        { value: '', label: '--判定--', isCategory: true },
-    ];
+    // 現在の選択値を保持
+    const currentValues = Array.from(select.selectedOptions).map(opt => opt.value);
     
-    judges.forEach(j => {
-        options.push({ value: 'judge:' + j.name, label: escapeHtml(j.name) + '' });
-    });
+    // プレースホルダー
+    let html = '<option disabled>効果先を選択</option>';
     
-    options.push({ value: '', label: '---攻撃---', isCategory: true });
+    // その他カテゴリ
+    html += `<option value="all-judge" ${currentValues.includes('all-judge') ? 'selected' : ''}>すべての判定</option>`;
+    html += `<option value="all-attack" ${currentValues.includes('all-attack') ? 'selected' : ''}>すべての攻撃</option>`;
+    html += `</optgroup>`;
     
-    attacks.forEach(a => {
-        options.push({ value: 'attack:' + a.name, label: escapeHtml(a.name) + '' });
-    });
-    
-    dropdown.innerHTML = options.map(opt => {
-        if (opt.isCategory) {
-            return `<div style="padding: 6px 8px; font-weight: 600; color: #999; font-size: 12px; pointer-events: none; user-select: none;">${opt.label}</div>`;
-        }
-        return `
-            <label class="multi-select-option">
-                <input type="checkbox" value="${escapeHtml(opt.value)}" ${selectedBuffTargets.includes(opt.value) ? 'checked' : ''}>
-                ${opt.label}
-            </label>
-        `;
-    }).join('');
-    
-    dropdown.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', () => {
-            selectedBuffTargets = Array.from(dropdown.querySelectorAll('input[type="checkbox"]:checked'))
-                .map(c => c.value);
-            updateBuffTargetDisplay();
+    // 判定カテゴリ
+    if (judges.length > 0) {
+        html += `<optgroup label="---判定---">`;
+        judges.forEach(j => {
+            const value = 'judge:' + j.name;
+            html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(j.name)}</option>`;
         });
-    });
-}
-
-function updateBuffTargetDisplay() {
-    const display = document.getElementById('buffTargetDisplay');
-    if (!display) return;
-    
-    if (selectedBuffTargets.length === 0) {
-        display.textContent = '効果先を選択';
-    } else if (selectedBuffTargets.length === 1) {
-        const val = selectedBuffTargets[0];
-        if (val === 'all-judge') display.textContent = 'すべての判定';
-        else if (val === 'all-attack') display.textContent = 'すべての攻撃';
-        else display.textContent = val.split(':')[1];
-    } else {
-        display.textContent = `${selectedBuffTargets.length}個選択`;
+        html += `</optgroup>`;
     }
+    
+    // 攻撃カテゴリ
+    if (attacks.length > 0) {
+        html += `<optgroup label="---攻撃---">`;
+        attacks.forEach(a => {
+            const value = 'attack:' + a.name;
+            html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(a.name)}</option>`;
+        });
+        html += `</optgroup>`;
+    }
+    
+    select.innerHTML = html;
 }
 
 /**
