@@ -63,7 +63,7 @@
         
         .header {
             background: var(--primary-color);
-            color: white;
+            color: whitesmoke;
             padding-top: var(--spacing-m);
             padding-bottom: 0;
             text-align: center;
@@ -73,7 +73,7 @@
 
         .header2 {
             background: var(--primary-color);
-            color: white;
+            color: whitesmoke;
             padding-top: 0;
             padding-bottom: var(--spacing-L);
             text-align: center;
@@ -242,7 +242,7 @@
         .add-btn {
             padding: 4px 8px;
             background: var(--add-color);
-            color: white;
+            color: whitesmoke;
             border: none;
             border-radius: 4px;
             font-size: 14px;
@@ -270,12 +270,13 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 10px;
+            padding: 5px 10px;
             background: #f8f9fa;
             border-radius: 4px;
             font-size: 14px;
             transition: all 0.2s;
             position: relative;
+            box-shadow: 0 1px rgba(0,0,0,0.3);
         }
         
         .item.clickable {
@@ -308,6 +309,7 @@
             background: none !important;
             outline: 1px solid var(--add-color) !important;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: grabbing;
         }
         
         .item.drag-over-top::before {
@@ -332,6 +334,7 @@
 
         .buff-item {
             position: relative;
+            cursor: grab;
         }
         
         .buff-item:not(.active) {
@@ -345,6 +348,7 @@
         }
         .buff-item.dragging .tooltip {
             display: none !important;
+            cursor: grabbing;
         }
         
         
@@ -375,12 +379,23 @@
         }
         
         .turn-badge {
-            background: rgba(0,0,0,0.2);
-            color: inherit;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 600;
+            display: flex;
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            width: 24px;
+            height: 24px;
+            background: whitesmoke;
+            color: var(--text-color);
+            border-radius: 50%;
+        }
+
+        .turn-count {
+            height: 24px;
+            margin: 10% auto 10%;
+            text-align: right;
+            font-size: 14px;
+            font-weight: 800;
         }
         
         .tooltip {
@@ -389,7 +404,7 @@
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.8);
-            color: white;
+            color: whitesmoke;
             padding: 6px 10px;
             border-radius: 4px;
             font-size: 12px;
@@ -430,7 +445,7 @@
             width: 18px;
             height: 18px;
             border-radius: 50%;
-            background: white;
+            background: whitesmoke;
             top: 3px;
             left: 3px;
             box-shadow: inset 0 -1px rgba(0,0,0.5,0.2);
@@ -472,7 +487,7 @@
             padding: 8px 24px;
             align-content: center;
             background: var(--optional-color);
-            color: white;
+            color: whitesmoke;
             border: none;
             border-radius: 4px;
             font-size: 15px;
@@ -541,7 +556,7 @@
             top: 8px;
             right: 8px;
             background: var(--add-color);
-            color: white;
+            color: whitesmoke;
             border: none;
             border-radius: 4px;
             padding: 4px 10px;
@@ -758,7 +773,7 @@
                         </div>
                         <div class="mt-8">
                             <span>
-                            <button class="add-btn btn--secondary full-width" id="bulkAddBtn">
+                            <button class="add-btn btn--secondary full-width" id="bulkAddJudgeBtn">
                                 <span class="material-symbols-rounded">list</span>
                                 一括追加 ▼</button>
                             </span>
@@ -818,7 +833,7 @@
                         </div>
                         <div class="mt-8">
                             <span>
-                            <button class="add-btn btn--secondary full-width" id="bulkAddBtn">
+                            <button class="add-btn btn--secondary full-width" id="bulkAddAttackBtn">
                                 <span class="material-symbols-rounded">list</span>
                                 一括追加 ▼</button>
                             </span>                            <div id="bulkAddAttackArea" class="hidden mt-8">

@@ -638,7 +638,7 @@ function renderBuffs() {
         const textColor = getContrastColor(bgColor);
         const targetTexts = buff.targets.map(t => getTargetText(t));
         const tooltipText = '効果先: ' + targetTexts.join(', ');
-        const turnDisplay = buff.turn ? `<span class="turn-badge">${buff.turn}t</span>` : '';
+        const turnDisplay = buff.turn ? `<span class="turn-badge" style="outline:2px solid ${buff.color};"><span class="turn-count">${buff.turn}</span></span>` : '';
         
         return `
             <div class="item buff-item draggable ${buff.active ? 'active' : ''}" 
