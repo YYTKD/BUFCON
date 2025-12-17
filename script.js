@@ -457,9 +457,7 @@ function addBuff() {
     saveData();
 }
 
-/**
- * 汎用一括追加関数（バフ、判定、攻撃に対応）
- */
+/* 汎用一括追加関数（バフ、判定、攻撃に対応） */
 function bulkAdd(type) {
     const typeConfig = {
         'buff': {
@@ -648,7 +646,7 @@ function renderBuffs() {
                  draggable="true"
                  data-index="${i}" data-type="buff">
                 <div class="tooltip">${escapeHtml(tooltipText)}</div>
-                <span class="drag-handle">︙</span>
+                <span class="material-symbols-rounded">\ue945</span>
                 <span class="item-name">${escapeHtml(buff.name)}</span>
                 ${buff.description ? `<span class="item-description">${escapeHtml(buff.description)}</span>` : ''}
                 ${buff.effect ? `<span class="item-effect">${escapeHtml(buff.effect)}</span>` : ''}
@@ -880,7 +878,7 @@ function renderPackage(type) {
     
     list.innerHTML = config.array.map((item, i) => `
         <div class="item clickable draggable" data-index="${i}" data-type="${type}" draggable="true">
-            <span class="drag-handle">︙</span>
+            <span class="material-symbols-rounded">drag_indicator</span>
             <span class="item-name">${escapeHtml(item.name)}</span>
             <span class="item-detail">${escapeHtml(item.roll)}</span>
             <span class="item-detail">${item.stat ? escapeHtml(item.stat) : 'なし'}</span>

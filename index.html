@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300,0..1,-50..200" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BUFCON</title>
@@ -10,14 +11,11 @@
             --add-color: #4769b3;
             --add-hover: #3B5796;
             --secondary-color: #689F38;
-            --secondary-hover: #40c057;
             --danger-color: #ff6b6b;
-            --danger-hover: #ff5252;
             --info-color: #4dabf7;
             --bg-light: #0e438c;
             --bg-gray: #E5E3D3;
             --optional-color: #ebb50a;
-            --optional-hover: #D88C00;
             --border-color: #00000033;
             --border-color-light: #ddd;
             --border-color-dark: #d1d1d1;
@@ -108,7 +106,13 @@
         }
         
         .section-header:hover {
-            background: #092a59;
+            filter: saturate(500%);
+            filter: brightness(90%);
+        }
+
+        .section-header-title {
+            margin-right: auto;
+            margin-left: var(--spacing-xs);
         }
         
         .section-header .arrow {
@@ -277,6 +281,16 @@
         .item.clickable {
             cursor: pointer;
         }
+
+        .item.material-symbols-rounded {
+            cursor: move;
+            font-size: 24px;
+            user-select: none;
+            flex-shrink: 0;
+            opacity: .4;
+            margin-left: -6px;
+            overflow: hidden;
+        }
         
         .item.clickable:hover {
             background: #e7f3ff;
@@ -287,10 +301,6 @@
             background: #e7f3ff;
             outline: 1px solid var(--add-color);
             box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
-        }
-        
-        .item.draggable {
-            cursor: move;
         }
         
         .item.dragging {
@@ -337,16 +347,6 @@
             display: none !important;
         }
         
-        .drag-handle {
-            cursor: move;
-            font-size: 12px;
-            user-select: none;
-            flex-shrink: 0;
-            opacity: 0.6;
-            margin-left: -6px;
-            transform: scale(1.6);
-            overflow: hidden;
-        }
         
         .item-name {
             font-size: 15px;
@@ -468,19 +468,21 @@
         }
         
         .turn-btn {
+            display: flex;
             padding: 8px 24px;
-            justify-content: flex-start;
+            align-content: center;
             background: var(--optional-color);
             color: white;
             border: none;
             border-radius: 4px;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
         }
         
         .turn-btn:hover {
-            background: var(--optional-hover);
+            filter: saturate(500%);
+            filter: brightness(90%);
         }
         
         .target-options {
@@ -612,7 +614,7 @@
         .textarea-mono { width: 100%; padding: 8px; border: 1px solid var(--border-color-light); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; }
         .row-controls { display: flex; gap: 6px; margin-top: 6px; }
         .flex-1 { flex: 1; }
-        .btn--secondary { background: var(--add-color); }
+        .btn--secondary {display: flex; background: var(--add-color); align-items: center; justify-content: center; gap: var(--spacing-xs);}
         .btn--muted { background: var(--text-muted); }
         .btn--info { background: var(--info-color); }
         .btn--danger { background: var(--danger-color); }
@@ -630,27 +632,34 @@
         <div class="content">
             <div class="section">
                 <div class="section-header collapsed">
-                    <span>📁 データ管理</span>
+                    <span class="material-symbols-rounded">checkbook</span>
+                    <span class="section-header-title">データ管理</span>
                     <span class="arrow">▼</span>
                 </div>
                 <div class="section-body">
                     <div class="mb-12">
-                        <button class="add-btn btn--info full-width" id="exportToClipboard">📋 設定をクリップボードにコピー</button>
+                        <button class="add-btn btn--secondary btn--info full-width" id="exportToClipboard">
+                            <span class="material-symbols-rounded">content_copy</span>
+                            設定をクリップボードにコピー</button>
                     </div>
                     <div>
                         <label class="label-muted">JSONを貼り付けて読み込み:</label>
                         <textarea id="importText" placeholder='{"stats":[...],"buffs":[...],...}' class="textarea-mono" style="height:120px;"></textarea>
-                        <button class="add-btn full-width mt-6" id="importConfirm">読み込み実行</button>
+                        <button class="add-btn btn--secondary full-width mt-6" id="importConfirm">読み込み実行</button>
                     </div>
                     <div class="mt-12 pt-12 bt-top">
-                        <button class="add-btn btn--danger full-width" id="resetBtn">🔄 すべて初期化</button>
+                        <button class="add-btn btn--secondary btn--danger full-width" id="resetBtn">
+                            <span class="material-symbols-rounded">delete_forever</span>
+                            すべて初期化
+                        </button>
                     </div>
                 </div>
             </div>
             
             <div class="section">
                 <div class="section-header">
-                    <span>📊 ステータス</span>
+                    <span class="material-symbols-rounded">analytics</span>
+                    <span class="section-header-title">ステータス</span>
                     <span class="arrow">▼</span>
                 </div>
                 <div class="section-body">
@@ -664,11 +673,12 @@
                         <div class="empty-message">ステータスを追加してください</div>
                     </div>
                 </div>
-            
+            </div>
             
             <div class="section">
                 <div class="section-header">
-                    <span>✨ バフ/デバフ</span>
+                    <span class="material-symbols-rounded">azm</span>
+                    <span class="section-header-title">バフ/デバフ</span>
                     <span class="arrow">▼</span>
                 </div>
                 <div class="section-body">
@@ -701,7 +711,11 @@
                             <button class="add-btn" id="addBuffBtn">✚</button>
                         </div>
                         <div class="mt-8">
-                            <button class="add-btn btn--secondary full-width" id="bulkAddBtn">📋 一括追加　▼</button>
+                            <span>
+                            <button class="add-btn btn--secondary full-width" id="bulkAddBtn">
+                                <span class="material-symbols-rounded">list</span>
+                                一括追加 ▼</button>
+                            </span>
                             <div id="bulkAddArea" class="hidden mt-8">
                                 <textarea id="bulkAddText" placeholder="例: マッスルベアー|すべての攻撃|筋力ボーナスUP|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
                                 <div class="row-controls">
@@ -712,8 +726,10 @@
                             </div>
                         </div>
                     </details>
-                    <div class="turn-control">
-                        <button class="turn-btn" id="turnProgressBtn">⏭ ターンを経過させる</button>
+                    <div class="turn-control" full-width>
+                            <button class="turn-btn" id="turnProgressBtn">
+                                <span class="material-symbols-rounded">skip_next</span>
+                                ターンを経過させる</button>
                     </div>
                     <div class="item-list" id="buffList">
                         <div class="empty-message">バフを追加してください</div>
@@ -723,7 +739,8 @@
             
             <div class="section">
                 <div class="section-header">
-                    <span>🎯 判定</span>
+                    <span class="material-symbols-rounded">ifl</span>
+                    <span class="section-header-title">判定</span>
                     <span class="arrow">▼</span>
                 </div>
                 <div class="section-body">
@@ -740,7 +757,11 @@
                             <button class="add-btn" id="addJudgeBtn">✚</button>
                         </div>
                         <div class="mt-8">
-                            <button class="add-btn btn--secondary full-width" id="bulkAddJudgeBtn">📋 一括追加　▼</button>
+                            <span>
+                            <button class="add-btn btn--secondary full-width" id="bulkAddBtn">
+                                <span class="material-symbols-rounded">list</span>
+                                一括追加 ▼</button>
+                            </span>
                             <div id="bulkAddJudgeArea" class="hidden mt-8">
                                 <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1|器用度&#10;回避判定|1d20|DEX" class="textarea-mono" style="height:80px;"></textarea>
                                 <div class="row-controls">
@@ -778,7 +799,8 @@
             
             <div class="section">
                 <div class="section-header">
-                    <span>⚔️ 攻撃</span>
+                    <span class="material-symbols-rounded">swords</span>
+                    <span class="section-header-title">攻撃</span>
                     <span class="arrow">▼</span>
                 </div>
                 <div class="section-body">
@@ -795,8 +817,11 @@
                             <button class="add-btn" id="addAttackBtn">✚</button>
                         </div>
                         <div class="mt-8">
-                            <button class="add-btn btn--secondary full-width" id="bulkAddAttackBtn">📋 一括追加　▼</button>
-                            <div id="bulkAddAttackArea" class="hidden mt-8">
+                            <span>
+                            <button class="add-btn btn--secondary full-width" id="bulkAddBtn">
+                                <span class="material-symbols-rounded">list</span>
+                                一括追加 ▼</button>
+                            </span>                            <div id="bulkAddAttackArea" class="hidden mt-8">
                                 <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10|筋力B&#10;ファイアボール|1d6+3|INT" class="textarea-mono" style="height:80px;"></textarea>
                                 <div class="row-controls">
                                     <button class="add-btn flex-1" id="bulkAddAttackConfirm">追加を実行</button>
