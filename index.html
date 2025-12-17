@@ -168,7 +168,7 @@
             content: '▼';
             font-size: 10px;
             transform: rotate(-90deg);
-            transition: transform .5s;
+            transition: transform .25s;
         }
 
         .add-area-container[open] summary::before {
@@ -207,7 +207,7 @@
         }
         
         .add-area-inputs {
-            display: flex;
+            display: flex ;
             gap: 6px;
             flex: 1;
             min-width: 0;
@@ -218,21 +218,12 @@
         .add-area input, .add-area select {
             padding: 6px 8px;
             border: 1px solid var(--border-color-light);
-            border-radius: 6px;
+            border-radius: 4px;
             font-size: 13px;
-            min-width: 20px;
-        }
-        
-        .add-area-inputs input,
-        .add-area-inputs select {
             flex: 1;
-            min-width: 20px;
+            min-width: 40px;
         }
 
-        .add-area-inputs {
-            flex: 2;
-            min-width: 120px;
-        }
         
         .add-area input:focus, .add-area select:focus {
             outline: none;
@@ -240,8 +231,6 @@
         }
         
         .add-area input[type="color"] {
-            width: 38px;
-            height: 38px;
             padding: 2px;
             cursor: pointer;
         }
@@ -305,11 +294,10 @@
         }
         
         .item.dragging {
-            opacity: 40%;
-            outline: 1px solid var(--add-color);
+            opacity: 30% !important;
+            background: none !important;
+            outline: 1px solid var(--add-color) !important;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            height: auto;
-            overflow: clip;
         }
         
         .item.drag-over-top::before {
@@ -331,6 +319,10 @@
             height: 3px;
             background: var(--add-color);
         }
+
+        .buff-item {
+            position: relative;
+        }
         
         .buff-item:not(.active) {
             opacity: 0.4;
@@ -341,19 +333,26 @@
             opacity: 1;
             filter: none;
         }
+        .buff-item.dragging .tooltip {
+            display: none !important;
+        }
         
         .drag-handle {
             cursor: move;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 12px;
             user-select: none;
             flex-shrink: 0;
-            opacity: 0.4;
+            opacity: 0.6;
+            margin-left: -6px;
+            transform: scale(1.6);
+            overflow: hidden;
         }
         
         .item-name {
+            font-size: 15px;
             font-weight: 600;
             margin-right: 8px;
+            margin-top: -3px;
         }
         
         .item-description {
@@ -396,14 +395,14 @@
             font-size: 12px;
             white-space: nowrap;
             pointer-events: none;
-            opacity: 0;
             transition: opacity 0.2s;
             margin-bottom: 5px;
             z-index: 1000;
+            display: none;
         }
         
-        .item:hover .tooltip {
-            opacity: 1;
+        .buff-item:hover .tooltip {
+            display: block;
         }
         
         .toggle-btn {
@@ -420,7 +419,7 @@
         }
 
         .toggle-btn.active {
-            background: #ff0000;
+            background: rgba(0,0,0,0.3);
             mix-blend-mode: luminosity;
         }
         
@@ -435,11 +434,12 @@
             top: 3px;
             left: 3px;
             box-shadow: inset 0 -1px rgba(0,0,0.5,0.2);
-            transition: transform 0.2s;
+            transition: transform 1s ease-out;
         }
         
         .toggle-btn.active::after {
             transform: translateX(24px);
+            transition: transform 1s ease-out;
         }
         
         .remove-btn {
@@ -654,11 +654,12 @@
                     <span class="arrow">▼</span>
                 </div>
                 <div class="section-body">
+                    <div class="add-area">
                             <div class="add-area-inputs">
                                 <input type="text" id="statName" placeholder="ステータス名 (,区切りで複数追加可)">
                             </div>
                             <button class="add-btn" id="addStatBtn">✚</button>
-                        </div>
+                    </div>
                     <div class="stat-tags" id="statList">
                         <div class="empty-message">ステータスを追加してください</div>
                     </div>
