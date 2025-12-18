@@ -23,4 +23,4 @@ TRPGオンラインセッションで発生するバフや状態を管理し、B
 
 htmlとjavascriptだけで動作するので、ローカルに保存しておけばネット接続が無くても使えます。  
 ご意見、ご要望、バグ報告などありましたら、作者のX(旧Twitter)アカウントまでお知らせいただけると幸いです。  
-[竹田ユウヤ @Y__TKDK](https://x.com/Y__TKD)
+**[BUFCON試用フィードバックフォーム](https://forms.gle/Z5YU8JaAVVUmWMaZ7)**
