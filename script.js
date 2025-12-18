@@ -570,11 +570,57 @@ function bulkAdd(type) {
     });
     
     if (added > 0) {
-        document.getElementById(config.textId).value = '';
-        document.getElementById(config.areaId).style.display = 'none';
+        const area = document.getElementById(config.areaId);
+        const textArea = document.getElementById(config.textId);
+
+        if (textArea) textArea.value = '';
+        if (area) {
+            area.classList.add('hidden');
+            area.style.display = 'none';
+        }
+
         config.afterAdd();
         saveData();
         showToast(`${added}件の${config.messageKey}を追加しました`, 'success');
+    }
+}
+
+function setupBulkAddControls({ toggleId, confirmId, cancelId, areaId, textId, type }) {
+    const toggleButton = document.getElementById(toggleId);
+    const confirmButton = document.getElementById(confirmId);
+    const cancelButton = document.getElementById(cancelId);
+    const area = document.getElementById(areaId);
+    const text = document.getElementById(textId);
+
+    if (toggleButton) {
+        toggleButton.addEventListener('click', () => {
+            if (area) {
+                const isHidden = area.classList.contains('hidden') || area.style.display === 'none';
+                if (isHidden) {
+                    area.classList.remove('hidden');
+                    area.style.display = 'block';
+                    text?.focus();
+                } else {
+                    area.classList.add('hidden');
+                    area.style.display = 'none';
+                    if (text) text.value = '';
+                }
+            }
+        });
+    }
+
+    if (confirmButton) {
+        confirmButton.addEventListener('click', () => bulkAdd(type));
+    }
+
+    if (cancelButton) {
+        cancelButton.addEventListener('click', () => {
+            if (area) {
+                area.classList.add('hidden');
+                area.style.display = 'none';
+            }
+            if (text) text.value = '';
+        });
     }
 }
 
@@ -1030,17 +1076,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // バフ
     document.getElementById('addBuffBtn')?.addEventListener('click', addBuff);
     document.getElementById('turnProgressBtn')?.addEventListener('click', progressTurn);
-    
-    document.getElementById('bulkAddBtn')?.addEventListener('click', () => {
-        const area = document.getElementById('bulkAddArea');
-        if (area) area.style.display = area.style.display === 'none' ? 'block' : 'none';
-    });
-    document.getElementById('bulkAddConfirm')?.addEventListener('click', () => bulkAdd('buff'));
-    document.getElementById('bulkAddCancel')?.addEventListener('click', () => {
-        const area = document.getElementById('bulkAddArea');
-        const text = document.getElementById('bulkAddText');
-        if (area) area.style.display = 'none';
-        if (text) text.value = '';
+
+    setupBulkAddControls({
+        toggleId: 'bulkAddBtn',
+        confirmId: 'bulkAddConfirm',
+        cancelId: 'bulkAddCancel',
+        areaId: 'bulkAddArea',
+        textId: 'bulkAddText',
+        type: 'buff'
     });
     
     // 判定パッケージ
@@ -1050,31 +1093,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('targetValue')?.addEventListener('input', () => updatePackageOutput('judge'));
     
-    document.getElementById('bulkAddJudgeBtn')?.addEventListener('click', () => {
-        const area = document.getElementById('bulkAddJudgeArea');
-        if (area) area.style.display = area.style.display === 'none' ? 'block' : 'none';
-    });
-    document.getElementById('bulkAddJudgeConfirm')?.addEventListener('click', () => bulkAdd('judge'));
-    document.getElementById('bulkAddJudgeCancel')?.addEventListener('click', () => {
-        const area = document.getElementById('bulkAddJudgeArea');
-        const text = document.getElementById('bulkAddJudgeText');
-        if (area) area.style.display = 'none';
-        if (text) text.value = '';
+    setupBulkAddControls({
+        toggleId: 'bulkAddJudgeBtn',
+        confirmId: 'bulkAddJudgeConfirm',
+        cancelId: 'bulkAddJudgeCancel',
+        areaId: 'bulkAddJudgeArea',
+        textId: 'bulkAddJudgeText',
+        type: 'judge'
     });
     
     // 攻撃パッケージ
     document.getElementById('addAttackBtn')?.addEventListener('click', addAttack);
     
-    document.getElementById('bulkAddAttackBtn')?.addEventListener('click', () => {
-        const area = document.getElementById('bulkAddAttackArea');
-        if (area) area.style.display = area.style.display === 'none' ? 'block' : 'none';
-    });
-    document.getElementById('bulkAddAttackConfirm')?.addEventListener('click', () => bulkAdd('attack'));
-    document.getElementById('bulkAddAttackCancel')?.addEventListener('click', () => {
-        const area = document.getElementById('bulkAddAttackArea');
-        const text = document.getElementById('bulkAddAttackText');
-        if (area) area.style.display = 'none';
-        if (text) text.value = '';
+    setupBulkAddControls({
+        toggleId: 'bulkAddAttackBtn',
+        confirmId: 'bulkAddAttackConfirm',
+        cancelId: 'bulkAddAttackCancel',
+        areaId: 'bulkAddAttackArea',
+        textId: 'bulkAddAttackText',
+        type: 'attack'
     });
     
     // データ管理
