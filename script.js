@@ -457,6 +457,61 @@ function addBuff() {
     saveData();
 }
 
+// =======================================
+// バフ格納
+// ========================================
+
+
+/*格納リスト
+
+function initMultiSelect() {
+    const select = document.getElementById('buffStorageSelect');
+    if (!select) return;
+    
+    select.addEventListener('change', () => {
+        selectedBuffTargets = Array.from(select.selectedOptions).map(opt => opt.value);
+    });
+}
+
+function updateBuffTargetDropdown() {
+    const select = document.getElementById('buffStorageSelect');
+    if (!select) return;
+    
+    // 現在の選択値を保持
+    const currentValues = Array.from(select.selectedOptions).map(opt => opt.value);
+    
+    // プレースホルダー
+    let html = '<option disabled>効果先を選択</option>';
+    
+    // その他カテゴリ
+    html += `<option value="all-judge" ${currentValues.includes('all-judge') ? 'selected' : ''}>すべての判定</option>`;
+    html += `<option value="all-attack" ${currentValues.includes('all-attack') ? 'selected' : ''}>すべての攻撃</option>`;
+    html += `</optgroup>`;
+    
+    // 判定カテゴリ
+    if (judges.length > 0) {
+        html += `<optgroup label="---判定---">`;
+        judges.forEach(j => {
+            const value = 'judge:' + j.name;
+            html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(j.name)}</option>`;
+        });
+        html += `</optgroup>`;
+    }
+    
+    // 攻撃カテゴリ
+    if (attacks.length > 0) {
+        html += `<optgroup label="---攻撃---">`;
+        attacks.forEach(a => {
+            const value = 'attack:' + a.name;
+            html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(a.name)}</option>`;
+        });
+        html += `</optgroup>`;
+    }
+    
+    select.innerHTML = html;
+}
+    */
+
 /* 汎用一括追加関数（バフ、判定、攻撃に対応） */
 function bulkAdd(type) {
     const typeConfig = {

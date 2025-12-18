@@ -499,6 +499,20 @@
             filter: saturate(500%);
             filter: brightness(90%);
         }
+/*ソートなど*/
+
+        .storage-list {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .storage-list::-ms-expand {
+            display: none;
+        }
+
+
+
+
         
         .target-options {
             display: flex;
@@ -645,6 +659,7 @@
         <div class="header">BUFCON</div>
         <div class="header2">TRPG戦闘サポートツール</div>
         <div class="content">
+<!-- データ管理 -->
             <div class="section">
                 <div class="section-header collapsed">
                     <span class="material-symbols-rounded">checkbook</span>
@@ -670,7 +685,7 @@
                     </div>
                 </div>
             </div>
-            
+<!-- ステータス -->
             <div class="section">
                 <div class="section-header">
                     <span class="material-symbols-rounded">analytics</span>
@@ -689,7 +704,7 @@
                     </div>
                 </div>
             </div>
-            
+<!-- バフ/デバフ -->
             <div class="section">
                 <div class="section-header">
                     <span class="material-symbols-rounded">azm</span>
@@ -741,17 +756,31 @@
                             </div>
                         </div>
                     </details>
+    <!-- バフ管理 -->
                     <div class="turn-control" full-width>
                             <button class="turn-btn" id="turnProgressBtn">
                                 <span class="material-symbols-rounded">skip_next</span>
-                                ターンを経過させる</button>
+                                ターン経過
+                            </button>
+
+                            <button class="sort-btn" id="buffSortBtn">
+                                <span class="material-symbols-rounded">sort</span>
+                            </button>
+                            <span>
+                                <button class="storage-btn" id="buffStorageBtn">
+                                    <span class="material-symbols-rounded">exit_to_app</span>
+                                </button>
+                                <select class="storage-list, material-symbols-rounded" id="buffStorageSelect" style="-webkit-appearance: none; -moz-appearance: none; appearance: none;">
+                                    <option disabled selected value>storage</option>
+                                </select>
+                            </span>
                     </div>
                     <div class="item-list" id="buffList">
                         <div class="empty-message">バフを追加してください</div>
                     </div>
                 </div>
             </div>
-            
+<!-- 判定 -->
             <div class="section">
                 <div class="section-header">
                     <span class="material-symbols-rounded">ifl</span>
@@ -811,7 +840,7 @@
                     </div>
                 </div>
             </div>
-            
+<!-- 攻撃 -->
             <div class="section">
                 <div class="section-header">
                     <span class="material-symbols-rounded">swords</span>
