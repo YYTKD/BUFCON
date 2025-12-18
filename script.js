@@ -369,9 +369,10 @@ function updateBuffTargetDropdown() {
     const currentValues = Array.from(select.selectedOptions).map(opt => opt.value);
     
     // プレースホルダー
-    let html = '<option disabled>効果先を選択</option>';
+    let html = '<option disabled>効果先</option>';
     
     // その他カテゴリ
+    html += `<option>なし</option>`;
     html += `<option value="all-judge" ${currentValues.includes('all-judge') ? 'selected' : ''}>すべての判定</option>`;
     html += `<option value="all-attack" ${currentValues.includes('all-attack') ? 'selected' : ''}>すべての攻撃</option>`;
     html += `</optgroup>`;
