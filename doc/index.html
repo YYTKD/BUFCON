@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300,0..1,-50..200" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BUFCON</title>
+    <style>
+        :root {
+            --primary-color: #2d2d2e;
+            --add-color: #4769b3;
+            --add-hover: #3B5796;
+            --secondary-color: #689F38;
+            --danger-color: #ff6b6b;
+            --info-color: #4dabf7;
+            --bg-light: #0e438c;
+            --bg-gray: ##ccc;
+            --optional-color: #ebb50a;
+            --border-color: #00000033;
+            --border-color-light: #ddd;
+            --border-color-dark: #d1d1d1;
+            --text-color: #333;
+            --text-secondary: #666;
+            --text-muted: #999;
+            
+            --border-radius: 4px;
+            --border-radius-lg: 6px;
+            --border-radius-xl: 8px;
+            --spacing-xs: 4px;
+            --spacing-sm: 6px;
+            --spacing-md: 8px;
+            --spacing-m: 12px;
+            --spacing-L: 16px;
+            
+            --font-size-xs: 11px;
+            --font-size-sm: 12px;
+            --font-size-base: 13px;
+            --font-size-md: 14px;
+            --font-size-lg: 16px;
+            --font-size-xl: 18px;
+            --font-size-xxl: 30px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--border-color-light);
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--bg-gray);
+            border-radius: var(--border-radius-xl);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: var(--primary-color);
+            color: whitesmoke;
+            padding-top: var(--spacing-m);
+            padding-bottom: 0;
+            text-align: center;
+            font-size: var(--font-size-xxl);
+            font-weight: 800;
+        }
+
+        .header2 {
+            background: var(--primary-color);
+            color: whitesmoke;
+            padding-top: 0;
+            padding-bottom: var(--spacing-L);
+            text-align: center;
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+        }
+        
+        .content {
+            padding: var(--spacing-L);
+        }
+        
+        .section {
+            margin-bottom: var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: var(--bg-light);
+            padding: var(--spacing-xs) var(--spacing-md);
+            font-weight: 600;
+            font-size: var(--font-size-m);
+            color: #fff;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-header:hover {
+            filter: saturate(500%);
+            filter: brightness(90%);
+        }
+
+        .section-header-title {
+            margin-right: auto;
+            margin-left: var(--spacing-xs);
+        }
+        
+        .section-header .arrow {
+            transition: transform 0.2s;
+        }
+        
+        .section-header.collapsed .arrow {
+            transform: rotate(-90deg);
+        }
+        
+        .section-body {
+            padding: 12px;
+            height: auto;
+            transition:
+                max-height 0.2s ease-out,
+                opacity 0.2s ease-out,
+                padding 0.2s;
+            overflow: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .section-body::-webkit-scrollbar{
+            display: none;
+        }
+        
+        .section-body.collapsed {
+            max-height: 0;
+            padding: 0 12px;
+            overflow: hidden;
+        }
+        
+        .add-area-container {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color-dark);
+        }
+
+        .add-area-container summary {
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--add-color);
+            padding: 8px 0;
+            user-select: none;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .add-area-container summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .add-area-container summary::before {
+            content: '▼';
+            font-size: 10px;
+            transform: rotate(-90deg);
+            transition: transform .25s;
+        }
+
+        .add-area-container[open] summary::before {
+            transform: rotate(0deg);
+        }
+
+        .add-area-container summary:hover {
+            color: var(--add-hover);
+        }
+
+        details {
+        &::details-content {
+            max-height: 0;
+            opacity: 0%;
+            overflow: hidden;
+            transition: 0.25 ease-out;
+        }
+        /* 開いた状態 */
+        &[open]::details-content {
+            opacity: 100%;
+            max-height: 100%;
+            overflow: auto;
+            transition: 0.25s ease-out;
+        }
+    }
+        
+
+        .add-area {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color-dark);
+            align-items: stretch;
+            flex-wrap: wrap;
+        }
+        
+        .add-area-inputs {
+            display: flex ;
+            gap: 6px;
+            flex: 1;
+            min-width: 0;
+            flex-wrap: wrap;
+            align-items: stretch;
+        }
+        
+        .add-area input, .add-area select {
+            padding: 6px 8px;
+            border: 1px solid var(--border-color-light);
+            border-radius: 4px;
+            font-size: 13px;
+            flex: 1;
+            min-width: 40px;
+        }
+
+        
+        .add-area input:focus, .add-area select:focus {
+            outline: none;
+            border-color: var(--add-color);
+        }
+        
+        .add-area input[type="color"] {
+            padding: 2px;
+            cursor: pointer;
+        }
+        
+        .add-btn {
+            padding: 4px 8px;
+            background: var(--add-color);
+            color: whitesmoke;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            align-self: stretch;
+            flex-shrink: 0;
+            box-shadow: inset 0 -1px rgba(0,0,0,0.1);
+        }
+        
+        .add-btn:hover {
+            filter: saturate(500%);
+            filter: brightness(90%);
+        }
+        
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow: visible;
+        }
+        
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.2s;
+            position: relative;
+            box-shadow: 0 1px rgba(0,0,0,0.3);
+        }
+        
+        .item.clickable {
+            cursor: pointer;
+        }
+
+        .item.material-symbols-rounded {
+            cursor: move;
+            font-size: 24px;
+            user-select: none;
+            flex-shrink: 0;
+            opacity: .4;
+            margin-left: -6px;
+            overflow: hidden;
+        }
+        
+        .item.clickable:hover {
+            background: #e7f3ff;
+            outline: 1px solid var(--add-color);
+        }
+        
+        .item.selected {
+            background: #e7f3ff;
+            outline: 1px solid var(--add-color);
+            box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
+        }
+        
+        .item.dragging {
+            opacity: 30% !important;
+            background: none !important;
+            outline: 1px solid var(--add-color) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: grabbing;
+        }
+        
+        .item.drag-over-top::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--add-color);
+        }
+        
+        .item.drag-over-bottom::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--add-color);
+        }
+
+        .buff-item {
+            position: relative;
+            cursor: grab;
+        }
+        
+        .buff-item:not(.active) {
+            opacity: 0.4;
+            filter: grayscale(50%);
+        }
+        
+        .buff-item.active {
+            opacity: 1;
+            filter: none;
+        }
+        .buff-item.dragging .tooltip {
+            display: none !important;
+            cursor: grabbing;
+        }
+        
+        
+        .item-name {
+            font-size: 15px;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-top: -3px;
+        }
+        
+        .item-description {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-right: 8px;
+        }
+        
+        .item-effect {
+            color: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: auto;
+        }
+        
+        .item-detail {
+            color: var(--add-color);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .turn-badge {
+            display: flex;
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            width: 24px;
+            height: 24px;
+            background: whitesmoke;
+            color: var(--text-color);
+            border-radius: 50%;
+        }
+
+        .turn-count {
+            height: 24px;
+            margin: 10% auto 10%;
+            text-align: right;
+            font-size: 14px;
+            font-weight: 800;
+        }
+        
+        .tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: whitesmoke;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            margin-bottom: 5px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .buff-item:hover .tooltip {
+            display: block;
+        }
+        
+        .toggle-btn {
+            width: 48px;
+            height: 24px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            right: 40px;
+            transition: background 0.2s;
+            flex-shrink: 0;
+            box-shadow: inset 0 2px rgba(0,0,2,0.1);
+        }
+
+        .toggle-btn.active {
+            background: rgba(0,0,0,0.3);
+            mix-blend-mode: luminosity;
+        }
+        
+        .toggle-btn::after {
+            content: '';
+            z-index: 1000;
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: whitesmoke;
+            top: 3px;
+            left: 3px;
+            box-shadow: inset 0 -1px rgba(0,0,0.5,0.2);
+            transition: transform 1s ease-out;
+        }
+        
+        .toggle-btn.active::after {
+            transform: translateX(24px);
+            transition: transform 1s ease-out;
+        }
+        
+        .remove-btn {
+            background: rgba(0,0,0,0.1);
+            color: inherit;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            margin-left: auto;
+            cursor: pointer;
+            font-size: 12px;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        
+        .remove-btn:hover {
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .turn-control {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border-color-dark);
+        }
+        
+        .turn-btn {
+            display: flex;
+            padding: 8px 24px;
+            align-content: center;
+            background: var(--optional-color);
+            color: whitesmoke;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .turn-btn:hover {
+            filter: saturate(500%);
+            filter: brightness(90%);
+        }
+        
+        .target-options {
+            display: flex;
+            gap: 12px;
+            margin-top: var(--spacing-ms);
+            margin-bottom: var(--spacing-m);
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .radio-option input {
+            cursor: pointer;
+        }
+        
+        .radio-option label {
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .output-box {
+            background: #f8f9fa;
+            border: 1px solid var(--add-color);
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 12px;
+            position: relative;
+        }
+        
+        .output-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--add-color);
+            margin-bottom: 6px;
+        }
+        
+        .output-text {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-color);
+            word-break: break-all;
+            user-select: all;
+            padding-right: 70px;
+            min-height: 20px;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--add-color);
+            color: whitesmoke;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        
+        .copy-btn:hover {
+            background: var(--add-hover);
+        }
+        
+        .copy-btn.copied {
+            background: var(--secondary-color);
+        }
+        
+        .empty-message {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            padding: 12px;
+        }
+        
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: #856404;
+        }
+        
+        .stat-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: var(--spacing-sm);
+        }
+        
+        .stat-tag {
+            background: #e7f3ff;
+            color: var(--add-color);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .stat-tag button {
+            background: none;
+            border: none;
+            color: var(--add-color);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        /* ---ユーティリティクラス--- */
+        .full-width { width: 100%; }
+        .hidden { display: none; }
+        .mt-8 { margin-top: 8px; }
+        .mt-6 { margin-top: 6px; }
+        .mb-12 { margin-bottom: 12px; }
+        .pt-12 { padding-top: 12px; }
+        .bt-top { border-top: 2px solid var(--border-color-dark); }
+        .textarea-mono { width: 100%; padding: 8px; border: 1px solid var(--border-color-light); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; }
+        .row-controls { display: flex; gap: 6px; margin-top: 6px; }
+        .flex-1 { flex: 1; }
+        .btn--secondary {display: flex; background: var(--add-color); align-items: center; justify-content: center; gap: var(--spacing-xs);}
+        .btn--muted { background: var(--text-muted); }
+        .btn--info { background: var(--info-color); }
+        .btn--danger { background: var(--danger-color); }
+        .small-text { font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
+        .label-muted { font-size: 12px; font-weight: 600; color: #555; display: block; margin-bottom: 6px; }
+        .input-narrow { width: 70px; flex: 0 0 70px; }
+        .input-color { width: 16px; flex: 0 0 16px; min-width: 36px; }
+        .input-compact { width: 60px; padding: 4px 6px; border: 1px solid var(--border-color-light); border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">BUFCON</div>
+        <div class="header2">TRPG戦闘サポートツール</div>
+        <div class="content">
+            <div class="section">
+                <div class="section-header collapsed">
+                    <span class="material-symbols-rounded">checkbook</span>
+                    <span class="section-header-title">データ管理</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-body">
+                    <div class="mb-12">
+                        <button class="add-btn btn--secondary btn--info full-width" id="exportToClipboard">
+                            <span class="material-symbols-rounded">content_copy</span>
+                            設定をクリップボードにコピー</button>
+                    </div>
+                    <div>
+                        <label class="label-muted">JSONを貼り付けて読み込み:</label>
+                        <textarea id="importText" placeholder='{"stats":[...],"buffs":[...],...}' class="textarea-mono" style="height:120px;"></textarea>
+                        <button class="add-btn btn--secondary full-width mt-6" id="importConfirm">読み込み実行</button>
+                    </div>
+                    <div class="mt-12 pt-12 bt-top">
+                        <button class="add-btn btn--secondary btn--danger full-width" id="resetBtn">
+                            <span class="material-symbols-rounded">delete_forever</span>
+                            すべて初期化
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="material-symbols-rounded">analytics</span>
+                    <span class="section-header-title">ステータス</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-body">
+                    <div class="add-area">
+                            <div class="add-area-inputs">
+                                <input type="text" id="statName" placeholder="ステータス名 (,区切りで複数追加可)">
+                            </div>
+                            <button class="add-btn" id="addStatBtn">✚</button>
+                    </div>
+                    <div class="stat-tags" id="statList">
+                        <div class="empty-message">ステータスを追加してください</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="material-symbols-rounded">azm</span>
+                    <span class="section-header-title">バフ/デバフ</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-body">
+                    <details class="add-area-container" open>
+                        <summary>追加欄を格納/展開</summary>
+                        <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。</div>
+                        <div class="add-area">
+                            <div class="add-area-inputs">
+                                <input type="text" id="buffName" placeholder="バフ名">
+                                <select id="buffTargetSelect" multiple size="1" style="flex: 0 0 150px;">
+                                    <option disabled>効果先</option>
+                                </select>
+                                <input type="text" id="buffDescription" placeholder="説明">
+                                <input type="text" id="buffEffect" placeholder="効果">
+                                <input type="number" id="buffTurn" placeholder="ターン" class="input-narrow">
+                                <input type="color" id="buffColor" value="#0079FF" list="buffColor-list" class="input-color">
+                                <datalist id="buffColor-list">
+                                    <option value="#0079FF"></option>
+                                    <option value="#953D96"></option>
+                                    <option value="#F64E9D"></option>
+                                    <option value="#DF383E"></option>
+                                    <option value="#F7821B"></option>
+                                    <option value="#FEC626"></option>
+                                    <option value="#62BA46"></option>
+                                    <option value="#F8F9FA"></option>
+                                    <option value="#141414"></option>
+                                    <option value="#595959"></option>
+                                </datalist>
+                            </div>
+                            <button class="add-btn" id="addBuffBtn">✚</button>
+                        </div>
+                        <div class="mt-8">
+                            <span>
+                            <button class="add-btn btn--secondary full-width" id="bulkAddBtn">
+                                <span class="material-symbols-rounded">list</span>
+                                一括追加 ▼</button>
+                            </span>
+                            <div id="bulkAddArea" class="hidden mt-8">
+                                <textarea id="bulkAddText" placeholder="例: マッスルベアー|すべての攻撃|筋力ボーナスUP|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
+                                <div class="row-controls">
+                                    <button class="add-btn flex-1" id="bulkAddConfirm">追加を実行</button>
+                                    <button class="add-btn btn--muted flex-1" id="bulkAddCancel">キャンセル</button>
+                                </div>
+                                <div class="small-text">形式: バフ名|効果先1,効果先2|説明|効果|ターン|カラーコード<br>※カラーコードは省略可(省略時: #0079FF)</div>
+                            </div>
+                        </div>
+                    </details>
+                    <div class="turn-control" full-width>
+                            <button class="turn-btn" id="turnProgressBtn">
+                                <span class="material-symbols-rounded">skip_next</span>
+                                ターン経過</button>
+                    </div>
+                    <div class="item-list" id="buffList">
+                        <div class="empty-message">バフを追加してください</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="material-symbols-rounded">ifl</span>
+                    <span class="section-header-title">判定</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-body">
+                    <details class="add-area-container" open>
+                        <summary>追加欄を格納/展開</summary>
+                        <div class="add-area">
+                            <div class="add-area-inputs">
+                                <input type="text" id="judgeName" placeholder="判定名">
+                                <input type="text" id="judgeRoll" placeholder="判定ロール (例: 1d20)">
+                                <select id="judgeStat" class="input-narrow">
+                                    <option value="">なし</option>
+                                </select>
+                            </div>
+                            <button class="add-btn" id="addJudgeBtn">✚</button>
+                        </div>
+                        <div class="mt-8">
+                            <span>
+                            <button class="add-btn btn--secondary full-width" id="bulkAddJudgeBtn">
+                                <span class="material-symbols-rounded">list</span>
+                                一括追加 ▼</button>
+                            </span>
+                            <div id="bulkAddJudgeArea" class="hidden mt-8">
+                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1|器用度&#10;回避判定|1d20|DEX" class="textarea-mono" style="height:80px;"></textarea>
+                                <div class="row-controls">
+                                    <button class="add-btn flex-1" id="bulkAddJudgeConfirm">追加を実行</button>
+                                    <button class="add-btn btn--muted flex-1" id="bulkAddJudgeCancel">キャンセル</button>
+                                </div>
+                                <div class="small-text">形式: 判定名|判定ロール|ステータス名<br>※ステータス名は省略可</div>
+                            </div>
+                        </div>
+                    </details>
+                    <div class="item-list" id="judgeList"></div>
+                    <div class="target-options">
+                        <label class="label-muted">目標値:</label>
+                        <div class="radio-option">
+                            <input type="radio" name="targetType" id="targetNone" value="none" checked>
+                            <label for="targetNone">なし</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="targetType" id="targetGte" value="gte">
+                            <label for="targetGte">>=</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="targetType" id="targetLte" value="lte">
+                            <label for="targetLte">=&lt;</label>
+                        </div>
+                        <input type="number" id="targetValue" placeholder="値" class="input-compact">
+                    </div>
+                    <div class="output-box">
+                        <div class="output-label">コピペ用コマンド</div>
+                        <div class="output-text" id="judgeOutput">判定を選択してください</div>
+                        <button class="copy-btn" data-target="judgeOutput">コピー</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="material-symbols-rounded">swords</span>
+                    <span class="section-header-title">攻撃</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-body">
+                    <details class="add-area-container" open>
+                        <summary>追加欄を格納/展開</summary>
+                        <div class="add-area">
+                            <div class="add-area-inputs">
+                                <input type="text" id="attackName" placeholder="攻撃名">
+                                <input type="text" id="attackRoll" placeholder="攻撃ロール (例: 2d6,K20@10)">
+                                <select id="attackStat" class="input-narrow">
+                                    <option value="">なし</option>
+                                </select>
+                            </div>
+                            <button class="add-btn" id="addAttackBtn">✚</button>
+                        </div>
+                        <div class="mt-8">
+                            <span>
+                            <button class="add-btn btn--secondary full-width" id="bulkAddAttackBtn">
+                                <span class="material-symbols-rounded">list</span>
+                                一括追加 ▼</button>
+                            </span>                            <div id="bulkAddAttackArea" class="hidden mt-8">
+                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10|筋力B&#10;ファイアボール|1d6+3|INT" class="textarea-mono" style="height:80px;"></textarea>
+                                <div class="row-controls">
+                                    <button class="add-btn flex-1" id="bulkAddAttackConfirm">追加を実行</button>
+                                    <button class="add-btn btn--muted flex-1" id="bulkAddAttackCancel">キャンセル</button>
+                                </div>
+                                <div class="small-text">形式: 攻撃名|攻撃ロール|ステータス名<br>※ステータス名は省略可</div>
+                            </div>
+                        </div>
+                    </details>
+                    <div class="item-list" id="attackList"></div>
+                    <div class="output-box">
+                        <div class="output-label">コピペ用コマンド</div>
+                        <div class="output-text" id="attackOutput">攻撃を選択してください</div>
+                        <button class="copy-btn" data-target="attackOutput">コピー</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
