@@ -2,7 +2,8 @@
 
 TRPGオンラインセッションで発生するバフや状態を管理し、BCDice対応コマンドを生成できる支援ツールです。
 
-[BUFCON（試験版）](https://yytkd.github.io/BUFCON/)
+### [BUFCON（試験版）](https://yytkd.github.io/BUFCON/)
+### [ユーザーマニュアル](https://bufcon.gitbook.io/bufcon-docs/)
 
 # ツールの動作について
 
