@@ -693,13 +693,17 @@ function renderBuffs() {
                  draggable="true"
                  data-index="${i}" data-type="buff">
                 <div class="tooltip">${escapeHtml(tooltipText)}</div>
-                <span class="material-symbols-rounded">\ue945</span>
-                <span class="item-name">${escapeHtml(buff.name)}</span>
-                ${buff.description ? `<span class="item-description">${escapeHtml(buff.description)}</span>` : ''}
-                ${buff.effect ? `<span class="item-effect">${escapeHtml(buff.effect)}</span>` : ''}
-                ${turnDisplay}
-               <button class="toggle-btn ${buff.active ? 'active' : ''}" data-toggle="${i}" data-toggle-type="buff"></button>
+                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m">drag_indicator</span>
+                <span class="item-param">
+                    <span class="item-name">${escapeHtml(buff.name)}</span>
+                    ${buff.description ? `<span class="item-description">${escapeHtml(buff.description)}</span>` : ''}
+                    ${buff.effect ? `<span class="item-effect">${escapeHtml(buff.effect)}</span>` : ''}
+                    ${turnDisplay}
+                </span>
+                <span class="buff-btn">
+                <button class="toggle-btn ${buff.active ? 'active' : ''}" data-toggle="${i}" data-toggle-type="buff"></button>
                 <button class="remove-btn" data-remove="${i}" data-remove-type="buff">×</button>
+                </span>
             </div>
         `;
     }).join('');
@@ -925,10 +929,12 @@ function renderPackage(type) {
     
     list.innerHTML = config.array.map((item, i) => `
         <div class="item clickable draggable" data-index="${i}" data-type="${type}" draggable="true">
-            <span class="material-symbols-rounded">drag_indicator</span>
-            <span class="item-name">${escapeHtml(item.name)}</span>
-            <span class="item-detail">${escapeHtml(item.roll)}</span>
-            <span class="item-detail">${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
+            <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m);">drag_indicator</span>
+            <span class="item-param">
+                <span class="item-name">${escapeHtml(item.name)}</span>
+                <span class="item-detail">${escapeHtml(item.roll)}</span>
+                <span class="item-detail">${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
+            </span>
             <button class="remove-btn" data-remove="${i}" data-remove-type="${type}">×</button>
         </div>
     `).join('');
@@ -936,9 +942,7 @@ function renderPackage(type) {
     attachItemEvents(type);
 }
 
-/**
- * 汎用アイテムイベントアタッチ関数
- */
+/* 汎用アイテムイベントアタッチ関数　*/
 function attachItemEvents(type) {
     const typeConfig = {
         'judge': {
@@ -982,7 +986,7 @@ function attachItemEvents(type) {
     });
 }
 
-/* 汎用出力関数（判定・攻撃パッケージ）*/
+/* コマンド生成関数（判定・攻撃パッケージ）*/
 function updatePackageOutput(type, selectedIndex = null) {
     const array = type === 'judge' ? judges : attacks;
     const outputId = type === 'judge' ? 'judgeOutput' : 'attackOutput';
@@ -1027,9 +1031,8 @@ function updatePackageOutput(type, selectedIndex = null) {
         } else if (targetType === 'lte' && targetValue) {
             command += `=<${targetValue}`;
         }
-    } else if (type === 'attack') {
-        command += ` ${item.name}`;
     }
+    command += ` ${item.name}`
     
     document.getElementById(outputId).textContent = command;
 }
