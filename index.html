@@ -116,6 +116,7 @@
             border-left: 2px solid rgba(245,245,245,0.3);
             color: whitesmoke;
             cursor: pointer;
+            opacity: 0.7;
             transition: 0.2s ease;
         }
 
@@ -125,7 +126,7 @@
 
 
         .header-menu-item span {
-            font-size: 200%;
+            font-size: 32px;
         }
 
 
@@ -593,8 +594,8 @@
         .target-options {
             display: flex;
             gap: 12px;
-            margin-top: var(--spacing-ms);
-            margin-bottom: var(--spacing-m);
+            margin-top: var(--spacing-md);
+            margin-bottom: var(--spacing-ms);
             align-items: center;
             flex-wrap: wrap;
         }
@@ -724,7 +725,7 @@
         .btn--info { background: var(--text-muted); }
         .btn--danger { background: var(--danger-color); }
         .small-text { font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
-        .label-muted { font-size: 12px; font-weight: 600; color: #555; display: block; margin-bottom: 6px; }
+        .label-muted { font-size: 13px; font-weight: 600; color: #555; display: block;}
         .input-narrow { width: 70px; flex: 0 0 70px; }
         .input-color { width: 16px; flex: 0 0 16px; min-width: 36px; }
         .input-compact { width: 60px; padding: 4px 6px; border: 1px solid var(--border-color-light); border-radius: 4px; }
@@ -738,7 +739,7 @@
         </div>
         <div class="header-menu">
             <button class="header-menu-item" data-tooltip="セーブ・ロード" command="show-modal" commandfor="DataOption">
-                <span class="material-symbols-rounded">checkbook</span>
+                <span class="material-symbols-rounded">save</span>
             </button>
             <a class="header-menu-item" href="https://bufcon.gitbook.io/bufcon-docs/" target="_blank" rel="noopener noreferrer">
                 <span class="material-symbols-rounded">help</span>
@@ -873,7 +874,7 @@
                             <div class="add-area-inputs">
                                 <input type="text" id="judgeName" placeholder="判定名">
                                 <input type="text" id="judgeRoll" placeholder="判定ロール (例: 1d20)">
-                                <select id="judgeStat" class="input-narrow">
+                                <select id="judgeStat" class="input-narrow" multiple size="1" style="flex: 0 0 150px;">
                                     <option value="">なし</option>
                                 </select>
                             </div>
@@ -891,7 +892,7 @@
                                     <button class="add-btn flex-1" id="bulkAddJudgeConfirm">追加を実行</button>
                                     <button class="add-btn btn--muted flex-1" id="bulkAddJudgeCancel">キャンセル</button>
                                 </div>
-                                <div class="small-text">形式: 判定名|判定ロール|ステータス名<br>※ステータス名は省略可</div>
+                                <div class="small-text">形式: 判定名|判定ロール|ステータス名,ステータス名<br>※ステータス名は省略可</div>
                             </div>
                         </div>
                     </details>
@@ -933,7 +934,7 @@
                             <div class="add-area-inputs">
                                 <input type="text" id="attackName" placeholder="攻撃名">
                                 <input type="text" id="attackRoll" placeholder="攻撃ロール (例: 2d6,K20@10)">
-                                <select id="attackStat" class="input-narrow">
+                                <select id="attackStat" class="input-narrow" multiple size="1">
                                     <option value="">なし</option>
                                 </select>
                             </div>
@@ -950,7 +951,7 @@
                                     <button class="add-btn flex-1" id="bulkAddAttackConfirm">追加を実行</button>
                                     <button class="add-btn btn--muted flex-1" id="bulkAddAttackCancel">キャンセル</button>
                                 </div>
-                                <div class="small-text">形式: 攻撃名|攻撃ロール|ステータス名<br>※ステータス名は省略可</div>
+                                <div class="small-text">形式: 攻撃名|攻撃ロール|ステータス名,ステータス名<br>※ステータス名は省略可</div>
                             </div>
                         </div>
                     </details>

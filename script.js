@@ -516,7 +516,7 @@ function bulkAdd(type) {
             parser: (parts, index) => {
                 const name = parts[0];
                 const roll = parts[1];
-                const stat = parts[2] || '';
+                const stat = parts[2] ? parts[2].split(',').map(s => s.trim()).join('+') : '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
                 return { name, roll, stat };
             },
@@ -534,7 +534,7 @@ function bulkAdd(type) {
             parser: (parts, index) => {
                 const name = parts[0];
                 const roll = parts[1];
-                const stat = parts[2] || '';
+                const stat = parts[2] ? parts[2].split(',').map(s => s.trim()).join('+') : '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
                 return { name, roll, stat };
             },
@@ -829,7 +829,8 @@ function handleDragEnd(e) {
 function addJudge() {
     const name = document.getElementById('judgeName').value.trim();
     const roll = document.getElementById('judgeRoll').value.trim();
-    const stat = document.getElementById('judgeStat').value;
+    const selectedStats = Array.from(document.getElementById('judgeStat').selectedOptions).map(opt => opt.value).filter(v => v);
+    const stat = selectedStats.length > 0 ? selectedStats.join('+') : '';
     
     if (!name || !roll) {
         showToast('判定名と判定ロールを入力してください', 'error');
@@ -839,6 +840,9 @@ function addJudge() {
     judges.push({ name: name, roll: roll, stat: stat });
     document.getElementById('judgeName').value = '';
     document.getElementById('judgeRoll').value = '';
+    
+    // マルチセレクトをリセット
+    Array.from(document.getElementById('judgeStat').options).forEach(opt => opt.selected = false);
     
     renderPackage('judge');
     updateBuffTargetDropdown();
@@ -858,7 +862,8 @@ function removeJudge(index) {
 function addAttack() {
     const name = document.getElementById('attackName').value.trim();
     const roll = document.getElementById('attackRoll').value.trim();
-    const stat = document.getElementById('attackStat').value;
+    const selectedStats = Array.from(document.getElementById('attackStat').selectedOptions).map(opt => opt.value).filter(v => v);
+    const stat = selectedStats.length > 0 ? selectedStats.join('+') : '';
     
     if (!name || !roll) {
         showToast('攻撃名と攻撃ロールを入力してください', 'error');
@@ -868,6 +873,9 @@ function addAttack() {
     attacks.push({ name: name, roll: roll, stat: stat });
     document.getElementById('attackName').value = '';
     document.getElementById('attackRoll').value = '';
+    
+    // マルチセレクトをリセット
+    Array.from(document.getElementById('attackStat').options).forEach(opt => opt.selected = false);
     
     renderPackage('attack');
     updateBuffTargetDropdown();
@@ -1007,7 +1015,9 @@ function updatePackageOutput(type, selectedIndex = null) {
     let command = item.roll;
     
     if (item.stat) {
-        command += '+{' + item.stat + '}';
+        // 複数ステータスの場合も対応（+ で区切られている）
+        const stats = item.stat.split('+');
+        command += '+{' + stats.join('}+{') + '}';
     }
     
     const filterKey = type === 'judge' ? 'judge:' : 'attack:';
