@@ -51,6 +51,18 @@
             background: var(--border-color-light);
             padding: 0;
         }
+
+        .copyright {
+            padding: 0 var(--spacing-m) var(--spacing-m);
+            font-size: var(--font-size-sm);
+            color: var(--text-color);
+        }
+
+        .copyright.summary {
+            margin-top: -24px;
+            justify-self: center;
+        }
+
         
         .container {
             max-width: 600px;
@@ -60,10 +72,13 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-        
+
         .header {
             background: var(--primary-color);
             color: whitesmoke;
+        }
+        
+        .title {
             padding-top: var(--spacing-m);
             padding-bottom: 0;
             text-align: center;
@@ -71,7 +86,7 @@
             font-weight: 800;
         }
 
-        .header2 {
+        .subtitle {
             background: var(--primary-color);
             color: whitesmoke;
             padding-top: 0;
@@ -80,7 +95,12 @@
             font-size: var(--font-size-xs);
             font-weight: 600;
         }
-        
+
+        .modal{
+            margin: var(--spacing-L);
+            justify-self: center;
+        }
+            
         .content {
             padding: var(--spacing-L);
         }
@@ -92,7 +112,7 @@
             overflow: hidden;
         }
         
-        .section-header {
+        .section-header, .section-header-m {
             background: var(--bg-light);
             padding: var(--spacing-xs) var(--spacing-md);
             font-weight: 600;
@@ -278,6 +298,12 @@
             position: relative;
             box-shadow: 0 1px rgba(0,0,0,0.3);
         }
+
+        .item-param {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+        }
         
         .item.clickable {
             cursor: pointer;
@@ -419,18 +445,27 @@
         .buff-item:hover .tooltip {
             display: block;
         }
+
+        .buff-btn {
+            display: flex;
+            flex-wrap: wrap-reverse;
+            justify-content: flex-end;
+            margin-left: auto;
+            width: 100%;
+            gap: inherit;
+        }
         
         .toggle-btn {
+            display: flex;
             width: 48px;
             height: 24px;
             border-radius: 12px;
             border: none;
             cursor: pointer;
-            position: absolute;
-            right: 40px;
             transition: background 0.2s;
             flex-shrink: 0;
             box-shadow: inset 0 2px rgba(0,0,2,0.1);
+            align-items: center;
         }
 
         .toggle-btn.active {
@@ -439,31 +474,27 @@
         }
         
         .toggle-btn::after {
+            display: flex;
             content: '';
-            z-index: 1000;
-            position: absolute;
+            position: relative;
+            left: 3px;
             width: 18px;
             height: 18px;
             border-radius: 50%;
             background: whitesmoke;
-            top: 3px;
-            left: 3px;
             box-shadow: inset 0 -1px rgba(0,0,0.5,0.2);
-            transition: transform 1s ease-out;
         }
         
         .toggle-btn.active::after {
             transform: translateX(24px);
-            transition: transform 1s ease-out;
         }
-        
+
         .remove-btn {
             background: rgba(0,0,0,0.1);
             color: inherit;
             border: none;
             border-radius: 4px;
             padding: 4px 8px;
-            margin-left: auto;
             cursor: pointer;
             font-size: 12px;
             flex-shrink: 0;
@@ -642,35 +673,39 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">BUFCON</div>
-        <div class="header2">TRPG戦闘サポートツール</div>
-        <div class="content">
-            <div class="section">
-                <div class="section-header collapsed">
-                    <span class="material-symbols-rounded">checkbook</span>
-                    <span class="section-header-title">データ管理</span>
-                    <span class="arrow">▼</span>
-                </div>
-                <div class="section-body">
-                    <div class="mb-12">
-                        <button class="add-btn btn--secondary btn--info full-width" id="exportToClipboard">
-                            <span class="material-symbols-rounded">content_copy</span>
-                            設定をクリップボードにコピー</button>
+        <div class="header">
+            <div class="title">BUFCON</div>
+            <div class="subtitle">TRPG戦闘サポートツール</div>
+            <button class="material-symbols-rounded" command="show-modal" commandfor="DataOption">checkbook</button>
+        </div>
+            <dialog class="section modal" id="DataOption">
+                    <div class="section-header-m collapsed">
+                        <span class="material-symbols-rounded">checkbook</span>
+                        <span class="section-header-title">データ管理</span>
+                        <button class="material-symbols-rounded add-btn" command="close" commandfor="DataOption" style="margin-left: auto; background: var(--danger-color);">close</button>
                     </div>
-                    <div>
-                        <label class="label-muted">JSONを貼り付けて読み込み:</label>
-                        <textarea id="importText" placeholder='{"stats":[...],"buffs":[...],...}' class="textarea-mono" style="height:120px;"></textarea>
-                        <button class="add-btn btn--secondary full-width mt-6" id="importConfirm">読み込み実行</button>
+                    <div class="section-body">
+                        <div class="mb-12">
+                            <label class="label-muted">クリップボードから貼り付けて読み込み:</label>
+                            <div style="display: flex; flex-direction: row; gap: 6px;">
+                                <textarea id="importText" placeholder='{"stats":[...],"buffs":[...],...}' class="textarea-mono" style="height:120px; flex: 3;"></textarea>
+                                <button class="add-btn" id="importConfirm">✚</button>
+                            </div>
+                        </div>
+                        <div class="mb-12">    
+                            <button class="add-btn btn--secondary btn--info full-width" id="exportToClipboard">
+                                <span class="material-symbols-rounded">content_copy</span>
+                                現在の設定をクリップボードにコピー</button>
+                        </div>
+                        <div class="mt-12 pt-12 bt-top">
+                            <button class="add-btn btn--secondary btn--danger full-width" id="resetBtn">
+                                <span class="material-symbols-rounded">delete_forever</span>
+                                すべて初期化
+                            </button>
+                        </div>
                     </div>
-                    <div class="mt-12 pt-12 bt-top">
-                        <button class="add-btn btn--secondary btn--danger full-width" id="resetBtn">
-                            <span class="material-symbols-rounded">delete_forever</span>
-                            すべて初期化
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
+                </dialog>
+        <div class="content">            
             <div class="section">
                 <div class="section-header">
                     <span class="material-symbols-rounded">analytics</span>
@@ -855,7 +890,24 @@
                 </div>
             </div>
         </div>
-    </div>
+    <details class="copyright">
+        <summary>Copyright</summary>
+            <div class="copyright"> (c) 2025 竹田ユウヤ/n
+
+本ソフトウェアおよび関連する文書のファイル（以下「ソフトウェア」）の複製を取得した全ての人物に対し、以下の条件に従うことを前提に、ソフトウェアを無制限に扱うことを無償で許可します。これには、ソフトウェアの複製を使用、複製、改変、結合、公開、頒布、再許諾、および/または販売する権利、およびソフトウェアを提供する人物に同様の行為を許可する権利が含まれますが、これらに限定されません。
+
+上記の著作権表示および本許諾表示を、ソフトウェアの全ての複製または実質的な部分に記載するものとします。
+
+ソフトウェアは「現状有姿」で提供され、商品性、特定目的への適合性、および権利の非侵害性に関する保証を含むがこれらに限定されず、明示的であるか黙示的であるかを問わず、いかなる種類の保証も行われません。著作者または著作権者は、契約、不法行為、またはその他の行為であるかを問わず、ソフトウェアまたはソフトウェアの使用もしくはその他に取り扱いに起因または関連して生じるいかなる請求、損害賠償、その他の責任について、一切の責任を負いません。
+
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</div>
+    </details>
     <script src="script.js"></script>
+    </div>
 </body>
 </html>
