@@ -12,10 +12,9 @@
             --add-hover: #3B5796;
             --secondary-color: #689F38;
             --danger-color: #ff6b6b;
-            --info-color: #4dabf7;
             --bg-light: #0e438c;
             --bg-gray: ##ccc;
-            --optional-color: #ebb50a;
+            --optional-color: #eba40a;
             --border-color: #00000033;
             --border-color-light: #ddd;
             --border-color-dark: #d1d1d1;
@@ -45,44 +44,164 @@
             padding: 0;
             box-sizing: border-box;
         }
+
+        button{
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            padding: 0;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
         
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
             background: var(--border-color-light);
             padding: 0;
         }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: var(--bg-gray);
-            border-radius: var(--border-radius-xl);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: var(--primary-color);
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.8);
             color: whitesmoke;
-            padding-top: var(--spacing-m);
-            padding-bottom: 0;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            margin: 5px 0;
+            z-index: 1000;
+            position-anchor: var(--target);
+        }
+
+            .tooltip::before {
+            content: "";
+            position: absolute;
+            border: 10px solid transparent;
+            border-bottom-color: rgba(0,0,0,0.8);
+            top: 8px;
+            left: 10px;
+            transform: rotate(-180deg);
+            transform-origin: bottom center;
+            }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            width: 100%;
+            height: 60px;
+            background: var(--primary-color);
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            margin-top: -8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            color: whitesmoke;
+        }
+
+        .title {
+            padding-left: 10px;
             text-align: center;
             font-size: var(--font-size-xxl);
             font-weight: 800;
         }
 
-        .header2 {
-            background: var(--primary-color);
-            color: whitesmoke;
-            padding-top: 0;
-            padding-bottom: var(--spacing-L);
+        .subtitle {
+            margin-top: -7px;
+            margin-left: -4px;
             text-align: center;
             font-size: var(--font-size-xs);
             font-weight: 600;
         }
+
+        .header-menu{
+            display: flex;
+            width: 50%;
+            max-width: 300px;
+            min-width: 120px;
+            justify-content: flex-end;
+            color: whitesmoke;
+        }
+
+        .header-menu-item {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: stretch;
+            height: 60px;
+            border-left: 2px solid rgba(245,245,245,0.3);
+            color: whitesmoke;
+            cursor: pointer;
+            opacity: 1;
+            transition: 0.2s ease;
+        }
+
+        .header-menu-item:hover .tooltip {
+            background: var(--primary-color);
+            opacity: 1;
+            bottom: calc(anchor(bottom) - 40px);
+            transform: translateX(-20%);
+            box-shadow:  0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .header-menu-item:hover .tooltip::before {
+            display: none;
+        }
+
+        .header-menu-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+
+        .header-menu-item span {
+            font-size: 32px;
+            opacity: 0.8;
+        }
+
+
+        .copyright {
+            padding: 0 var(--spacing-m) var(--spacing-m);
+            font-size: var(--font-size-sm);
+            color: var(--text-color);
+        }
+
+        .copyright.summary {
+            margin-top: -24px;
+            justify-self: center;
+        }
+
         
+        .container {
+            max-width: 600px;
+            margin:0 auto;
+            background: var(--bg-gray);
+            border-radius: var(--border-radius-xl);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .modal {
+            margin: var(--spacing-L);
+            justify-self: center;
+        }
+
+        .modal::backdrop {
+            background: rgba(0,0,0,0.5);
+        }
+            
         .content {
             padding: var(--spacing-L);
+            margin-top: 60px;
         }
         
         .section {
@@ -92,7 +211,7 @@
             overflow: hidden;
         }
         
-        .section-header {
+        .section-header, .section-header-m {
             background: var(--bg-light);
             padding: var(--spacing-xs) var(--spacing-md);
             font-weight: 600;
@@ -225,7 +344,7 @@
             border-radius: 4px;
             font-size: 13px;
             flex: 1;
-            min-width: 40px;
+            min-width: 20px;
         }
 
         
@@ -277,6 +396,12 @@
             transition: all 0.2s;
             position: relative;
             box-shadow: 0 1px rgba(0,0,0,0.3);
+        }
+
+        .item-param {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
         }
         
         .item.clickable {
@@ -346,6 +471,15 @@
             opacity: 1;
             filter: none;
         }
+
+        .buff-item:hover .tooltip {
+            opacity: 1;
+            align-items: normal;
+            bottom: 100%;
+            left: 100px;
+            transform: translateX(50px); 
+        }
+
         .buff-item.dragging .tooltip {
             display: none !important;
             cursor: grabbing;
@@ -381,6 +515,7 @@
         .turn-badge {
             display: flex;
             position: absolute;
+            align-items: baseline;
             top: -6px;
             left: -6px;
             width: 24px;
@@ -390,47 +525,32 @@
             border-radius: 50%;
         }
 
-        .turn-count {
+        .turn-badge span {
             height: 24px;
             margin: 10% auto 10%;
             text-align: right;
             font-size: 14px;
             font-weight: 800;
         }
-        
-        .tooltip {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: whitesmoke;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            pointer-events: none;
-            transition: opacity 0.2s;
-            margin-bottom: 5px;
-            z-index: 1000;
-            display: none;
-        }
-        
-        .buff-item:hover .tooltip {
-            display: block;
+
+        .buff-btn {
+            display: flex;
+            justify-content: flex-end;
+            margin-left: auto;
+            gap: inherit;
         }
         
         .toggle-btn {
+            display: flex;
             width: 48px;
             height: 24px;
             border-radius: 12px;
             border: none;
             cursor: pointer;
-            position: absolute;
-            right: 40px;
             transition: background 0.2s;
             flex-shrink: 0;
             box-shadow: inset 0 2px rgba(0,0,2,0.1);
+            align-items: center;
         }
 
         .toggle-btn.active {
@@ -439,31 +559,27 @@
         }
         
         .toggle-btn::after {
+            display: flex;
             content: '';
-            z-index: 1000;
-            position: absolute;
+            position: relative;
+            left: 3px;
             width: 18px;
             height: 18px;
             border-radius: 50%;
             background: whitesmoke;
-            top: 3px;
-            left: 3px;
             box-shadow: inset 0 -1px rgba(0,0,0.5,0.2);
-            transition: transform 1s ease-out;
         }
         
         .toggle-btn.active::after {
             transform: translateX(24px);
-            transition: transform 1s ease-out;
         }
-        
+
         .remove-btn {
             background: rgba(0,0,0,0.1);
             color: inherit;
             border: none;
             border-radius: 4px;
             padding: 4px 8px;
-            margin-left: auto;
             cursor: pointer;
             font-size: 12px;
             flex-shrink: 0;
@@ -474,7 +590,7 @@
             background: rgba(0,0,0,0.2);
         }
         
-        .turn-control {
+        .buff-control {
             display: flex;
             justify-content: flex-start;
             margin-bottom: 12px;
@@ -493,6 +609,7 @@
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 1px rgba(0,0,0,0.3);
         }
         
         .turn-btn:hover {
@@ -503,8 +620,8 @@
         .target-options {
             display: flex;
             gap: 12px;
-            margin-top: var(--spacing-ms);
-            margin-bottom: var(--spacing-m);
+            margin-top: var(--spacing-md);
+            margin-bottom: var(--spacing-ms);
             align-items: center;
             flex-wrap: wrap;
         }
@@ -608,7 +725,7 @@
             gap: 6px;
         }
         
-        .stat-tag button {
+        .stat-tag.button {
             background: none;
             border: none;
             color: var(--add-color);
@@ -631,46 +748,67 @@
         .flex-1 { flex: 1; }
         .btn--secondary {display: flex; background: var(--add-color); align-items: center; justify-content: center; gap: var(--spacing-xs);}
         .btn--muted { background: var(--text-muted); }
-        .btn--info { background: var(--info-color); }
+        .btn--info { background: var(--text-muted); }
         .btn--danger { background: var(--danger-color); }
         .small-text { font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
-        .label-muted { font-size: 12px; font-weight: 600; color: #555; display: block; margin-bottom: 6px; }
+        .label-muted { font-size: 13px; font-weight: 600; color: #555; display: block;}
         .input-narrow { width: 70px; flex: 0 0 70px; }
         .input-color { width: 16px; flex: 0 0 16px; min-width: 36px; }
         .input-compact { width: 60px; padding: 4px 6px; border: 1px solid var(--border-color-light); border-radius: 4px; }
     </style>
 </head>
 <body>
+    <header>
+        <div class="logo">
+            <div class="title">BUFCON</div>
+            <div class="subtitle">TRPG戦闘サポートツール</div>
+        </div>
+        <div class="header-menu">
+            <button class="header-menu-item" style="anchor-name: --save" command="show-modal" commandfor="DataOption">
+                <div class="tooltip" style="--target: --save">セーブ・ロード</div>
+                <span class="material-symbols-rounded">save</span>
+            </button>
+            <a class="header-menu-item" style="anchor-name: --help" href="https://bufcon.gitbook.io/bufcon-docs/" target="_blank" rel="noopener noreferrer">
+                <div class="tooltip" style="--target: --help">使い方</div>
+                <span class="material-symbols-rounded">help</span>
+            </a>
+            <a class="header-menu-item" style="anchor-name: --feedback" href="https://forms.gle/Z5YU8JaAVVUmWMaZ7" target="_blank" rel="noopener noreferrer">
+                <div class="tooltip" style="--target: --feedback">感想投稿フォーム</div>
+                <span class="material-symbols-rounded">feedback</span>
+            </a>
+        </div>
+    </header>
+
+                <dialog class="section modal" id="DataOption" closedby="any">
+                    <div class="section-header-m collapsed">
+                        <span class="material-symbols-rounded">checkbook</span>
+                        <span class="section-header-title">データ管理</span>
+                    </div>
+                    <div class="section-body">
+                        <div class="mb-12">
+                            <label class="label-muted">クリップボードから貼り付けて読み込み:</label>
+                            <div style="display: flex; flex-direction: row; gap: 6px;">
+                                <textarea id="importText" placeholder='{"stats":[...],"buffs":[...],...}' class="textarea-mono" style="height:120px; flex: 3;"></textarea>
+                                <button class="add-btn" id="importConfirm">✚</button>
+                            </div>
+                        </div>
+                        <div class="mb-12">    
+                            <button class="add-btn btn--secondary btn--info full-width" id="exportToClipboard">
+                                <span class="material-symbols-rounded">content_copy</span>
+                                現在の設定をクリップボードにコピー</button>
+                        </div>
+                        <div class="mt-12 pt-12 bt-top">
+                            <button class="add-btn btn--secondary btn--danger full-width" id="resetBtn">
+                                <span class="material-symbols-rounded">delete_forever</span>
+                                すべて初期化
+                            </button>
+                        </div>
+                    </div>
+                </dialog>
+
     <div class="container">
-        <div class="header">BUFCON</div>
-        <div class="header2">TRPG戦闘サポートツール</div>
-        <div class="content">
-            <div class="section">
-                <div class="section-header collapsed">
-                    <span class="material-symbols-rounded">checkbook</span>
-                    <span class="section-header-title">データ管理</span>
-                    <span class="arrow">▼</span>
-                </div>
-                <div class="section-body">
-                    <div class="mb-12">
-                        <button class="add-btn btn--secondary btn--info full-width" id="exportToClipboard">
-                            <span class="material-symbols-rounded">content_copy</span>
-                            設定をクリップボードにコピー</button>
-                    </div>
-                    <div>
-                        <label class="label-muted">JSONを貼り付けて読み込み:</label>
-                        <textarea id="importText" placeholder='{"stats":[...],"buffs":[...],...}' class="textarea-mono" style="height:120px;"></textarea>
-                        <button class="add-btn btn--secondary full-width mt-6" id="importConfirm">読み込み実行</button>
-                    </div>
-                    <div class="mt-12 pt-12 bt-top">
-                        <button class="add-btn btn--secondary btn--danger full-width" id="resetBtn">
-                            <span class="material-symbols-rounded">delete_forever</span>
-                            すべて初期化
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
+
+        <div class="content">            
             <div class="section">
                 <div class="section-header">
                     <span class="material-symbols-rounded">analytics</span>
@@ -741,7 +879,7 @@
                             </div>
                         </div>
                     </details>
-                    <div class="turn-control" full-width>
+                    <div class="buff-control" full-width>
                             <button class="turn-btn" id="turnProgressBtn">
                                 <span class="material-symbols-rounded">skip_next</span>
                                 ターン経過</button>
@@ -765,7 +903,7 @@
                             <div class="add-area-inputs">
                                 <input type="text" id="judgeName" placeholder="判定名">
                                 <input type="text" id="judgeRoll" placeholder="判定ロール (例: 1d20)">
-                                <select id="judgeStat" class="input-narrow">
+                                <select id="judgeStat" class="input-narrow" multiple size="1" style="flex: 0 0 150px;">
                                     <option value="">なし</option>
                                 </select>
                             </div>
@@ -783,7 +921,7 @@
                                     <button class="add-btn flex-1" id="bulkAddJudgeConfirm">追加を実行</button>
                                     <button class="add-btn btn--muted flex-1" id="bulkAddJudgeCancel">キャンセル</button>
                                 </div>
-                                <div class="small-text">形式: 判定名|判定ロール|ステータス名<br>※ステータス名は省略可</div>
+                                <div class="small-text">形式: 判定名|判定ロール|ステータス名,ステータス名<br>※ステータス名は省略可</div>
                             </div>
                         </div>
                     </details>
@@ -825,7 +963,7 @@
                             <div class="add-area-inputs">
                                 <input type="text" id="attackName" placeholder="攻撃名">
                                 <input type="text" id="attackRoll" placeholder="攻撃ロール (例: 2d6,K20@10)">
-                                <select id="attackStat" class="input-narrow">
+                                <select id="attackStat" class="input-narrow" multiple size="1">
                                     <option value="">なし</option>
                                 </select>
                             </div>
@@ -842,7 +980,7 @@
                                     <button class="add-btn flex-1" id="bulkAddAttackConfirm">追加を実行</button>
                                     <button class="add-btn btn--muted flex-1" id="bulkAddAttackCancel">キャンセル</button>
                                 </div>
-                                <div class="small-text">形式: 攻撃名|攻撃ロール|ステータス名<br>※ステータス名は省略可</div>
+                                <div class="small-text">形式: 攻撃名|攻撃ロール|ステータス名,ステータス名<br>※ステータス名は省略可</div>
                             </div>
                         </div>
                     </details>
@@ -855,7 +993,24 @@
                 </div>
             </div>
         </div>
-    </div>
+    <details class="copyright">
+        <summary>Copyright</summary>
+            <div class="copyright"> (c) 2025 竹田ユウヤ/n
+
+本ソフトウェアおよび関連する文書のファイル（以下「ソフトウェア」）の複製を取得した全ての人物に対し、以下の条件に従うことを前提に、ソフトウェアを無制限に扱うことを無償で許可します。これには、ソフトウェアの複製を使用、複製、改変、結合、公開、頒布、再許諾、および/または販売する権利、およびソフトウェアを提供する人物に同様の行為を許可する権利が含まれますが、これらに限定されません。
+
+上記の著作権表示および本許諾表示を、ソフトウェアの全ての複製または実質的な部分に記載するものとします。
+
+ソフトウェアは「現状有姿」で提供され、商品性、特定目的への適合性、および権利の非侵害性に関する保証を含むがこれらに限定されず、明示的であるか黙示的であるかを問わず、いかなる種類の保証も行われません。著作者または著作権者は、契約、不法行為、またはその他の行為であるかを問わず、ソフトウェアまたはソフトウェアの使用もしくはその他に取り扱いに起因または関連して生じるいかなる請求、損害賠償、その他の責任について、一切の責任を負いません。
+
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</div>
+    </details>
     <script src="script.js"></script>
+    </div>
 </body>
 </html>

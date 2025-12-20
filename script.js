@@ -49,7 +49,7 @@ function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.style.cssText = `
         position: fixed;
-        top: 20px;
+        top: 80px;
         right: 20px;
         padding: 12px 20px;
         background: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#4dabf7'};
@@ -516,7 +516,7 @@ function bulkAdd(type) {
             parser: (parts, index) => {
                 const name = parts[0];
                 const roll = parts[1];
-                const stat = parts[2] || '';
+                const stat = parts[2] ? parts[2].split(',').map(s => s.trim()).join('+') : '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
                 return { name, roll, stat };
             },
@@ -534,7 +534,7 @@ function bulkAdd(type) {
             parser: (parts, index) => {
                 const name = parts[0];
                 const roll = parts[1];
-                const stat = parts[2] || '';
+                const stat = parts[2] ? parts[2].split(',').map(s => s.trim()).join('+') : '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
                 return { name, roll, stat };
             },
@@ -685,21 +685,25 @@ function renderBuffs() {
         const textColor = getContrastColor(bgColor);
         const targetTexts = buff.targets.map(t => getTargetText(t));
         const tooltipText = '効果先: ' + targetTexts.join(', ');
-        const turnDisplay = buff.turn ? `<span class="turn-badge" style="outline:2px solid ${buff.color};"><span class="turn-count">${buff.turn}</span></span>` : '';
+        const turnDisplay = buff.turn ? `<span class="turn-badge" style="outline:2px solid ${buff.color};"><span>${buff.turn}</span></span>` : '';
         
         return `
             <div class="item buff-item draggable ${buff.active ? 'active' : ''}" 
-                 style="background-color: ${bgColor}; color: ${textColor};"
+                 style="background-color: ${bgColor}; color: ${textColor}; anchor-name: --no${i};"
                  draggable="true"
                  data-index="${i}" data-type="buff">
-                <div class="tooltip">${escapeHtml(tooltipText)}</div>
-                <span class="material-symbols-rounded">\ue945</span>
-                <span class="item-name">${escapeHtml(buff.name)}</span>
-                ${buff.description ? `<span class="item-description">${escapeHtml(buff.description)}</span>` : ''}
-                ${buff.effect ? `<span class="item-effect">${escapeHtml(buff.effect)}</span>` : ''}
-                ${turnDisplay}
-               <button class="toggle-btn ${buff.active ? 'active' : ''}" data-toggle="${i}" data-toggle-type="buff"></button>
-                <button class="remove-btn" data-remove="${i}" data-remove-type="buff">×</button>
+                <div class="tooltip" style="--target: --no${i};">${escapeHtml(tooltipText)}</div>
+                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m">drag_indicator</span>
+                <span class="item-param">
+                    <span class="item-name">${escapeHtml(buff.name)}</span>
+                    ${buff.description ? `<span class="item-description">${escapeHtml(buff.description)}</span>` : ''}
+                    ${buff.effect ? `<span class="item-effect">${escapeHtml(buff.effect)}</span>` : ''}
+                    ${turnDisplay}
+                </span>
+                <span class="buff-btn">
+                    <button class="toggle-btn ${buff.active ? 'active' : ''}" data-toggle="${i}" data-toggle-type="buff"></button>
+                    <button class="remove-btn" data-remove="${i}" data-remove-type="buff">×</button>
+                </span>
             </div>
         `;
     }).join('');
@@ -825,7 +829,8 @@ function handleDragEnd(e) {
 function addJudge() {
     const name = document.getElementById('judgeName').value.trim();
     const roll = document.getElementById('judgeRoll').value.trim();
-    const stat = document.getElementById('judgeStat').value;
+    const selectedStats = Array.from(document.getElementById('judgeStat').selectedOptions).map(opt => opt.value).filter(v => v);
+    const stat = selectedStats.length > 0 ? selectedStats.join('+') : '';
     
     if (!name || !roll) {
         showToast('判定名と判定ロールを入力してください', 'error');
@@ -835,6 +840,9 @@ function addJudge() {
     judges.push({ name: name, roll: roll, stat: stat });
     document.getElementById('judgeName').value = '';
     document.getElementById('judgeRoll').value = '';
+    
+    // マルチセレクトをリセット
+    Array.from(document.getElementById('judgeStat').options).forEach(opt => opt.selected = false);
     
     renderPackage('judge');
     updateBuffTargetDropdown();
@@ -854,7 +862,8 @@ function removeJudge(index) {
 function addAttack() {
     const name = document.getElementById('attackName').value.trim();
     const roll = document.getElementById('attackRoll').value.trim();
-    const stat = document.getElementById('attackStat').value;
+    const selectedStats = Array.from(document.getElementById('attackStat').selectedOptions).map(opt => opt.value).filter(v => v);
+    const stat = selectedStats.length > 0 ? selectedStats.join('+') : '';
     
     if (!name || !roll) {
         showToast('攻撃名と攻撃ロールを入力してください', 'error');
@@ -864,6 +873,9 @@ function addAttack() {
     attacks.push({ name: name, roll: roll, stat: stat });
     document.getElementById('attackName').value = '';
     document.getElementById('attackRoll').value = '';
+    
+    // マルチセレクトをリセット
+    Array.from(document.getElementById('attackStat').options).forEach(opt => opt.selected = false);
     
     renderPackage('attack');
     updateBuffTargetDropdown();
@@ -925,10 +937,12 @@ function renderPackage(type) {
     
     list.innerHTML = config.array.map((item, i) => `
         <div class="item clickable draggable" data-index="${i}" data-type="${type}" draggable="true">
-            <span class="material-symbols-rounded">drag_indicator</span>
-            <span class="item-name">${escapeHtml(item.name)}</span>
-            <span class="item-detail">${escapeHtml(item.roll)}</span>
-            <span class="item-detail">${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
+            <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m);">drag_indicator</span>
+            <span class="item-param">
+                <span class="item-name">${escapeHtml(item.name)}</span>
+                <span class="item-detail">${escapeHtml(item.roll)}</span>
+                <span class="item-detail">${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
+            </span>
             <button class="remove-btn" data-remove="${i}" data-remove-type="${type}">×</button>
         </div>
     `).join('');
@@ -936,9 +950,7 @@ function renderPackage(type) {
     attachItemEvents(type);
 }
 
-/**
- * 汎用アイテムイベントアタッチ関数
- */
+/* 汎用アイテムイベントアタッチ関数　*/
 function attachItemEvents(type) {
     const typeConfig = {
         'judge': {
@@ -982,7 +994,7 @@ function attachItemEvents(type) {
     });
 }
 
-/* 汎用出力関数（判定・攻撃パッケージ）*/
+/* コマンド生成関数（判定・攻撃パッケージ）*/
 function updatePackageOutput(type, selectedIndex = null) {
     const array = type === 'judge' ? judges : attacks;
     const outputId = type === 'judge' ? 'judgeOutput' : 'attackOutput';
@@ -1003,7 +1015,9 @@ function updatePackageOutput(type, selectedIndex = null) {
     let command = item.roll;
     
     if (item.stat) {
-        command += '+{' + item.stat + '}';
+        // 複数ステータスの場合も対応（+ で区切られている）
+        const stats = item.stat.split('+');
+        command += '+{' + stats.join('}+{') + '}';
     }
     
     const filterKey = type === 'judge' ? 'judge:' : 'attack:';
@@ -1027,9 +1041,8 @@ function updatePackageOutput(type, selectedIndex = null) {
         } else if (targetType === 'lte' && targetValue) {
             command += `=<${targetValue}`;
         }
-    } else if (type === 'attack') {
-        command += ` ${item.name}`;
     }
+    command += ` ${item.name}`
     
     document.getElementById(outputId).textContent = command;
 }
