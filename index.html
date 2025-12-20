@@ -14,7 +14,7 @@
             --danger-color: #ff6b6b;
             --bg-light: #0e438c;
             --bg-gray: ##ccc;
-            --optional-color: #ebb50a;
+            --optional-color: #eba40a;
             --border-color: #00000033;
             --border-color-light: #ddd;
             --border-color-dark: #d1d1d1;
@@ -46,13 +46,13 @@
         }
 
         button{
-        background-color: transparent;
-        border: none;
-        cursor: pointer;
-        outline: none;
-        padding: 0;
-        -webkit-appearance: none;
-	    -moz-appearance: none;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            padding: 0;
+            -webkit-appearance: none;
+            -moz-appearance: none;
         }
         
         body {
@@ -60,6 +60,32 @@
             background: var(--border-color-light);
             padding: 0;
         }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            color: whitesmoke;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            margin: 5px 0;
+            z-index: 1000;
+            position-anchor: var(--target);
+        }
+
+            .tooltip::before {
+            content: "";
+            position: absolute;
+            border: 10px solid transparent;
+            border-bottom-color: rgba(0,0,0,0.8);
+            top: 8px;
+            left: 10px;
+            transform: rotate(-180deg);
+            transform-origin: bottom center;
+            }
 
         header {
             display: flex;
@@ -116,8 +142,20 @@
             border-left: 2px solid rgba(245,245,245,0.3);
             color: whitesmoke;
             cursor: pointer;
-            opacity: 0.7;
+            opacity: 1;
             transition: 0.2s ease;
+        }
+
+        .header-menu-item:hover .tooltip {
+            background: var(--primary-color);
+            opacity: 1;
+            bottom: calc(anchor(bottom) - 40px);
+            transform: translateX(-20%);
+            box-shadow:  0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .header-menu-item:hover .tooltip::before {
+            display: none;
         }
 
         .header-menu-item:hover {
@@ -127,6 +165,7 @@
 
         .header-menu-item span {
             font-size: 32px;
+            opacity: 0.8;
         }
 
 
@@ -305,7 +344,7 @@
             border-radius: 4px;
             font-size: 13px;
             flex: 1;
-            min-width: 40px;
+            min-width: 20px;
         }
 
         
@@ -432,6 +471,15 @@
             opacity: 1;
             filter: none;
         }
+
+        .buff-item:hover .tooltip {
+            opacity: 1;
+            align-items: normal;
+            bottom: 100%;
+            left: 100px;
+            transform: translateX(50px); 
+        }
+
         .buff-item.dragging .tooltip {
             display: none !important;
             cursor: grabbing;
@@ -467,6 +515,7 @@
         .turn-badge {
             display: flex;
             position: absolute;
+            align-items: baseline;
             top: -6px;
             left: -6px;
             width: 24px;
@@ -476,42 +525,18 @@
             border-radius: 50%;
         }
 
-        .turn-count {
+        .turn-badge span {
             height: 24px;
             margin: 10% auto 10%;
             text-align: right;
             font-size: 14px;
             font-weight: 800;
         }
-        
-        .tooltip {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: whitesmoke;
-            padding: 6px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            pointer-events: none;
-            transition: opacity 0.2s;
-            margin-bottom: 5px;
-            z-index: 1000;
-            display: none;
-        }
-        
-        .buff-item:hover .tooltip {
-            display: block;
-        }
 
         .buff-btn {
             display: flex;
-            flex-wrap: wrap-reverse;
             justify-content: flex-end;
             margin-left: auto;
-            width: 100%;
             gap: inherit;
         }
         
@@ -565,7 +590,7 @@
             background: rgba(0,0,0,0.2);
         }
         
-        .turn-control {
+        .buff-control {
             display: flex;
             justify-content: flex-start;
             margin-bottom: 12px;
@@ -584,6 +609,7 @@
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 1px rgba(0,0,0,0.3);
         }
         
         .turn-btn:hover {
@@ -738,13 +764,16 @@
             <div class="subtitle">TRPG戦闘サポートツール</div>
         </div>
         <div class="header-menu">
-            <button class="header-menu-item" data-tooltip="セーブ・ロード" command="show-modal" commandfor="DataOption">
+            <button class="header-menu-item" style="anchor-name: --save" command="show-modal" commandfor="DataOption">
+                <div class="tooltip" style="--target: --save">セーブ・ロード</div>
                 <span class="material-symbols-rounded">save</span>
             </button>
-            <a class="header-menu-item" href="https://bufcon.gitbook.io/bufcon-docs/" target="_blank" rel="noopener noreferrer">
+            <a class="header-menu-item" style="anchor-name: --help" href="https://bufcon.gitbook.io/bufcon-docs/" target="_blank" rel="noopener noreferrer">
+                <div class="tooltip" style="--target: --help">使い方</div>
                 <span class="material-symbols-rounded">help</span>
             </a>
-            <a class="header-menu-item" href="https://forms.gle/Z5YU8JaAVVUmWMaZ7" target="_blank" rel="noopener noreferrer">
+            <a class="header-menu-item" style="anchor-name: --feedback" href="https://forms.gle/Z5YU8JaAVVUmWMaZ7" target="_blank" rel="noopener noreferrer">
+                <div class="tooltip" style="--target: --feedback">感想投稿フォーム</div>
                 <span class="material-symbols-rounded">feedback</span>
             </a>
         </div>
@@ -850,7 +879,7 @@
                             </div>
                         </div>
                     </details>
-                    <div class="turn-control" full-width>
+                    <div class="buff-control" full-width>
                             <button class="turn-btn" id="turnProgressBtn">
                                 <span class="material-symbols-rounded">skip_next</span>
                                 ターン経過</button>

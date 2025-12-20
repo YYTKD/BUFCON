@@ -685,14 +685,14 @@ function renderBuffs() {
         const textColor = getContrastColor(bgColor);
         const targetTexts = buff.targets.map(t => getTargetText(t));
         const tooltipText = '効果先: ' + targetTexts.join(', ');
-        const turnDisplay = buff.turn ? `<span class="turn-badge" style="outline:2px solid ${buff.color};"><span class="turn-count">${buff.turn}</span></span>` : '';
+        const turnDisplay = buff.turn ? `<span class="turn-badge" style="outline:2px solid ${buff.color};"><span>${buff.turn}</span></span>` : '';
         
         return `
             <div class="item buff-item draggable ${buff.active ? 'active' : ''}" 
-                 style="background-color: ${bgColor}; color: ${textColor};"
+                 style="background-color: ${bgColor}; color: ${textColor}; anchor-name: --no${i};"
                  draggable="true"
                  data-index="${i}" data-type="buff">
-                <div class="tooltip">${escapeHtml(tooltipText)}</div>
+                <div class="tooltip" style="--target: --no${i};">${escapeHtml(tooltipText)}</div>
                 <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m">drag_indicator</span>
                 <span class="item-param">
                     <span class="item-name">${escapeHtml(buff.name)}</span>
@@ -701,8 +701,8 @@ function renderBuffs() {
                     ${turnDisplay}
                 </span>
                 <span class="buff-btn">
-                <button class="toggle-btn ${buff.active ? 'active' : ''}" data-toggle="${i}" data-toggle-type="buff"></button>
-                <button class="remove-btn" data-remove="${i}" data-remove-type="buff">×</button>
+                    <button class="toggle-btn ${buff.active ? 'active' : ''}" data-toggle="${i}" data-toggle-type="buff"></button>
+                    <button class="remove-btn" data-remove="${i}" data-remove-type="buff">×</button>
                 </span>
             </div>
         `;
