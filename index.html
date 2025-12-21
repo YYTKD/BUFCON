@@ -75,11 +75,47 @@ body {
     font-family: 'Segoe UI', system-ui, sans-serif;
     background: var(--border-color-light);
     padding: 0;
+    box-sizing: border-box !important;
 }
 
 p {
   margin-left: 3em;
   text-indent: -3em;
+}
+
+/* モーダル */
+.modal {
+    position: fixed;
+    border: 0;
+    width: calc(100% - 16px);
+    max-width: 600px;
+    background: var(--bg-gray);
+    justify-self: center;
+    align-self: flex-start;
+    margin-top: 120px;
+}
+
+.modal::backdrop {
+    background: rgba(0,0,0,0.5);
+}
+
+/* ========================================
+   レイアウト・コンテナ
+   ======================================== */
+
+/* メインコンテナ */
+.container {
+    padding: 8px;
+    background: var(--bg-gray);
+    overflow: hidden;
+}
+
+/* コンテンツエリア */
+.content {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 60px;
+    gap: var(--spacing-sm);
 }
 
 /* ========================================
@@ -181,42 +217,6 @@ header {
     opacity: 0.8;
 }
 
-/* ========================================
-   レイアウト・コンテナ
-   ======================================== */
-
-/* メインコンテナ */
-.container {
-    margin: 0 auto;
-    background: var(--bg-gray);
-    overflow: hidden;
-}
-
-/* モーダル */
-.modal {
-    position: fixed;
-    width: 600px;
-    height: max-content;
-    border: 0;
-    width: 100%;
-    max-width: 600px;
-    background: var(--bg-gray);
-    margin: var(--spacing-L);
-    justify-self: center;
-}
-
-.modal::backdrop {
-    background: rgba(0,0,0,0.5);
-}
-
-/* コンテンツエリア */
-.content {
-    display: flex;
-    flex-wrap: wrap;
-    padding: var(--spacing-md);
-    margin-top: 60px;
-    gap: var(--spacing-sm);
-}
 
 /* ========================================
    セクション関連
@@ -226,7 +226,6 @@ header {
 .section {
     flex: 1 720px;
     max-width: 720px;
-    margin-bottom: var(--spacing-sm);
     background: none;
 }
 
@@ -274,6 +273,9 @@ header {
 
 /* セクションボディ */
 .section-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     padding: 12px;
     border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
     border: 1px solid var(--border-color);
@@ -299,23 +301,24 @@ header {
 .add-area {
     display: flex;
     gap: 6px;
-    margin-bottom: 12px;
     padding-bottom: 12px;
     border-bottom: 2px solid var(--border-color-dark);
 }
 
 .add-area-inputs {
     display: flex;
+    flex: 1;
+    justify-content: flex-start;
     gap: 6px;
     flex-wrap: wrap;
 }
 
-.add-area-inputs * {
+.add-area-inputs > * {
     flex-direction: column;
     flex: 1 96px;
 }
 
-input, 
+input[type="text"], 
 select {
     padding: 6px 8px;
     border: 1px solid var(--border-color-dark);
@@ -342,6 +345,8 @@ select {
     width: 100%;
     cursor: pointer;
 }
+
+/* ファイルドロップ領域 */
 
 /* ラジオボタンオプション */
 .target-options {
@@ -399,6 +404,7 @@ select {
     align-items: center; 
     justify-content: center; 
     gap: var(--spacing-xs);
+    flex-wrap: wrap;
 }
 
 
@@ -406,7 +412,6 @@ select {
 .buff-control {
     display: flex;
     justify-content: flex-start;
-    margin-bottom: 12px;
     padding-bottom: 12px;
     border-bottom: 2px solid var(--border-color-dark);
 }
@@ -772,7 +777,6 @@ select {
     border: 1px solid #ffc107;
     border-radius: 4px;
     padding: 8px;
-    margin-bottom: 12px;
     font-size: 12px;
     color: #856404;
 }
@@ -787,13 +791,12 @@ select {
 
 /* コピーライト */
 .copyright {
-    padding: 0 var(--spacing-m) var(--spacing-m);
+    margin: 12px;
     font-size: var(--font-size-sm);
     color: var(--text-color);
 }
 
 .copyright.summary {
-    margin-top: -24px;
     justify-self: center;
 }
 
@@ -815,7 +818,7 @@ select {
    ======================================== */
 
 .full-width { width: 100%; }
-.line-udr { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--border-color-dark);}
+.line-udr { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 2px solid var(--border-color-dark);}
 .hidden { display: none; }
 .m-8 { margin: 8px 0; }
 .m-4 { margin: 4px 4; }
@@ -828,7 +831,7 @@ select {
 .fd-cl { flex-direction: column; }
 .jc-end { justify-content: flex-end; }
 .btn--muted { background: var(--text-muted); }
-.btn--info { background: var(--text-muted); }
+.btn--info { background: var(--secondary-color); }
 .btn--danger { background: var(--danger-color); width: 30%; }
 .small-text { font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
 .label-s { font-size: 12px; font-weight: 600; color: #555; display: block; margin: 0 0 4px 2px;}
@@ -862,8 +865,8 @@ select {
 
 <div class="container">
 
-    <div class="content">
-<!--データ管理-->
+<div class="content">
+<!--データ管理　モーダル-->
             <dialog class="section modal" id="DataOption" closedby="any">
                     <div class="section-header-m">
                         <span class="material-symbols-rounded">checkbook</span>
@@ -872,24 +875,26 @@ select {
                     <div class="section-body">
                         <div class="mb-12">
                             <label class="label-s">クリップボードから貼り付けて読み込み:</label>
-                            <div style="display: flex; flex-direction: row; gap: 6px;">
-                                <textarea id="importText" placeholder='{"stats":[...],"buffs":[...],...}' class="textarea-mono" style="height:120px; flex: 3;"></textarea>
-                                <button class="add-btn" id="importConfirm">✚</button>
-                            </div>
+                                <textarea id="importText" placeholder='.txtまたは.jsonファイルを直接ドロップしても読み込めます' class="textarea-mono" style="height:120px; flex: 3;"></textarea>
                         </div>
-                        <div class="mb-12">    
-                            <button class="add-btn secondary-btn btn--info full-width" id="exportToClipboard">
+                        <div class="mb-12" style="display: flex; gap: 12px;">
+                            <button class="add-btn secondary-btn flex-1" id="importConfirm">
+                                <span class="material-symbols-rounded">download</span>
+                                <span>このデータを読み込み</span>
+                            </button>
+                            <button class="add-btn secondary-btn btn--info flex-1" id="exportToClipboard">
                                 <span class="material-symbols-rounded">content_copy</span>
-                                現在の設定をクリップボードにコピー</button>
+                                <span>現在の設定を</span><span>クリップボードにコピー</span>
+                            </button>
                         </div>
                         <div class="pt-12 bt-top">
-                            <button class="add-btn secondary-btn btn--danger full-width" id="resetBtn">
+                            <button class="add-btn secondary-btn btn--danger" id="resetBtn">
                                 <span class="material-symbols-rounded">delete_forever</span>
-                                すべて初期化
+                                <span>すべて</span><span>初期化</span>
                             </button>
                         </div>
                     </div>
-            </dialog> 
+            </dialog>
 <!--ステータス-->     
             <details class="section">
                 <summary class="section-header">
@@ -918,65 +923,9 @@ select {
                     <span class="arrow">▼</span>
                 </summary>
                 <div class="section-body">
-                    <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。</div>
-                    <div class="add-area">
-                        <div class="add-area-inputs">
-                            <div>
-                                <label for="buffName" class="label-s">バフ名</label>
-                                <input type="text" id="buffName" placeholder="名前">
-                            </div>
-                            <div>
-                                <label for="buffTargetSelect" class="label-s">効果先を選択</label>
-                                <select id=buffTargetSelect multiple size="1"></select>
-                            </div>
-                            <div>
-                                <label for="buffDescription" class="label-s">効果</label>
-                                <input type="text" id="buffDescription" placeholder="説明">
-                            </div>
-                            <div>
-                                <label for="buffEffect" class="label-s">コマンド</label>
-                                <input type="text" id="buffEffect" placeholder="例：+2,-1d6">
-                            </div>
-                            <div>
-                                <label for="buffTurn" class="label-s">ターン</label>
-                                <input type="number" id="buffTurn" placeholder="数値">
-                            </div>
-                            <div>
-                                <label for="buffColor" class="label-s">ラベルの色を選択</label>
-                                <input type="color" id="buffColor" value="#0079FF" list="buffColor-list">
-                                <datalist id="buffColor-list">
-                                    <option value="#0079FF"></option>
-                                    <option value="#953D96"></option>
-                                    <option value="#F64E9D"></option>
-                                    <option value="#DF383E"></option>
-                                    <option value="#F7821B"></option>
-                                    <option value="#FEC626"></option>
-                                    <option value="#62BA46"></option>
-                                    <option value="#F8F9FA"></option>
-                                    <option value="#141414"></option>
-                                    <option value="#595959"></option>
-                                </datalist>
-                            </div>
-                        </div>
-                        <button class="add-btn" id="addBuffBtn">✚</button>
-                    </div>
-                    <div class="m-8">
-                        <div class="label-L">
-                            <span class="material-symbols-rounded">clear_all</span>
-                            <span>一括追加</span>
-                        </div>
-                        <div class="add-area fd-cl" id="bulkAddArea">
-                            <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
-                            <div>
-                            <div class="row-controls">
-                                <button class="add-btn flex-1" id="bulkAddConfirm">追加を実行</button>
-                                <button class="add-btn btn--muted flex-1" id="bulkAddCancel">キャンセル</button>
-                            </div>
-                            <p class="small-text">形式：バフ名|効果先1,効果先2|説明|効果|ターン|カラーコード<br>バフ名と効果先以外は省略可</p>
-                            </div>
-                        </div>
-                    </div>
-                   
+                    <button class="add-btn" command="show-modal" commandfor="buffaddmodal">
+                        バフを追加
+                    </button>
                     <div class="buff-control" full-width>
                             <button class="turn-btn" id="turnProgressBtn">
                                 <span class="material-symbols-rounded">skip_next</span>
@@ -987,6 +936,71 @@ select {
                     </div>
                 </div>
             </details>
+<!--バフ/デバフ モーダル-->
+        <dialog class="section modal" id="buffaddmodal" closedby="any">
+            <div class="section-header-m">
+                <span class="section-header-title">バフ追加</span>
+            </div>
+            <div class="section-body">
+                <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。</div>
+                <div class="add-area">
+                    <div class="add-area-inputs">
+                        <div>
+                            <label for="buffName" class="label-s">バフ名</label>
+                            <input type="text" id="buffName" placeholder="名前">
+                        </div>
+                        <div>
+                            <label for="buffTargetSelect" class="label-s">効果先を選択</label>
+                            <select id="buffTargetSelect" multiple size="1"></select>
+                        </div>
+                        <div>
+                            <label for="buffDescription" class="label-s">効果</label>
+                            <input type="text" id="buffDescription" placeholder="説明">
+                        </div>
+                        <div>
+                            <label for="buffEffect" class="label-s">コマンド</label>
+                            <input type="text" id="buffEffect" placeholder="例：+2,-1d6">
+                        </div>
+                        <div>
+                            <label for="buffTurn" class="label-s">ターン</label>
+                            <input type="number" id="buffTurn" placeholder="数値">
+                        </div>
+                        <div>
+                            <label for="buffColor" class="label-s">ラベルの色を選択</label>
+                            <input type="color" id="buffColor" value="#0079FF" list="buffColor-list">
+                            <datalist id="buffColor-list">
+                                <option value="#0079FF"></option>
+                                <option value="#953D96"></option>
+                                <option value="#F64E9D"></option>
+                                <option value="#DF383E"></option>
+                                <option value="#F7821B"></option>
+                                <option value="#FEC626"></option>
+                                <option value="#62BA46"></option>
+                                <option value="#F8F9FA"></option>
+                                <option value="#141414"></option>
+                                <option value="#595959"></option>
+                            </datalist>
+                        </div>
+                    </div>
+                    <button class="add-btn" id="addBuffBtn">✚</button>
+                </div>
+                <div class="m-8">
+                    <div class="label-L">
+                        <span class="material-symbols-rounded">clear_all</span>
+                        <span>一括追加</span>
+                    </div>
+                    <div class="add-area fd-cl" id="bulkAddArea">
+                        <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
+                        <div>
+                        <div class="row-controls">
+                            <button class="add-btn flex-1" id="bulkAddConfirm">追加を実行</button>
+                        </div>
+                        <p class="small-text">形式：バフ名|効果先1,効果先2|説明|効果|ターン|カラーコード<br>バフ名と効果先以外は省略可</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </dialog>
 <!--判定-->
             <details class="section">
                 <summary class="section-header">
@@ -995,6 +1009,44 @@ select {
                     <span class="arrow">▼</span>
                 </summary>
                 <div class="section-body">
+                    <button class="add-btn" command="show-modal" commandfor="judgeaddmodal">
+                        判定パッケージを追加
+                    </button>
+                    <div class="m-8">
+                                <div class="item-list" id="judgeList">
+                                    <div class="empty-message">判定パッケージを追加してください</div>
+                                </div>
+                        <div class="target-options">
+                            <span class="label-s">目標値：</span>
+                            <div class="radio-option">
+                                <input type="radio" name="targetType" id="targetNone" value="none" checked>
+                                <label for="targetNone" class="label-s">なし</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="targetType" id="targetGte" value="gte">
+                                <label for="targetGte" class="label-s">>=</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="targetType" id="targetLte" value="lte">
+                                <label for="targetLte" class="label-s">=&lt;</label>
+                            </div>
+                            <input type="number" id="targetValue" placeholder="値" class="input-compact">
+                        </div>
+                        <div class="output-box">
+                            <div class="output-label">コピペ用コマンド</div>
+                            <div class="output-text" id="judgeOutput">判定を選択してください</div>
+                            <button class="copy-btn" data-target="judgeOutput">コピー</button>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+<!--判定　モーダル-->
+            <dialog class="section modal" id="judgeaddmodal" closedby="any">
+                    <div class="section-header-m">
+                        <span class="section-header-title">判定パッケージ追加</span>
+                    </div>
+                    <div class="section-body">
                         <div class="add-area">
                             <div class="add-area-inputs">
                                 <div>
@@ -1008,7 +1060,7 @@ select {
                                 <div>
                                     <label for="judgeStat" class="label-s">参照ステータス</label>
                                     <select id="judgeStat" multiple size="1">
-                                        <option value="">なし</option>
+                                        <option>なし</option>
                                     </select>
                                 </div>
                             </div>
@@ -1024,39 +1076,15 @@ select {
                                 <div>    
                                     <div class="row-controls">
                                         <button class="add-btn flex-1" id="bulkAddJudgeConfirm">追加を実行</button>
-                                        <button class="add-btn btn--muted flex-1" id="bulkAddJudgeCancel">キャンセル</button>
+
                                     </div>
                                     <p class="small-text">形式：判定名|判定ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="m-8">
-                            <div class="item-list line-udr" id="judgeList">
-                                <div class="empty-message">判定パッケージを追加してください</div>
-                            </div>
-                    <div class="target-options">
-                        <label class="label-s">目標値:</label>
-                        <div class="radio-option">
-                            <input type="radio" name="targetType" id="targetNone" value="none" checked>
-                            <label for="targetNone">なし</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" name="targetType" id="targetGte" value="gte">
-                            <label for="targetGte">>=</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" name="targetType" id="targetLte" value="lte">
-                            <label for="targetLte">=&lt;</label>
-                        </div>
-                        <input type="number" id="targetValue" placeholder="値" class="input-compact">
                     </div>
-                    <div class="output-box">
-                        <div class="output-label">コピペ用コマンド</div>
-                        <div class="output-text" id="judgeOutput">判定を選択してください</div>
-                        <button class="copy-btn" data-target="judgeOutput">コピー</button>
-                    </div>
-                </div>
-            </details>
+            </dialog>
+
 <!--攻撃-->           
             <details class="section">
                 <summary class="section-header">
@@ -1065,7 +1093,26 @@ select {
                     <span class="arrow">▼</span>
                 </summary>
                 <div class="section-body">
-                        <div class="add-area">
+                    <button class="add-btn" command="show-modal" commandfor="attackaddmodal">
+                        攻撃パッケージを追加
+                    </button>
+                    <div class="item-list" id="attackList">
+                        <div class="empty-message">攻撃パッケージを追加してください</div>
+                    </div>
+                    <div class="output-box">
+                        <div class="output-label">コピペ用コマンド</div>
+                        <div class="output-text" id="attackOutput">攻撃を選択してください</div>
+                        <button class="copy-btn" data-target="attackOutput">コピー</button>
+                    </div>
+                </div>
+            </details>
+<!--攻撃　モーダル-->
+            <dialog class="section modal" id="attackaddmodal" closedby="any">
+                    <div class="section-header-m">
+                        <span class="section-header-title">攻撃パッケージ追加</span>
+                    </div>
+                    <div class="section-body">
+                                        <div class="add-area">
                             <div class="add-area-inputs">
                                 <div>
                                     <label for="attackName" class="label-s">攻撃名</label>
@@ -1078,7 +1125,7 @@ select {
                                 <div>
                                     <label for="judgeStat" class="label-s">参照ステータス</label>
                                     <select id="attackStat" multiple size="1">
-                                        <option value="">なし</option>
+                                        <option value="none">なし</option>
                                     </select>
                                 </div>
                             </div>
@@ -1094,24 +1141,13 @@ select {
                                 <div>
                                     <div class="row-controls">
                                         <button class="add-btn flex-1" id="bulkAddAttackConfirm">追加を実行</button>
-                                        <button class="add-btn btn--muted flex-1" id="bulkAddAttackCancel">キャンセル</button>
                                     </div>
                                 </div>
                                 <p class="small-text">形式：攻撃名|攻撃ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
                             </div>
                         </div>
-                    <div class="item-list line-udr" id="attackList">
-                        <div class="empty-message">攻撃パッケージを追加してください</div>
-                    </div>
-                    <div class="output-box">
-                        <div class="output-label">コピペ用コマンド</div>
-                        <div class="output-text" id="attackOutput">攻撃を選択してください</div>
-                        <button class="copy-btn" data-target="attackOutput">コピー</button>
-                    </div>
-                </div>
-            </details>
-        </div>
-
+            </dialog>
+</div>
     <details class="copyright">
         <summary>Copyright</summary>
             <div class="copyright"> (c) 2025 竹田ユウヤ/n

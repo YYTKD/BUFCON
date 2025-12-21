@@ -89,6 +89,46 @@ if (!document.getElementById('toast-styles')) {
 }
 
 // ========================================
+// セクション管理
+// ========================================
+
+function toggleSection(header) {
+    header.classList.toggle('collapsed');
+    const body = header.nextElementSibling;
+    body.classList.toggle('collapsed');
+    saveUIState();
+}
+
+function saveUIState() {
+    try {
+        const states = {};
+        document.querySelectorAll('.section-header').forEach((header, i) => {
+            states[i] = header.classList.contains('collapsed');
+        });
+        localStorage.setItem('uiState', JSON.stringify(states));
+    } catch (e) {
+        console.error('UI状態の保存に失敗:', e);
+    }
+}
+
+function loadUIState() {
+    try {
+        const saved = localStorage.getItem('uiState');
+        if (saved) {
+            const states = JSON.parse(saved);
+            document.querySelectorAll('.section-header').forEach((header, i) => {
+                if (states[i]) {
+                    header.classList.add('collapsed');
+                    header.nextElementSibling.classList.add('collapsed');
+                }
+            });
+        }
+    } catch (e) {
+        console.error('UI状態の読み込みに失敗:', e);
+    }
+}
+
+// ========================================
 // データ管理
 // ========================================
 
@@ -122,14 +162,14 @@ function loadData() {
 
 function getDefaultJudges() {
     return [
-        { name: '命中(武器A)', roll: '1d20', stat: '' },
-        { name: '回避', roll: '1d20', stat: '' }
+        { name: '命中(武器A)　SAMPLE', roll: '1d20', stat: '' },
+        { name: '回避　SAMPLE', roll: '1d20', stat: '' }
     ];
 }
 
 function getDefaultAttacks() {
     return [
-        { name: '武器A', roll: '2d6', stat: '' }
+        { name: '武器A　SAMPLE', roll: '2d6', stat: '' }
     ];
 }
 
@@ -228,6 +268,83 @@ function importData() {
     }
 }
 
+/**
+ * ファイルドロップ機能の初期化
+ */
+function initFileDropZone() {
+    const dropZone = document.getElementById('importText');
+    if (!dropZone) return;
+    
+    // ドラッグオーバー時の処理
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.style.borderColor = '#4769b3';
+        dropZone.style.borderStyle = 'dashed';
+        dropZone.style.borderWidth = '3px';
+        dropZone.style.background = '#e7f3ff';
+    });
+    
+    // ドラッグが離れた時の処理
+    dropZone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.style.borderColor = '';
+        dropZone.style.borderStyle = '';
+        dropZone.style.borderWidth = '';
+        dropZone.style.background = '';
+    });
+    
+    // ドロップ時の処理
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // スタイルを元に戻す
+        dropZone.style.borderColor = '';
+        dropZone.style.borderStyle = '';
+        dropZone.style.borderWidth = '';
+        dropZone.style.background = '';
+        
+        // ファイルを取得
+        const files = e.dataTransfer.files;
+        
+        if (files.length === 0) {
+            showToast('ファイルが見つかりません', 'error');
+            return;
+        }
+        
+        // 最初のファイルのみ処理
+        const file = files[0];
+        
+        // ファイル拡張子チェック
+        const fileName = file.name.toLowerCase();
+        if (!fileName.endsWith('.txt') && !fileName.endsWith('.json')) {
+            showToast('.txtまたは.jsonファイルのみ対応しています', 'error');
+            return;
+        }
+        
+        // FileReader APIでファイルを読み込む
+        const reader = new FileReader();
+        
+        // 読み込み完了時の処理
+        reader.onload = (event) => {
+            const content = event.target.result;
+            dropZone.value = content;
+            showToast(`${file.name} を読み込みました`, 'success');
+        };
+        
+        // 読み込みエラー時の処理
+        reader.onerror = () => {
+            showToast('ファイルの読み込みに失敗しました', 'error');
+        };
+        
+        // テキストとして読み込み開始
+        reader.readAsText(file);
+    });
+}
+
+
 // ========================================
 // ステータス管理
 // ========================================
@@ -301,7 +418,7 @@ function updateStatSelects() {
     const judgeSelect = document.getElementById('judgeStat');
     const attackSelect = document.getElementById('attackStat');
     
-    const options = '<option value="">なし</option>' + 
+    const options = '<option value="none">なし</option>' + 
         stats.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('');
     
     judgeSelect.innerHTML = options;
@@ -329,10 +446,10 @@ function updateBuffTargetDropdown() {
     const currentValues = Array.from(select.selectedOptions).map(opt => opt.value);
     
     // プレースホルダー
-    let html = '<option disabled>効果先</option>';
+    let html = '<option disabled>複数選択可</option>';
     
     // その他カテゴリ
-    html += `<option>なし</option>`;
+    html += `<option value="none">なし</option>`;
     html += `<option value="all-judge" ${currentValues.includes('all-judge') ? 'selected' : ''}>すべての判定</option>`;
     html += `<option value="all-attack" ${currentValues.includes('all-attack') ? 'selected' : ''}>すべての攻撃</option>`;
     html += `</optgroup>`;
@@ -405,6 +522,7 @@ function addBuff() {
     });
     
     document.getElementById('buffName').value = '';
+    document.getElementById('buffTargetSelect').selectedIndex = -1;
     document.getElementById('buffDescription').value = '';
     document.getElementById('buffEffect').value = '';
     document.getElementById('buffTurn').value = '';
@@ -653,7 +771,7 @@ function renderBuffs() {
                  draggable="true"
                  data-index="${i}" data-type="buff">
                 <div class="tooltip" style="--target: --no${i};">${escapeHtml(tooltipText)}</div>
-                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity: 0.5;">drag_indicator</span>
+                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity: 0.6;">drag_indicator</span>
                 <span class="item-param">
                     <span class="item-name">${escapeHtml(buff.name)}</span>
                     ${buff.description ? `<span class="item-description">${escapeHtml(buff.description)}</span>` : ''}
@@ -799,10 +917,8 @@ function addJudge() {
     
     judges.push({ name: name, roll: roll, stat: stat });
     document.getElementById('judgeName').value = '';
+    document.getElementById('judgeStat').value = '';
     document.getElementById('judgeRoll').value = '';
-    
-    // マルチセレクトをリセット
-    Array.from(document.getElementById('judgeStat').options).forEach(opt => opt.selected = false);
     
     renderPackage('judge');
     updateBuffTargetDropdown();
@@ -832,10 +948,8 @@ function addAttack() {
     
     attacks.push({ name: name, roll: roll, stat: stat });
     document.getElementById('attackName').value = '';
+    document.getElementById('attackStat').value = '';
     document.getElementById('attackRoll').value = '';
-    
-    // マルチセレクトをリセット
-    Array.from(document.getElementById('attackStat').options).forEach(opt => opt.selected = false);
     
     renderPackage('attack');
     updateBuffTargetDropdown();
@@ -897,11 +1011,11 @@ function renderPackage(type) {
     
     list.innerHTML = config.array.map((item, i) => `
         <div class="item clickable draggable" data-index="${i}" data-type="${type}" draggable="true">
-            <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m);">drag_indicator</span>
+            <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity: 0.6;">drag_indicator</span>
             <span class="item-param">
                 <span class="item-name">${escapeHtml(item.name)}</span>
                 <span class="item-detail">${escapeHtml(item.roll)}</span>
-                <span class="item-detail">${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
+                <span class="item-detail">+${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
             </span>
             <button class="remove-btn" data-remove="${i}" data-remove-type="${type}">×</button>
         </div>
@@ -1052,8 +1166,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('turnProgressBtn')?.addEventListener('click', progressTurn);
 
     setupBulkAddControls({
+        toggleId: 'bulkAddBtn',
         confirmId: 'bulkAddConfirm',
-        cancelId: 'bulkAddCancel',
         areaId: 'bulkAddArea',
         textId: 'bulkAddText',
         type: 'buff'
@@ -1067,9 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('targetValue')?.addEventListener('input', () => updatePackageOutput('judge'));
     
     setupBulkAddControls({
-        toggleId: 'bulkAddJudgeBtn',
         confirmId: 'bulkAddJudgeConfirm',
-        cancelId: 'bulkAddJudgeCancel',
         areaId: 'bulkAddJudgeArea',
         textId: 'bulkAddJudgeText',
         type: 'judge'
@@ -1079,9 +1191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('addAttackBtn')?.addEventListener('click', addAttack);
     
     setupBulkAddControls({
-        toggleId: 'bulkAddAttackBtn',
         confirmId: 'bulkAddAttackConfirm',
-        cancelId: 'bulkAddAttackCancel',
         areaId: 'bulkAddAttackArea',
         textId: 'bulkAddAttackText',
         type: 'attack'
@@ -1102,6 +1212,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 初期化
     initMultiSelect();
+    initFileDropZone(); 
     loadUIState();
     loadData();
 });
