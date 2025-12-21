@@ -89,46 +89,6 @@ if (!document.getElementById('toast-styles')) {
 }
 
 // ========================================
-// セクション管理
-// ========================================
-
-function toggleSection(header) {
-    header.classList.toggle('collapsed');
-    const body = header.nextElementSibling;
-    body.classList.toggle('collapsed');
-    saveUIState();
-}
-
-function saveUIState() {
-    try {
-        const states = {};
-        document.querySelectorAll('.section-header').forEach((header, i) => {
-            states[i] = header.classList.contains('collapsed');
-        });
-        localStorage.setItem('uiState', JSON.stringify(states));
-    } catch (e) {
-        console.error('UI状態の保存に失敗:', e);
-    }
-}
-
-function loadUIState() {
-    try {
-        const saved = localStorage.getItem('uiState');
-        if (saved) {
-            const states = JSON.parse(saved);
-            document.querySelectorAll('.section-header').forEach((header, i) => {
-                if (states[i]) {
-                    header.classList.add('collapsed');
-                    header.nextElementSibling.classList.add('collapsed');
-                }
-            });
-        }
-    } catch (e) {
-        console.error('UI状態の読み込みに失敗:', e);
-    }
-}
-
-// ========================================
 // データ管理
 // ========================================
 
@@ -693,7 +653,7 @@ function renderBuffs() {
                  draggable="true"
                  data-index="${i}" data-type="buff">
                 <div class="tooltip" style="--target: --no${i};">${escapeHtml(tooltipText)}</div>
-                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m">drag_indicator</span>
+                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity: 0.5;">drag_indicator</span>
                 <span class="item-param">
                     <span class="item-name">${escapeHtml(buff.name)}</span>
                     ${buff.description ? `<span class="item-description">${escapeHtml(buff.description)}</span>` : ''}
@@ -1092,7 +1052,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('turnProgressBtn')?.addEventListener('click', progressTurn);
 
     setupBulkAddControls({
-        toggleId: 'bulkAddBtn',
         confirmId: 'bulkAddConfirm',
         cancelId: 'bulkAddCancel',
         areaId: 'bulkAddArea',
