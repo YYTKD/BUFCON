@@ -968,7 +968,7 @@ function removeAttack(index) {
 
 
 /**
- * 汎用選択関数（判定・攻撃パッケージ）
+ * 選択関数（判定・攻撃パッケージ）
  */
 function selectPackage(index, type) {
     const array = type === 'judge' ? judges : attacks;
@@ -982,7 +982,7 @@ function selectPackage(index, type) {
 }
 
 /**
- * 汎用レンダリング関数（判定・攻撃パッケージ）
+ * レンダリング（判定・攻撃パッケージ）
  */
 function renderPackage(type) {
     const typeConfig = {

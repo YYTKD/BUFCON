@@ -561,6 +561,14 @@ select {
     outline: 1px solid var(--add-color);
 }
 
+.item:hover .tooltip {
+    opacity: 1;
+    align-items: normal;
+    bottom: 100%;
+    left: 100px;
+    transform: translateX(50px);
+}
+
 .item.selected {
     background: #e7f3ff;
     outline: 1px solid var(--add-color);
@@ -612,13 +620,7 @@ select {
     filter: none;
 }
 
-.buff-item:hover .tooltip {
-    opacity: 1;
-    align-items: normal;
-    bottom: 100%;
-    left: 100px;
-    transform: translateX(50px);
-}
+
 
 .buff-item.dragging .tooltip {
     display: none !important;
