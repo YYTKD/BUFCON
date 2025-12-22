@@ -1075,6 +1075,7 @@ function attachItemEvents(type) {
 }
 
 /* コマンド生成関数（判定・攻撃パッケージ）*/
+/* コマンド生成関数(判定・攻撃パッケージ)*/
 function updatePackageOutput(type, selectedIndex = null) {
     const array = getCollection(type);
     const outputId = type === 'judge' ? 'judgeOutput' : 'attackOutput';
@@ -1097,7 +1098,7 @@ function updatePackageOutput(type, selectedIndex = null) {
     let command = item.roll;
     
     if (item.stat) {
-        // 複数ステータスの場合も対応（+ で区切られている）
+        // 複数ステータスの場合も対応(+ で区切られている)
         const stats = item.stat.split('+');
         command += '+{' + stats.join('}+{') + '}';
     }
@@ -1110,8 +1111,43 @@ function updatePackageOutput(type, selectedIndex = null) {
          b.targets.includes(filterKey + item.name))
     );
     
+    // スロット置換用のマップを構築
+    const slotMap = {};
+    const normalEffects = [];
+    
     activeBuffs.forEach(buff => {
-        command += buff.effect;
+        const effects = buff.effect.split(',').map(e => e.trim());
+        
+        effects.forEach(effect => {
+            // スロット記法のパターン: {{NAME}}=値
+            const slotMatch = effect.match(/\{\{([^}]+)\}\}=(.+)/);
+            
+            if (slotMatch) {
+                const slotName = slotMatch[1];
+                const slotValue = slotMatch[2];
+                
+                if (!slotMap[slotName]) {
+                    slotMap[slotName] = [];
+                }
+                slotMap[slotName].push(slotValue);
+            } else if (effect) {
+                // 通常効果
+                normalEffects.push(effect);
+            }
+        });
+    });
+    
+    // スロットを置換
+    command = command.replace(/\{\{([^}]+)\}\}/g, (match, slotName) => {
+        if (slotMap[slotName] && slotMap[slotName].length > 0) {
+            return slotMap[slotName].join('');
+        }
+        return ''; // 未定義スロットは空文字
+    });
+    
+    // 通常効果を追加
+    normalEffects.forEach(effect => {
+        command += effect;
     });
     
     if (type === 'judge') {
