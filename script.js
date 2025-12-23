@@ -568,15 +568,16 @@ function bulkAdd(type) {
                 const targets = [];
                 
                 targetNames.forEach(tName => {
-                    if (tName === 'すべての判定') targets.push('all-judge');
-                    else if (tName === 'すべての攻撃') targets.push('all-attack');
-                    else {
-                        const judge = state.judges.find(j => j.name === tName);
-                        if (judge) targets.push('judge:' + tName);
-                        else {
-                            const attack = state.attacks.find(a => a.name === tName);
-                            if (attack) targets.push('attack:' + tName);
-                            else throw `行${index + 1}: 効果先「${tName}」が見つかりません`;
+                    if (tName === 'なし') targets.push('none');
+                       else if (tName === 'すべての判定') targets.push('all-judge');
+                            else if (tName === 'すべての攻撃') targets.push('all-attack');
+                            else {
+                                const judge = state.judges.find(j => j.name === tName);
+                                if (judge) targets.push('judge:' + tName);
+                                else {
+                                    const attack = state.attacks.find(a => a.name === tName);
+                                    if (attack) targets.push('attack:' + tName);
+                                    else throw `行${index + 1}: 効果先「${tName}」が見つかりません`;
                         }
                     }
                 });
@@ -661,10 +662,6 @@ function bulkAdd(type) {
         const textArea = document.getElementById(config.textId);
 
         if (textArea) textArea.value = '';
-        if (area) {
-            area.classList.add('hidden');
-            area.style.display = 'none';
-        }
 
         config.afterAdd();
         saveData();
