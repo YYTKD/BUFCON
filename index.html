@@ -92,7 +92,7 @@ p {
     background: var(--bg-gray);
     justify-self: center;
     align-self: flex-start;
-    margin-top: 120px;
+    margin-top: 20px;
 }
 
 .modal::backdrop {
@@ -300,30 +300,20 @@ header {
 /* 入力フォーム */
 .add-area {
     display: flex;
-    gap: 6px;
+    gap: 8px;
+    flex-direction: column;
     padding-bottom: 12px;
     border-bottom: 2px solid var(--border-color-dark);
 }
 
-.add-area-inputs {
-    display: flex;
-    flex: 1;
-    justify-content: flex-start;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.add-area-inputs > * {
-    flex-direction: column;
-    flex: 1 96px;
-}
-
 input[type="text"], 
-select {
+select,
+input[type="number"] {
     padding: 6px 8px;
     border: 1px solid var(--border-color-dark);
     border-radius: 4px;
-    font-size: 13px;
+    background: white;
+    font-size: 14px;
     height: 40px;
     width: 100%;
 }
@@ -335,14 +325,13 @@ select {
 }
 
 .add-area input[type="number"] {
-    padding: none;
-    width: 60%;
-    cursor: pointer;
+    
 }
 
 .add-area input[type="color"] {
     padding: none;
-    width: 100%;
+    height: 40px;
+    width: 60px;
     cursor: pointer;
 }
 
@@ -364,7 +353,9 @@ select {
     gap: 4px;
 }
 
-.radio-option input {
+.target-options input[type="number"] {
+    height: 40px;
+    width: 60px;
     cursor: pointer;
 }
 
@@ -392,6 +383,10 @@ select {
     flex-shrink: 0;
     box-shadow: inset 0 -1px rgba(0,0,0,0.1);
 }
+
+.add-btn .material-symbols-rounded {
+    margin-top: 0.1em;
+} 
 
 .add-btn:hover {
     filter: saturate(500%);
@@ -773,15 +768,38 @@ select {
     min-height: 20px;
 }
 
-/* 注意書き */
+/* ヘルプ */
+.btn--help {
+    position: absolute;
+    right: 12px;
+    background: var(--secondary-color);
+}
+
+.btn--help input {
+    display: none;
+}
+        
+.btn--help:has(input:checked) {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #ffc107;
+    box-shadow: inset 0 1px rgba(0,0,0,0.2);
+}
+        
 .note {
     background: #fff3cd;
     border: 1px solid #ffc107;
     border-radius: 4px;
     padding: 8px;
+    margin-left: 32px;
     font-size: 12px;
     color: #856404;
+    display: none;
 }
+
+.section-body:has(.btn--help input:checked) .add-area .note {
+     display: block;
+ }
 
 /* 空メッセージ */
 .empty-message {
@@ -944,48 +962,57 @@ select {
                 <span class="section-header-title">バフ追加</span>
             </div>
             <div class="section-body">
-                <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。</div>
-                <div class="add-area">
-                    <div class="add-area-inputs">
-                        <div>
-                            <label for="buffName" class="label-s">バフ名</label>
-                            <input type="text" id="buffName" placeholder="名前">
-                        </div>
-                        <div>
-                            <label for="buffTargetSelect" class="label-s">効果先を選択</label>
-                            <select id="buffTargetSelect" multiple size="1"></select>
-                        </div>
-                        <div>
-                            <label for="buffDescription" class="label-s">効果</label>
-                            <input type="text" id="buffDescription" placeholder="説明">
-                        </div>
-                        <div>
-                            <label for="buffEffect" class="label-s">コマンド</label>
-                            <input type="text" id="buffEffect" placeholder="例：+2,-1d6">
-                        </div>
-                        <div>
-                            <label for="buffTurn" class="label-s">ターン</label>
-                            <input type="number" id="buffTurn" placeholder="数値">
-                        </div>
-                        <div>
-                            <label for="buffColor" class="label-s">ラベルの色を選択</label>
-                            <input type="color" id="buffColor" value="#0079FF" list="buffColor-list">
-                            <datalist id="buffColor-list">
-                                <option value="#0079FF"></option>
-                                <option value="#953D96"></option>
-                                <option value="#F64E9D"></option>
-                                <option value="#DF383E"></option>
-                                <option value="#F7821B"></option>
-                                <option value="#FEC626"></option>
-                                <option value="#62BA46"></option>
-                                <option value="#F8F9FA"></option>
-                                <option value="#141414"></option>
-                                <option value="#595959"></option>
-                            </datalist>
+                <div class="m-8">
+                            <div class="label-L">
+                                    <span class="material-symbols-rounded">add_box</span>
+                                    <span>個別追加</span>
+                                    <label class="add-btn btn--help">
+                                        <input type="checkbox"/>
+                                        <span class="material-symbols-rounded">help</span>
+                                    </label>
+                            </div>
+                            <div class="add-area">
+                                <div>
+                                    <label for="buffName" class="label-s">バフ名</label>
+                                    <input type="text" id="buffName" placeholder="名前">
+                                </div>
+                                <div>
+                                    <label for="buffTargetSelect" class="label-s">効果先を選択</label>
+                                    <select id="buffTargetSelect" multiple size="1"></select>
+                                </div>
+                                <div>
+                                    <label for="buffDescription" class="label-s">効果</label>
+                                    <input type="text" id="buffDescription" placeholder="説明">
+                                </div>
+                                <div>
+                                    <label for="buffEffect" class="label-s">コマンド</label>
+                                    <input type="text" id="buffEffect" placeholder="例：+2,-1d6">
+                                </div>
+                                <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。
+                                </div>
+                                <div>
+                                    <label for="buffTurn" class="label-s">ターン</label>
+                                    <input type="number" id="buffTurn" placeholder="数値">
+                                </div>
+                                <div>
+                                    <label for="buffColor" class="label-s">ラベルの色を選択</label>
+                                    <input type="color" id="buffColor" value="#0079FF" list="buffColor-list">
+                                    <datalist id="buffColor-list">
+                                        <option value="#0079FF"></option>
+                                        <option value="#953D96"></option>
+                                        <option value="#F64E9D"></option>
+                                        <option value="#DF383E"></option>
+                                        <option value="#F7821B"></option>
+                                        <option value="#FEC626"></option>
+                                        <option value="#62BA46"></option>
+                                        <option value="#F8F9FA"></option>
+                                        <option value="#141414"></option>
+                                        <option value="#595959"></option>
+                                    </datalist>
+                                </div>
+                            <button class="add-btn" id="addBuffBtn">✚</button>
                         </div>
                     </div>
-                    <button class="add-btn" id="addBuffBtn">✚</button>
-                </div>
                 <div class="m-8">
                     <div class="label-L">
                         <span class="material-symbols-rounded">clear_all</span>
@@ -1049,8 +1076,15 @@ select {
                         <span class="section-header-title">判定パッケージ追加</span>
                     </div>
                     <div class="section-body">
+                        <div class="m-8">
+                            <div class="label-L">
+                                    <span class="material-symbols-rounded">add_box</span>
+                                    <span>個別追加</span>
+                                    <button class="add-btn btn--help">
+                                        <span class="material-symbols-rounded" style="margin-left: auto;">help</span>
+                                    </button>
+                            </div>
                         <div class="add-area">
-                            <div class="add-area-inputs">
                                 <div>
                                     <label for="judgeName" class="label-s">判定名</label>
                                     <input type="text" id="judgeName" placeholder="例：命中、回避">
@@ -1065,8 +1099,8 @@ select {
                                         <option>なし</option>
                                     </select>
                                 </div>
-                            </div>
                             <button class="add-btn" id="addJudgeBtn">✚</button>
+                        </div>
                         </div>
                         <div class="m-8">
                             <div class="label-L">
@@ -1114,8 +1148,15 @@ select {
                         <span class="section-header-title">攻撃パッケージ追加</span>
                     </div>
                     <div class="section-body">
+                        <div class="m-8">
+                            <div class="label-L">
+                                    <span class="material-symbols-rounded">add_box</span>
+                                    <span>個別追加</span>
+                                    <button class="add-btn btn--help" style="margin-left: auto;">
+                                        <span class="material-symbols-rounded">help</span>
+                                    </button>
+                            </div>
                                         <div class="add-area">
-                            <div class="add-area-inputs">
                                 <div>
                                     <label for="attackName" class="label-s">攻撃名</label>
                                     <input type="text" id="attackName" placeholder="例：ソード(1H)">
@@ -1130,8 +1171,8 @@ select {
                                         <option value="none">なし</option>
                                     </select>
                                 </div>
-                            </div>
                             <button class="add-btn" id="addAttackBtn">✚</button>
+                        </div>
                         </div>
                         <div class="m-8">
                             <div class="label-L">
