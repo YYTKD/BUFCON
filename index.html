@@ -973,6 +973,13 @@ input[type="number"] {
                             </div>
                             <div class="add-area">
                                 <div>
+                                    <label for="buffCategoryInput" class="label-s">カテゴリ</label>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" id="buffCategoryInput" placeholder="例：前衛、後衛" aria-label="バフカテゴリの新規追加">
+                                        <button class="add-btn" id="addBuffCategoryBtn" title="カテゴリを追加">✚</button>
+                                    </div>
+                                </div>
+                                <div>
                                     <label for="buffName" class="label-s">バフ名</label>
                                     <input type="text" id="buffName" placeholder="名前">
                                 </div>
@@ -1016,12 +1023,19 @@ input[type="number"] {
                                         <option value="#FEC626"></option>
                                         <option value="#62BA46"></option>
                                         <option value="#F8F9FA"></option>
-                                        <option value="#141414"></option>
-                                        <option value="#595959"></option>
-                                    </datalist>
+                                    <option value="#141414"></option>
+                                    <option value="#595959"></option>
+                                </datalist>
                                 </div>
                                 <div class="note">その他からより詳細に色を指定できます。
                                 </div>
+                                <div>
+                                    <label for="buffCategorySelect" class="label-s">カテゴリを選択</label>
+                                    <select id="buffCategorySelect" size="1">
+                                        <option value="none">なし</option>
+                                    </select>
+                                </div>
+                                <div class="note">カテゴリは「&gt;&gt;カテゴリ名」表記で効果先としても選択できます。</div>
                             <button class="add-btn" id="addBuffBtn">✚</button>
                         </div>
                     </div>
@@ -1031,6 +1045,7 @@ input[type="number"] {
                         <span>一括追加</span>
                     </div>
                         <p class="small-text">形式：バフ名|効果先1,効果先2|説明|効果|ターン|カラーコード<br>バフ名と効果先以外は省略可</p>
+                        <p class="small-text">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。カテゴリ指定の効果先は「&gt;&gt;カテゴリ名」と記述</p>
                     <div class="add-area fd-cl m-8" id="bulkAddArea">
                         <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
                         <div>
@@ -1090,14 +1105,21 @@ input[type="number"] {
                     <div class="section-body">
                         <div class="m-8">
                             <div class="label-L">
-                                    <span class="material-symbols-rounded">add_box</span>
-                                    <span>個別追加</span>
-                                    <label class="add-btn btn--help">
-                                        <input type="checkbox"/>
-                                        <span class="material-symbols-rounded">help</span>
-                                    </label>
+                                <span class="material-symbols-rounded">add_box</span>
+                                <span>個別追加</span>
+                                <label class="add-btn btn--help">
+                                    <input type="checkbox"/>
+                                    <span class="material-symbols-rounded">help</span>
+                                </label>
                             </div>
                         <div class="add-area">
+                                <div>
+                                    <label for="judgeCategoryInput" class="label-s">カテゴリ</label>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" id="judgeCategoryInput" placeholder="例：前衛、後衛" aria-label="判定カテゴリの新規追加">
+                                        <button class="add-btn" id="addJudgeCategoryBtn" title="カテゴリを追加">✚</button>
+                                    </div>
+                                </div>
                                 <div>
                                     <label for="judgeName" class="label-s">判定名</label>
                                     <input type="text" id="judgeName" placeholder="例：命中、回避">
@@ -1127,9 +1149,10 @@ input[type="number"] {
                                 <span>一括追加</span>
                             </div>
                                 <p class="small-text">形式：判定名|判定ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
+                                <p class="small-text">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了</p>
                             <div class="add-area fd-cl m-8" id="bulkAddJudgeArea">
                                 <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1|器用度&#10;回避判定|1d20|DEX" class="textarea-mono" style="height:80px;"></textarea>
-                                <div>    
+                                <div>
                                     <div class="row-controls">
                                         <button class="add-btn flex-1" id="bulkAddJudgeConfirm">追加を実行</button>
                                     </div>
@@ -1177,6 +1200,13 @@ input[type="number"] {
                             </div>
                                         <div class="add-area">
                                 <div>
+                                    <label for="attackCategoryInput" class="label-s">カテゴリ</label>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" id="attackCategoryInput" placeholder="例：前衛、後衛" aria-label="攻撃カテゴリの新規追加">
+                                        <button class="add-btn" id="addAttackCategoryBtn" title="カテゴリを追加">✚</button>
+                                    </div>
+                                </div>
+                                <div>
                                     <label for="attackName" class="label-s">攻撃名</label>
                                     <input type="text" id="attackName" placeholder="例：ソード(1H)">
                                 </div>
@@ -1205,6 +1235,7 @@ input[type="number"] {
                                 <span>一括追加</span>
                             </div>
                                 <p class="small-text">形式：攻撃名|攻撃ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
+                                <p class="small-text">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了</p>
                             <div class="add-area fd-cl m-8" id="bulkAddAttackArea">
                                 <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10|筋力B&#10;ファイアボール|1d6+3|INT" class="textarea-mono" style="height:80px;"></textarea>
                                 <div>

@@ -6,8 +6,12 @@ const state = {
     buffs: [],
     judges: [],
     attacks: [],
+    buffCategories: [],
+    judgeCategories: [],
+    attackCategories: [],
     draggedIndex: null,
     draggedType: null,
+    draggedCategory: null,
     selectedBuffTargets: [],
     editMode: {
         active: false,
@@ -21,6 +25,13 @@ function getCollection(type) {
     if (type === 'buff') return state.buffs;
     if (type === 'judge') return state.judges;
     if (type === 'attack') return state.attacks;
+    return null;
+}
+
+function getCategories(type) {
+    if (type === 'buff') return state.buffCategories;
+    if (type === 'judge') return state.judgeCategories;
+    if (type === 'attack') return state.attackCategories;
     return null;
 }
 
@@ -163,8 +174,11 @@ function loadData() {
             const data = JSON.parse(saved);
             state.stats = Array.isArray(data.stats) ? data.stats : [];
             state.buffs = Array.isArray(data.buffs) ? data.buffs : [];
+            state.buffCategories = Array.isArray(data.buffCategories) ? data.buffCategories : [];
             state.judges = Array.isArray(data.judges) ? data.judges : getDefaultJudges();
+            state.judgeCategories = Array.isArray(data.judgeCategories) ? data.judgeCategories : [];
             state.attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
+            state.attackCategories = Array.isArray(data.attackCategories) ? data.attackCategories : [];
         } else {
             state.judges = getDefaultJudges();
             state.attacks = getDefaultAttacks();
@@ -175,7 +189,8 @@ function loadData() {
         state.judges = getDefaultJudges();
         state.attacks = getDefaultAttacks();
     }
-    
+
+    updateBuffCategorySelect();
     renderStats();
     renderBuffs();
     renderPackage('judge');
@@ -201,8 +216,11 @@ function saveData() {
     const data = {
         stats: state.stats,
         buffs: state.buffs,
+        buffCategories: state.buffCategories,
         judges: state.judges,
-        attacks: state.attacks
+        judgeCategories: state.judgeCategories,
+        attacks: state.attacks,
+        attackCategories: state.attackCategories
     };
     
     try {
@@ -245,8 +263,11 @@ function exportData() {
     const data = {
         stats: state.stats,
         buffs: state.buffs,
+        buffCategories: state.buffCategories,
         judges: state.judges,
-        attacks: state.attacks
+        judgeCategories: state.judgeCategories,
+        attacks: state.attacks,
+        attackCategories: state.attackCategories
     };
     const json = JSON.stringify(data, null, 2);
     
@@ -270,12 +291,16 @@ function importData() {
         if (!data.stats || !data.buffs || !data.judges || !data.attacks) {
             throw new Error('無効なデータ形式です');
         }
-        
+
         state.stats = data.stats || [];
         state.buffs = data.buffs || [];
+        state.buffCategories = data.buffCategories || [];
         state.judges = data.judges || [];
+        state.judgeCategories = data.judgeCategories || [];
         state.attacks = data.attacks || [];
-        
+        state.attackCategories = data.attackCategories || [];
+
+        updateBuffCategorySelect();
         renderStats();
         renderBuffs();
         renderPackage('judge');
@@ -450,6 +475,113 @@ function updateStatSelects() {
 }
 
 // ========================================
+// カテゴリ管理
+// ========================================
+
+function addCategory(type, inputId) {
+    const categories = getCategories(type);
+    if (!categories) return;
+
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const name = input.value.trim();
+    if (!name) {
+        showToast('カテゴリ名を入力してください', 'error');
+        return;
+    }
+
+    if (categories.includes(name)) {
+        showToast('同名のカテゴリが既に存在します', 'error');
+        return;
+    }
+
+    categories.push(name);
+    input.value = '';
+
+    if (type === 'buff') {
+        updateBuffCategorySelect();
+        renderBuffs();
+    } else if (type === 'judge') {
+        renderPackage('judge');
+    } else if (type === 'attack') {
+        renderPackage('attack');
+    }
+
+    updateBuffTargetDropdown();
+    saveData();
+}
+
+function buildCategoryMap(type) {
+    const map = { 'none': [] };
+    const categories = getCategories(type) || [];
+    categories.forEach(name => map[name] = []);
+
+    const items = getCollection(type) || [];
+    items.forEach((item, index) => {
+        const key = item.category || 'none';
+        if (!map[key]) {
+            map[key] = [];
+            categories.push(key);
+        }
+        map[key].push({ item, index });
+    });
+
+    return map;
+}
+
+function renderBuffItems(entries = []) {
+    if (!Array.isArray(entries) || entries.length === 0) return '';
+
+    return entries.map(({ item, index }) => {
+        const bgColor = validateColor(item.color);
+        const textColor = getContrastColor(bgColor);
+        const targetTexts = item.targets.map(t => {
+            const text = getTargetText(t);
+            return text === "none" ? "なし" : text;
+        });
+        const tooltipText = '効果先: ' + targetTexts.join(', ');
+        const turnDisplay = item.turn ? `<span class="turn-badge" style="outline:2px solid ${item.color};"><span>${item.turn}</span></span>` : '';
+
+        return `
+            <div class="item buff-item draggable ${item.active ? 'active' : ''}"
+                 style="background-color: ${bgColor}; color: ${textColor}; anchor-name: --no${index};"
+                 draggable="true"
+                 data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}">
+                <div class="tooltip" style="--target: --no${index};">${escapeHtml(tooltipText)}</div>
+                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity:0.6;">drag_indicator</span>
+                <span class="item-param">
+                    <span class="item-name">${escapeHtml(item.name)}</span>
+                    ${item.description ? `<span class="item-description">${escapeHtml(item.description)}</span>` : ''}
+                    ${item.effect ? `<span class="item-effect">${escapeHtml(item.effect)}</span>` : ''}
+                    ${turnDisplay}
+                </span>
+                <span class="buff-btn">
+                    <button class="toggle-btn ${item.active ? 'active' : ''}" data-toggle="${index}" data-toggle-type="buff"></button>
+                    <button class="edit-btn" data-edit="${index}" data-edit-type="buff">
+                        <span class="material-symbols-rounded" style="font-size: 16px;">edit</span>
+                    </button>
+                    <button class="copy-item-btn" data-copy="${index}" data-copy-type="buff">コピー</button>
+                    <button class="remove-btn" data-remove="${index}" data-remove-type="buff">×</button>
+                </span>
+            </div>
+        `;
+    }).join('');
+}
+
+function updateBuffCategorySelect() {
+    const select = document.getElementById('buffCategorySelect');
+    if (!select) return;
+
+    const options = ['<option value="none">なし</option>'];
+    state.buffCategories.forEach(name => {
+        options.push(`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`);
+    });
+
+    select.innerHTML = options.join('');
+}
+
+// ========================================
 // マルチセレクト
 // ========================================
 
@@ -487,9 +619,16 @@ function updateBuffTargetDropdown() {
             const value = 'judge:' + j.name;
             html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(j.name)}</option>`;
         });
+
+        if (state.judgeCategories.length > 0) {
+            state.judgeCategories.forEach(name => {
+                const value = `judge-category:${name}`;
+                html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>&gt;&gt;${escapeHtml(name)}</option>`;
+            });
+        }
         html += `</optgroup>`;
     }
-    
+
     // 攻撃カテゴリ
     if (state.attacks.length > 0) {
         html += `<optgroup label="---攻撃---">`;
@@ -497,6 +636,13 @@ function updateBuffTargetDropdown() {
             const value = 'attack:' + a.name;
             html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(a.name)}</option>`;
         });
+
+        if (state.attackCategories.length > 0) {
+            state.attackCategories.forEach(name => {
+                const value = `attack-category:${name}`;
+                html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>&gt;&gt;${escapeHtml(name)}</option>`;
+            });
+        }
         html += `</optgroup>`;
     }
     
@@ -511,6 +657,8 @@ function getTargetText(target) {
     if (target === 'all-attack') return 'すべての攻撃';
     if (target.startsWith('judge:')) return target.substring(6);
     if (target.startsWith('attack:')) return target.substring(7);
+    if (target.startsWith('judge-category:')) return '>>' + target.substring(16);
+    if (target.startsWith('attack-category:')) return '>>' + target.substring(17);
     return target;
 }
 
@@ -532,11 +680,13 @@ function openBuffModal(editIndex = null) {
         bulkAddSection.style.display = 'none';
         
         const buff = state.buffs[editIndex];
+        updateBuffCategorySelect();
         document.getElementById('buffName').value = buff.name;
         document.getElementById('buffDescription').value = buff.description || '';
         document.getElementById('buffEffect').value = buff.effect || '';
         document.getElementById('buffTurn').value = buff.originalTurn || '';
         document.getElementById('buffColor').value = buff.color;
+        document.getElementById('buffCategorySelect').value = buff.category || 'none';
         
         // 効果先の選択状態を復元
         state.selectedBuffTargets = [...buff.targets];
@@ -559,6 +709,7 @@ function resetBuffForm() {
     document.getElementById('buffEffect').value = '';
     document.getElementById('buffTurn').value = '';
     document.getElementById('buffColor').value = '#0079FF';
+    document.getElementById('buffCategorySelect').value = 'none';
     state.selectedBuffTargets = [];
     updateBuffTargetDropdown();
 }
@@ -570,6 +721,8 @@ function addBuff() {
     const targets = [...state.selectedBuffTargets];
     const turn = document.getElementById('buffTurn').value.trim();
     const color = validateColor(document.getElementById('buffColor').value);
+    const categorySelect = document.getElementById('buffCategorySelect');
+    const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
     
     if (!name) {
         showToast('バフ名を入力してください', 'error');
@@ -594,6 +747,7 @@ function addBuff() {
             turn: turn ? parseInt(turn) : oldTurn,
             originalTurn: turn ? parseInt(turn) : oldOriginalTurn,
             color: color,
+            category: category,
             active: state.buffs[index].active
         };
         
@@ -608,6 +762,7 @@ function addBuff() {
             turn: turn ? parseInt(turn) : null,
             originalTurn: turn ? parseInt(turn) : null,
             color: color,
+            category: category,
             active: true
         });
     }
@@ -629,7 +784,7 @@ function bulkAdd(type) {
             areaId: 'bulkAddArea',
             minParts: 1,
             messageKey: 'バフ',
-            parser: (parts, index) => {
+            parser: (parts, index, category) => {
                 const name = parts[0];
                 const targetStr = parts[1] || '';
                 const description = parts[2] || '';
@@ -641,8 +796,22 @@ function bulkAdd(type) {
                 
                 const targetNames = targetStr.split(',').map(t => t.trim());
                 const targets = [];
-                
+
                 targetNames.forEach(tName => {
+                    if (tName.startsWith('>>')) {
+                        const catName = tName.replace(/^>>\s*/, '');
+                        let matched = false;
+                        if (state.judgeCategories.includes(catName)) {
+                            targets.push('judge-category:' + catName);
+                            matched = true;
+                        }
+                        if (state.attackCategories.includes(catName)) {
+                            targets.push('attack-category:' + catName);
+                            matched = true;
+                        }
+                        if (!matched) throw `行${index + 1}: カテゴリ「${catName}」が見つかりません`;
+                        return;
+                    }
                     if (tName === 'なし') targets.push('none');
                     else if (tName === '') targets.push('none');
                     else if (tName === 'すべての判定') targets.push('all-judge');
@@ -659,13 +828,14 @@ function bulkAdd(type) {
                 });
                 
                 if (targets.length === 0) throw `行${index + 1}: 有効な効果先がありません`;
-                
+
                 return {
                     name, description, effect, targets, turn, originalTurn: turn,
-                    color, active: true
+                    color, active: true, category
                 };
             },
             afterAdd: () => {
+                updateBuffCategorySelect();
                 renderBuffs();
                 updatePackageOutput('judge');
                 updatePackageOutput('attack');
@@ -676,12 +846,12 @@ function bulkAdd(type) {
             areaId: 'bulkAddJudgeArea',
             minParts: 2,
             messageKey: '判定パッケージ',
-            parser: (parts, index) => {
+            parser: (parts, index, category) => {
                 const name = parts[0];
                 const roll = parts[1];
                 const stat = parts[2] ? parts[2].split(',').map(s => s.trim()).join('+') : '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
-                return { name, roll, stat };
+                return { name, roll, stat, category };
             },
             afterAdd: () => {
                 renderPackage('judge');
@@ -693,12 +863,12 @@ function bulkAdd(type) {
             areaId: 'bulkAddAttackArea',
             minParts: 2,
             messageKey: '攻撃パッケージ',
-            parser: (parts, index) => {
+            parser: (parts, index, category) => {
                 const name = parts[0];
                 const roll = parts[1];
                 const stat = parts[2] ? parts[2].split(',').map(s => s.trim()).join('+') : '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
-                return { name, roll, stat };
+                return { name, roll, stat, category };
             },
             afterAdd: () => {
                 renderPackage('attack');
@@ -719,13 +889,31 @@ function bulkAdd(type) {
     
     const lines = text.split('\n').filter(line => line.trim());
     let added = 0;
-    
+    let currentCategory = null;
+
     lines.forEach((line, index) => {
+        const openMatch = line.match(/^<([^\/][^>]*)>$/);
+        const closeMatch = line.match(/^<\/([^>]+)>$/);
+
+        if (openMatch) {
+            currentCategory = openMatch[1].trim();
+            const cats = getCategories(type);
+            if (cats && currentCategory && !cats.includes(currentCategory)) {
+                cats.push(currentCategory);
+            }
+            return;
+        }
+
+        if (closeMatch) {
+            currentCategory = null;
+            return;
+        }
+
         try {
             const parts = line.split('|').map(p => p.trim());
             if (parts.length < config.minParts) return;
-            
-            const item = config.parser(parts, index);
+
+            const item = config.parser(parts, index, currentCategory);
             targetArray.push(item);
             added++;
         } catch (error) {
@@ -828,50 +1016,44 @@ function progressTurn() {
     }
 }
 
+
 function renderBuffs() {
     const list = document.getElementById('buffList');
     if (!list) return;
-    
-    if (state.buffs.length === 0) {
+
+    const categoryMap = buildCategoryMap('buff');
+    const hasContent = (state.buffs.length + state.buffCategories.length) > 0;
+
+    if (!hasContent) {
         list.innerHTML = '<div class="empty-message">バフを追加してください</div>';
         return;
     }
-    
-    list.innerHTML = state.buffs.map((buff, i) => {
-        const bgColor = validateColor(buff.color);
-        const textColor = getContrastColor(bgColor);
-        const targetTexts = buff.targets.map(t => {
-            const text = getTargetText(t); 
-            return text === "none" ? "なし" : text;
-        });
-        const tooltipText = '効果先: ' + targetTexts.join(', ');
-        const turnDisplay = buff.turn ? `<span class="turn-badge" style="outline:2px solid ${buff.color};"><span>${buff.turn}</span></span>` : '';
-        
-        return `
-            <div class="item buff-item draggable ${buff.active ? 'active' : ''}" 
-                 style="background-color: ${bgColor}; color: ${textColor}; anchor-name: --no${i};"
-                 draggable="true"
-                 data-index="${i}" data-type="buff">
-                <div class="tooltip" style="--target: --no${i};">${escapeHtml(tooltipText)}</div>
-                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity: 0.6;">drag_indicator</span>
-                <span class="item-param">
-                    <span class="item-name">${escapeHtml(buff.name)}</span>
-                    ${buff.description ? `<span class="item-description">${escapeHtml(buff.description)}</span>` : ''}
-                    ${buff.effect ? `<span class="item-effect">${escapeHtml(buff.effect)}</span>` : ''}
-                    ${turnDisplay}
-                </span>
-                <span class="buff-btn">
-                    <button class="toggle-btn ${buff.active ? 'active' : ''}" data-toggle="${i}" data-toggle-type="buff"></button>
-                    <button class="edit-btn" data-edit="${i}" data-edit-type="buff">
-                        <span class="material-symbols-rounded" style="font-size: 16px;">edit</span>
-                    </button>
-                    <button class="copy-item-btn" data-copy="${i}" data-copy-type="buff">コピー</button>
-                    <button class="remove-btn" data-remove="${i}" data-remove-type="buff">×</button>
-                </span>
+
+    const sections = [];
+
+    sections.push(`
+        <div class="category-block uncategorized" data-category="none">
+            <div class="category-header" data-category="none">未所属</div>
+            <div class="category-body" data-category="none">
+                ${renderBuffItems(categoryMap['none'])}
             </div>
-        `;
-    }).join('');
-    
+        </div>
+    `);
+
+    state.buffCategories.forEach(name => {
+        sections.push(`
+            <details class="category-block" open data-category="${escapeHtml(name)}">
+                <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">drag_indicator</span>${escapeHtml(name)}
+                </summary>
+                <div class="category-body" data-category="${escapeHtml(name)}">
+                    ${renderBuffItems(categoryMap[name])}
+                </div>
+            </details>
+        `);
+    });
+
+    list.innerHTML = sections.join('');
     attachBuffEvents();
 }
 
@@ -1103,11 +1285,12 @@ function addJudge() {
     if (state.editMode.active && state.editMode.type === 'judge') {
         // 編集モード: 既存の判定を更新
         const index = state.editMode.index;
-        state.judges[index] = { name: name, roll: roll, stat: stat };
+        const currentCategory = state.judges[index].category || null;
+        state.judges[index] = { name: name, roll: roll, stat: stat, category: currentCategory };
         showToast('判定を更新しました', 'success');
     } else {
         // 追加モード: 新規判定を追加
-        state.judges.push({ name: name, roll: roll, stat: stat });
+        state.judges.push({ name: name, roll: roll, stat: stat, category: null });
     }
     
     resetJudgeForm();
@@ -1142,11 +1325,12 @@ function addAttack() {
     if (state.editMode.active && state.editMode.type === 'attack') {
         // 編集モード: 既存の攻撃を更新
         const index = state.editMode.index;
-        state.attacks[index] = { name: name, roll: roll, stat: stat };
+        const currentCategory = state.attacks[index].category || null;
+        state.attacks[index] = { name: name, roll: roll, stat: stat, category: currentCategory };
         showToast('攻撃を更新しました', 'success');
     } else {
         // 追加モード: 新規攻撃を追加
-        state.attacks.push({ name: name, roll: roll, stat: stat });
+        state.attacks.push({ name: name, roll: roll, stat: stat, category: null });
     }
     
     resetAttackForm();
@@ -1306,18 +1490,21 @@ function updatePackageOutput(type, selectedIndex = null) {
     
     const item = array[selectedIndex];
     let command = item.roll;
-    
+
     if (item.stat) {
         const stats = item.stat.split('+');
         command += '+{' + stats.join('}+{') + '}';
     }
-    
+
     const filterKey = type === 'judge' ? 'judge:' : 'attack:';
-    const activeBuffs = state.buffs.filter(b => 
-        b.active && 
+    const categoryKey = type === 'judge' ? 'judge-category:' : 'attack-category:';
+    const itemCategory = item.category || null;
+    const activeBuffs = state.buffs.filter(b =>
+        b.active &&
         b.effect &&
-        (b.targets.includes(type === 'judge' ? 'all-judge' : 'all-attack') || 
-         b.targets.includes(filterKey + item.name))
+        (b.targets.includes(type === 'judge' ? 'all-judge' : 'all-attack') ||
+         b.targets.includes(filterKey + item.name) ||
+         (itemCategory && b.targets.includes(categoryKey + itemCategory)))
     );
     
     const slotMap = {};
@@ -1381,6 +1568,8 @@ function formatTargetsForBulk(targets) {
         if (target === 'all-attack') return 'すべての攻撃';
         if (target.startsWith('judge:')) return target.slice(6);
         if (target.startsWith('attack:')) return target.slice(7);
+        if (target.startsWith('judge-category:')) return '>>' + target.slice(16);
+        if (target.startsWith('attack-category:')) return '>>' + target.slice(17);
         return target;
     });
 
@@ -1472,6 +1661,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     document.getElementById('addBuffBtn')?.addEventListener('click', addBuff);
+    document.getElementById('addBuffCategoryBtn')?.addEventListener('click', () => addCategory('buff', 'buffCategoryInput'));
     document.getElementById('turnProgressBtn')?.addEventListener('click', progressTurn);
 
     const buffModal = document.getElementById('buffaddmodal');
@@ -1491,6 +1681,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     document.getElementById('addJudgeBtn')?.addEventListener('click', addJudge);
+    document.getElementById('addJudgeCategoryBtn')?.addEventListener('click', () => addCategory('judge', 'judgeCategoryInput'));
     document.querySelectorAll('input[name="targetType"]').forEach(radio => {
         radio.addEventListener('change', () => updatePackageOutput('judge'));
     });
@@ -1512,6 +1703,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     document.getElementById('addAttackBtn')?.addEventListener('click', addAttack);
+    document.getElementById('addAttackCategoryBtn')?.addEventListener('click', () => addCategory('attack', 'attackCategoryInput'));
     
     const attackModal = document.getElementById('attackaddmodal');
     if (attackModal) {
