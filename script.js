@@ -55,11 +55,21 @@ function validateColor(color) {
 /**
  * トースト通知を表示(alert代替)
  */
+function getActiveModal() {
+    const openDialogs = Array.from(document.querySelectorAll('dialog[open]'));
+    return openDialogs[openDialogs.length - 1] || null;
+}
+
 function showToast(message, type = 'info') {
+    const activeModal = getActiveModal();
+    const parent = activeModal || document.body;
+    const position = activeModal ? 'absolute' : 'fixed';
+    const top = activeModal ? '20px' : '80px';
+
     const toast = document.createElement('div');
     toast.style.cssText = `
-        position: fixed;
-        top: 80px;
+        position: ${position};
+        top: ${top};
         right: 20px;
         padding: 12px 20px;
         background: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#4dabf7'};
@@ -72,9 +82,9 @@ function showToast(message, type = 'info') {
         max-width: 300px;
     `;
     toast.textContent = message;
-    
-    document.body.appendChild(toast);
-    
+
+    parent.appendChild(toast);
+
     setTimeout(() => {
         toast.style.animation = 'slideOut 0.3s ease-in';
         setTimeout(() => toast.remove(), 300);
