@@ -60,11 +60,20 @@ function validateColor(color) {
 /**
  * トースト通知を表示(alert代替)
  */
+function getActiveModal() {
+    const openDialogs = Array.from(document.querySelectorAll('dialog[open]'));
+    return openDialogs[openDialogs.length - 1] || null;
+}
+
 function showToast(message, type = 'info') {
+    const activeModal = getActiveModal();
+    const parent = activeModal || document.body;
+    const top = activeModal ? '40px' : '80px';
+
     const toast = document.createElement('div');
     toast.style.cssText = `
         position: fixed;
-        top: 80px;
+        top: ${top};
         right: 20px;
         padding: 12px 20px;
         background: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#4dabf7'};
@@ -77,9 +86,9 @@ function showToast(message, type = 'info') {
         max-width: 300px;
     `;
     toast.textContent = message;
-    
-    document.body.appendChild(toast);
-    
+
+    parent.appendChild(toast);
+
     setTimeout(() => {
         toast.style.animation = 'slideOut 0.3s ease-in';
         setTimeout(() => toast.remove(), 300);
@@ -456,15 +465,17 @@ function initMultiSelect() {
 function updateBuffTargetDropdown() {
     const select = document.getElementById('buffTargetSelect');
     if (!select) return;
-    
-    // 現在の選択値を保持
-    const currentValues = Array.from(select.selectedOptions).map(opt => opt.value);
-    
+
     // プレースホルダー
     let html = '<option disabled>複数選択可</option>';
     
+    // 状態に保持している選択値を使用
+    const currentValues = Array.isArray(state.selectedBuffTargets)
+        ? [...state.selectedBuffTargets]
+        : [];
+
     // その他カテゴリ
-    html += `<option value="none">なし</option>`;
+    html += `<option value="none" ${currentValues.includes('none') ? 'selected' : ''}>なし</option>`;
     html += `<option value="all-judge" ${currentValues.includes('all-judge') ? 'selected' : ''}>すべての判定</option>`;
     html += `<option value="all-attack" ${currentValues.includes('all-attack') ? 'selected' : ''}>すべての攻撃</option>`;
     html += `</optgroup>`;
@@ -620,7 +631,7 @@ function bulkAdd(type) {
             messageKey: 'バフ',
             parser: (parts, index) => {
                 const name = parts[0];
-                const targetStr = parts[1] ? parseInt(parts[1]) : '';
+                const targetStr = parts[1] || '';
                 const description = parts[2] || '';
                 const effect = parts[3] || '';
                 const turn = parts[4] ? parseInt(parts[4]) : null;
@@ -854,6 +865,7 @@ function renderBuffs() {
                     <button class="edit-btn" data-edit="${i}" data-edit-type="buff">
                         <span class="material-symbols-rounded" style="font-size: 16px;">edit</span>
                     </button>
+                    <button class="copy-item-btn" data-copy="${i}" data-copy-type="buff">コピー</button>
                     <button class="remove-btn" data-remove="${i}" data-remove-type="buff">×</button>
                 </span>
             </div>
@@ -895,6 +907,16 @@ function attachBuffEvents() {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             openBuffModal(i);
+        });
+    });
+    
+    buffList.querySelectorAll('[data-copy-type="buff"]').forEach(btn => {
+        const i = parseInt(btn.getAttribute('data-copy'));
+        if (isNaN(i)) return;
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyItemData('buff', i, btn);
         });
     });
     
@@ -1189,8 +1211,9 @@ function renderPackage(type) {
                 <span class="item-detail">+${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
             </span>
             <button class="edit-btn" data-edit="${i}" data-edit-type="${type}">
-                <span class="material-symbols-rounded" style="font-size: 16px;">edit</span>
+                <span class="material-symbols-rounded">edit</span>
             </button>
+            <button class="copy-item-btn" data-copy="${i}" data-copy-type="${type}">コピー</button>
             <button class="remove-btn" data-remove="${i}" data-remove-type="${type}">×</button>
         </div>
     `).join('');
@@ -1239,6 +1262,16 @@ function attachItemEvents(type) {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             config.onEdit(i);
+        });
+    });
+    
+    listElement.querySelectorAll(`[data-copy-type="${type}"]`).forEach(btn => {
+        const i = parseInt(btn.getAttribute('data-copy'));
+        if (isNaN(i)) return;
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyItemData(type, i, btn);
         });
     });
     
@@ -1339,6 +1372,70 @@ function updatePackageOutput(type, selectedIndex = null) {
 // ========================================
 // コピー機能
 // ========================================
+function formatTargetsForBulk(targets) {
+    if (!Array.isArray(targets) || targets.length === 0) return 'なし';
+
+    const labels = targets.map(target => {
+        if (target === 'none') return 'なし';
+        if (target === 'all-judge') return 'すべての判定';
+        if (target === 'all-attack') return 'すべての攻撃';
+        if (target.startsWith('judge:')) return target.slice(6);
+        if (target.startsWith('attack:')) return target.slice(7);
+        return target;
+    });
+
+    return labels.join(',');
+}
+
+function formatBuffForBulk(buff) {
+    const targetText = formatTargetsForBulk(buff.targets);
+    const turnText = buff.originalTurn ?? buff.turn ?? '';
+
+    return [
+        buff.name || '',
+        targetText,
+        buff.description || '',
+        buff.effect || '',
+        turnText,
+        buff.color || '#0079FF'
+    ].join('|');
+}
+
+function formatPackageForBulk(item) {
+    const statText = item.stat ? item.stat.split('+').join(',') : '';
+    return `${item.name}|${item.roll}|${statText}`;
+}
+
+function copyItemData(type, index, button) {
+    const array = getCollection(type);
+    if (!array || index < 0 || index >= array.length) return;
+
+    let text = '';
+    const item = array[index];
+
+    if (type === 'buff') {
+        text = formatBuffForBulk(item);
+    } else if (type === 'judge' || type === 'attack') {
+        text = formatPackageForBulk(item);
+    } else {
+        return;
+    }
+
+    navigator.clipboard.writeText(text).then(() => {
+        if (button) {
+            const original = button.textContent;
+            button.textContent = 'コピー済み!';
+            button.classList.add('copied');
+            setTimeout(() => {
+                button.textContent = original;
+                button.classList.remove('copied');
+            }, 2000);
+        }
+        showToast('クリップボードにコピーしました', 'success');
+    }).catch(() => {
+        showToast('コピーに失敗しました', 'error');
+    });
+}
 
 function copyToClipboard(elementId, button) {
     const text = document.getElementById(elementId)?.textContent;
