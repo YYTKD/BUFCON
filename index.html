@@ -465,8 +465,8 @@ input[type="number"] {
     transform: translateX(24px);
 }
 
-/* 削除ボタン */
-.remove-btn {
+/* 削除・編集ボタン */
+.remove-btn, .edit-btn {
     background: rgba(0,0,0,0.1);
     color: inherit;
     border: none;
@@ -478,7 +478,7 @@ input[type="number"] {
     transition: background 0.2s;
 }
 
-.remove-btn:hover {
+.remove-btn:hover, .edit-btn:hover {
     background: rgba(0,0,0,0.2);
 }
 
@@ -560,7 +560,7 @@ input[type="number"] {
     opacity: 1;
     align-items: normal;
     bottom: 100%;
-    left: 100px;
+    left: 0px;
     transform: translateX(50px);
 }
 
@@ -943,7 +943,7 @@ input[type="number"] {
                     <span class="arrow">▼</span>
                 </summary>
                 <div class="section-body">
-                    <button class="add-btn" command="show-modal" commandfor="buffaddmodal">
+                    <button class="add-btn" onclick="openBuffModal()">
                         バフを追加
                     </button>
                     <div class="buff-control" full-width>
@@ -980,9 +980,13 @@ input[type="number"] {
                                     <label for="buffTargetSelect" class="label-s">効果先を選択</label>
                                     <select id="buffTargetSelect" multiple size="1"></select>
                                 </div>
+                                <div class="note">効果先を選択しない場合、「効果先：なし」として登録されます。
+                                </div>
                                 <div>
                                     <label for="buffDescription" class="label-s">効果</label>
                                     <input type="text" id="buffDescription" placeholder="説明">
+                                </div>
+                                <div class="note">効果の概要を記入します。>
                                 </div>
                                 <div>
                                     <label for="buffEffect" class="label-s">コマンド</label>
@@ -990,9 +994,15 @@ input[type="number"] {
                                 </div>
                                 <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。
                                 </div>
+                                <div class="note">代入記法：<br>{{NAME}}=コマンド　*NAMEは任意の文字列<br>という記述で、判定や攻撃の基本ロール内にある{{NAME}}にコマンドが代入されます。これにより、判定や計算式の任意の位置にバフの効果を挿入することができます。<br>同じ変数を指定したバフが複数あるときは、バフの並び順にしたがって全て代入されます。
+                                </div>
+                                <div class="note">代入記法は「,」で区切ることで、一つのバフから複数の場所へ代入を指示することができます。<br>通常の記法とも併用できます。<br>例：{{ダイスボーナス}}=+1,{{ダイスの種類}}=20,-2
+                                </div>
                                 <div>
                                     <label for="buffTurn" class="label-s">ターン</label>
                                     <input type="number" id="buffTurn" placeholder="数値">
+                                </div>
+                                <div class="note">効果時間がターンで決められている場合、効果の続くターン数を指定します。
                                 </div>
                                 <div>
                                     <label for="buffColor" class="label-s">ラベルの色を選択</label>
@@ -1009,6 +1019,8 @@ input[type="number"] {
                                         <option value="#141414"></option>
                                         <option value="#595959"></option>
                                     </datalist>
+                                </div>
+                                <div class="note">その他からより詳細に色を指定できます。
                                 </div>
                             <button class="add-btn" id="addBuffBtn">✚</button>
                         </div>
@@ -1038,7 +1050,7 @@ input[type="number"] {
                     <span class="arrow">▼</span>
                 </summary>
                 <div class="section-body">
-                    <button class="add-btn" command="show-modal" commandfor="judgeaddmodal">
+                    <button class="add-btn" onclick="openJudgeModal()">
                         判定パッケージを追加
                     </button>
                     <div class="m-8">
@@ -1080,9 +1092,10 @@ input[type="number"] {
                             <div class="label-L">
                                     <span class="material-symbols-rounded">add_box</span>
                                     <span>個別追加</span>
-                                    <button class="add-btn btn--help">
-                                        <span class="material-symbols-rounded" style="margin-left: auto;">help</span>
-                                    </button>
+                                    <label class="add-btn btn--help">
+                                        <input type="checkbox"/>
+                                        <span class="material-symbols-rounded">help</span>
+                                    </label>
                             </div>
                         <div class="add-area">
                                 <div>
@@ -1129,7 +1142,7 @@ input[type="number"] {
                     <span class="arrow">▼</span>
                 </summary>
                 <div class="section-body">
-                    <button class="add-btn" command="show-modal" commandfor="attackaddmodal">
+                    <button class="add-btn" onclick="openAttackModal()">
                         攻撃パッケージを追加
                     </button>
                     <div class="item-list" id="attackList">
@@ -1152,9 +1165,10 @@ input[type="number"] {
                             <div class="label-L">
                                     <span class="material-symbols-rounded">add_box</span>
                                     <span>個別追加</span>
-                                    <button class="add-btn btn--help" style="margin-left: auto;">
+                                    <label class="add-btn btn--help">
+                                        <input type="checkbox"/>
                                         <span class="material-symbols-rounded">help</span>
-                                    </button>
+                                    </label>
                             </div>
                                         <div class="add-area">
                                 <div>
