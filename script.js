@@ -12,6 +12,8 @@ const state = {
     draggedIndex: null,
     draggedType: null,
     draggedCategory: null,
+    draggedCategoryName: null,
+    draggedCategoryType: null,
     selectedBuffTargets: [],
     editMode: {
         active: false,
@@ -1292,6 +1294,10 @@ function attachBuffEvents() {
     });
 
     buffList.querySelectorAll('.category-header').forEach(header => {
+        if (header.getAttribute('data-category') !== 'none') {
+            header.addEventListener('dragstart', (e) => handleCategoryReorderDragStart(e, 'buff'));
+            header.addEventListener('dragend', handleDragEnd);
+        }
         header.addEventListener('dragover', handleCategoryDragOver);
         header.addEventListener('dragleave', handleCategoryDragLeave);
         header.addEventListener('drop', handleCategoryDrop);
@@ -1316,6 +1322,8 @@ function handleDragStart(e, index, type) {
     state.draggedIndex = index;
     state.draggedType = type;
     state.draggedCategory = null;
+    state.draggedCategoryName = null;
+    state.draggedCategoryType = null;
 
     if (type === 'buff') {
         const buff = state.buffs[index];
@@ -1400,18 +1408,33 @@ function handleDrop(e, targetIndex, type) {
 }
 
 function handleCategoryDragOver(e) {
-    if (!['buff', 'judge', 'attack'].includes(state.draggedType)) return;
+    const isCategoryDrag = !!state.draggedCategoryType;
+
+    if (!isCategoryDrag && !['buff', 'judge', 'attack'].includes(state.draggedType)) return;
 
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+
+    e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom');
+    e.currentTarget.classList.add(e.clientY < midY ? 'drag-over-top' : 'drag-over-bottom');
     e.currentTarget.classList.add('category-drag-over');
 }
 
 function handleCategoryDragLeave(e) {
-    e.currentTarget.classList.remove('category-drag-over');
+    e.currentTarget.classList.remove('category-drag-over', 'drag-over-top', 'drag-over-bottom');
 }
 
 function handleCategoryDrop(e) {
+    const isCategoryDrag = !!state.draggedCategoryType;
+
+    if (isCategoryDrag) {
+        handleCategoryReorderDrop(e);
+        return;
+    }
+
     if (!['buff', 'judge', 'attack'].includes(state.draggedType) || state.draggedIndex === null) return;
 
     e.preventDefault();
@@ -1424,7 +1447,7 @@ function handleCategoryDrop(e) {
     const item = collection ? collection[state.draggedIndex] : null;
 
     if (!collection || !item) {
-        e.currentTarget.classList.remove('category-drag-over');
+        e.currentTarget.classList.remove('category-drag-over', 'drag-over-top', 'drag-over-bottom');
         return;
     }
 
@@ -1442,7 +1465,7 @@ function handleCategoryDrop(e) {
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
-    e.currentTarget.classList.remove('category-drag-over');
+    e.currentTarget.classList.remove('category-drag-over', 'drag-over-top', 'drag-over-bottom');
 }
 
 function handleCategoryBodyDragOver(e, type) {
@@ -1492,10 +1515,116 @@ function handleCategoryBodyDrop(e, type) {
 function handleDragEnd(e) {
     e.target.classList.remove('dragging');
     document.querySelectorAll('.category-header.category-drag-over')
-        .forEach(header => header.classList.remove('category-drag-over'));
+        .forEach(header => header.classList.remove('category-drag-over', 'drag-over-top', 'drag-over-bottom'));
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
+    state.draggedCategoryName = null;
+    state.draggedCategoryType = null;
+}
+
+function handleCategoryReorderDragStart(e, type) {
+    const category = e.currentTarget.getAttribute('data-category');
+    if (!category) return;
+
+    state.draggedCategoryType = type;
+    state.draggedCategoryName = category;
+    state.draggedIndex = null;
+    state.draggedType = null;
+    state.draggedCategory = null;
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.classList.add('dragging');
+}
+
+function reorderCollectionByCategories(type, orderedCategories) {
+    const collection = getCollection(type);
+    if (!collection) return;
+
+    const categoryBuckets = {};
+    collection.forEach(item => {
+        const key = item.category || 'none';
+        if (!categoryBuckets[key]) {
+            categoryBuckets[key] = [];
+        }
+        categoryBuckets[key].push(item);
+    });
+
+    const uniqueOrder = orderedCategories.filter((cat, idx) => orderedCategories.indexOf(cat) === idx);
+    const remainingCategories = Object.keys(categoryBuckets).filter(cat =>
+        cat !== 'none' && !uniqueOrder.includes(cat)
+    );
+
+    const finalOrder = ['none', ...uniqueOrder, ...remainingCategories];
+    const newCollection = [];
+
+    finalOrder.forEach(cat => {
+        if (categoryBuckets[cat]) {
+            newCollection.push(...categoryBuckets[cat]);
+        }
+    });
+
+    collection.splice(0, collection.length, ...newCollection);
+}
+
+function applyCategoryReorder(type, targetCategory, insertAfter) {
+    const categories = getCategories(type);
+    const draggedName = state.draggedCategoryName;
+
+    if (!categories || !draggedName || draggedName === targetCategory) return;
+
+    const fromIndex = categories.indexOf(draggedName);
+    const toIndex = categories.indexOf(targetCategory);
+
+    if (fromIndex === -1 || toIndex === -1) return;
+
+    categories.splice(fromIndex, 1);
+
+    let insertIndex = toIndex;
+    if (insertAfter) {
+        insertIndex = toIndex + (fromIndex < toIndex ? 0 : 1);
+    } else if (fromIndex < toIndex) {
+        insertIndex = toIndex - 1;
+    }
+
+    categories.splice(insertIndex, 0, draggedName);
+
+    reorderCollectionByCategories(type, categories);
+
+    if (type === 'buff') {
+        renderBuffs();
+        updateBuffCategorySelect();
+    } else if (type === 'judge') {
+        renderPackage('judge');
+        updateJudgeCategorySelect();
+    } else if (type === 'attack') {
+        renderPackage('attack');
+        updateAttackCategorySelect();
+    }
+
+    updateBuffTargetDropdown();
+    saveData();
+}
+
+function handleCategoryReorderDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!state.draggedCategoryType || !state.draggedCategoryName) return;
+
+    const targetCategory = e.currentTarget.getAttribute('data-category');
+    if (!targetCategory || targetCategory === 'none') return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const insertAfter = e.clientY >= rect.top + rect.height / 2;
+
+    applyCategoryReorder(state.draggedCategoryType, targetCategory, insertAfter);
+
+    document.querySelectorAll('.category-header.category-drag-over')
+        .forEach(header => header.classList.remove('category-drag-over', 'drag-over-top', 'drag-over-bottom'));
+
+    state.draggedCategoryType = null;
+    state.draggedCategoryName = null;
 }
 
 // ========================================
@@ -1794,6 +1923,10 @@ function attachItemEvents(type) {
     });
 
     listElement.querySelectorAll('.category-header').forEach(header => {
+        if (header.getAttribute('data-category') !== 'none') {
+            header.addEventListener('dragstart', (e) => handleCategoryReorderDragStart(e, type));
+            header.addEventListener('dragend', handleDragEnd);
+        }
         header.addEventListener('dragover', handleCategoryDragOver);
         header.addEventListener('dragleave', handleCategoryDragLeave);
         header.addEventListener('drop', handleCategoryDrop);
