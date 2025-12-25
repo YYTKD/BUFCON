@@ -744,6 +744,15 @@ function updateItemIndexOptions(type) {
     }
 
     categories.forEach(name => {
+        options.push(`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`);
+    });
+
+    select.innerHTML = options.join('');
+    if ([...select.options].some(opt => opt.value === prev)) {
+        select.value = prev;
+    }
+}
+
 function updateJudgeCategorySelect() {
     const select = document.getElementById('judgeCategorySelect');
     if (!select) return;
