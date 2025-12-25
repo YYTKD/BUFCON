@@ -1071,6 +1071,12 @@ function attachBuffEvents() {
         el.addEventListener('drop', (e) => handleDrop(e, i, 'buff'));
         el.addEventListener('dragend', handleDragEnd);
     });
+
+    buffList.querySelectorAll('.category-header').forEach(header => {
+        header.addEventListener('dragover', handleCategoryDragOver);
+        header.addEventListener('dragleave', handleCategoryDragLeave);
+        header.addEventListener('drop', handleCategoryDrop);
+    });
     
     buffList.querySelectorAll('[data-toggle-type="buff"]').forEach(btn => {
         const i = parseInt(btn.getAttribute('data-toggle'));
@@ -1120,6 +1126,13 @@ function attachBuffEvents() {
 function handleDragStart(e, index, type) {
     state.draggedIndex = index;
     state.draggedType = type;
+    state.draggedCategory = null;
+
+    if (type === 'buff') {
+        const buff = state.buffs[index];
+        state.draggedCategory = buff ? (buff.category || 'none') : null;
+    }
+
     e.target.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
 }
@@ -1179,10 +1192,54 @@ function handleDrop(e, targetIndex, type) {
     saveData();
 }
 
-function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
+function handleCategoryDragOver(e) {
+    if (state.draggedType !== 'buff') return;
+
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('category-drag-over');
+}
+
+function handleCategoryDragLeave(e) {
+    e.currentTarget.classList.remove('category-drag-over');
+}
+
+function handleCategoryDrop(e) {
+    if (state.draggedType !== 'buff' || state.draggedIndex === null) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const categoryKey = e.currentTarget.getAttribute('data-category') || 'none';
+    const targetCategory = categoryKey === 'none' ? null : categoryKey;
+    const buff = state.buffs[state.draggedIndex];
+
+    if (!buff) {
+        e.currentTarget.classList.remove('category-drag-over');
+        return;
+    }
+
+    if ((buff.category || null) !== targetCategory) {
+        buff.category = targetCategory;
+        renderBuffs();
+        updatePackageOutput('judge');
+        updatePackageOutput('attack');
+        saveData();
+    }
+
     state.draggedIndex = null;
     state.draggedType = null;
+    state.draggedCategory = null;
+    e.currentTarget.classList.remove('category-drag-over');
+}
+
+function handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+    document.querySelectorAll('.category-header.category-drag-over')
+        .forEach(header => header.classList.remove('category-drag-over'));
+    state.draggedIndex = null;
+    state.draggedType = null;
+    state.draggedCategory = null;
 }
 
 // ========================================
