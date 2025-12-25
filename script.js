@@ -629,6 +629,18 @@ function buildCategoryMap(type) {
     return map;
 }
 
+function getCategoryInsertIndex(type, categoryKey) {
+    const arr = getCollection(type) || [];
+    const normalizedKey = categoryKey || 'none';
+    const indices = arr
+        .map((item, idx) => ({ item, idx }))
+        .filter(({ item }) => (item.category || 'none') === normalizedKey)
+        .map(({ idx }) => idx);
+
+    if (indices.length === 0) return arr.length;
+    return Math.max(...indices) + 1;
+}
+
 function renderBuffItems(entries = []) {
     if (!Array.isArray(entries) || entries.length === 0) return '';
 
@@ -661,6 +673,26 @@ function renderBuffItems(entries = []) {
             </div>
         `;
     }).join('');
+}
+
+function renderPackageItems(type, entries = []) {
+    if (!Array.isArray(entries) || entries.length === 0) return '';
+
+    return entries.map(({ item, index }) => `
+        <div class="item clickable draggable" data-index="${index}" data-type="${type}" data-category="${escapeHtml(item.category || 'none')}" draggable="true">
+            <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity: 0.6;">drag_indicator</span>
+            <span class="item-param">
+                <span class="item-name">${escapeHtml(item.name)}</span>
+                <span class="item-detail">${escapeHtml(item.roll)}</span>
+                <span class="item-detail">+${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
+            </span>
+            <button class="edit-btn" data-edit="${index}" data-edit-type="${type}">
+                <span class="material-symbols-rounded">edit</span>
+            </button>
+            <button class="copy-item-btn" data-copy="${index}" data-copy-type="${type}">コピー</button>
+            <button class="remove-btn" data-remove="${index}" data-remove-type="${type}">×</button>
+        </div>
+    `).join('');
 }
 
 function updateBuffCategorySelect() {
@@ -1166,6 +1198,12 @@ function attachBuffEvents() {
         el.addEventListener('dragend', handleDragEnd);
         el.addEventListener('contextmenu', (e) => openItemContextMenu(e, 'buff', i));
     });
+
+    buffList.querySelectorAll('.category-header').forEach(header => {
+        header.addEventListener('dragover', handleCategoryDragOver);
+        header.addEventListener('dragleave', handleCategoryDragLeave);
+        header.addEventListener('drop', handleCategoryDrop);
+    });
     
     buffList.querySelectorAll('[data-toggle-type="buff"]').forEach(btn => {
         const i = parseInt(btn.getAttribute('data-toggle'));
@@ -1185,6 +1223,13 @@ function attachBuffEvents() {
 function handleDragStart(e, index, type) {
     state.draggedIndex = index;
     state.draggedType = type;
+    state.draggedCategory = null;
+
+    if (type === 'buff') {
+        const buff = state.buffs[index];
+        state.draggedCategory = buff ? (buff.category || 'none') : null;
+    }
+
     e.target.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
 }
@@ -1212,29 +1257,47 @@ function handleDragLeave(e) {
 function handleDrop(e, targetIndex, type) {
     e.preventDefault();
     e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom');
-    
+
     if (state.draggedIndex === null || state.draggedType !== type || state.draggedIndex === targetIndex) {
         return;
     }
-    
+
     const arr = getCollection(type);
     if (!arr) return;
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const midY = rect.top + rect.height / 2;
+
+    const draggedItem = arr[state.draggedIndex];
+    if (!draggedItem) return;
+
+    let targetCategory = null;
+    if (['buff', 'judge', 'attack'].includes(type)) {
+        const categoryAttr = e.currentTarget.getAttribute('data-category');
+        if (categoryAttr !== null) {
+            targetCategory = categoryAttr === 'none' ? null : categoryAttr;
+        }
+    }
+
     let insertIndex = targetIndex;
-    
-    if (e.clientY >= midY) {
-        insertIndex = targetIndex + 1;
+    if (targetIndex === null || targetIndex === undefined) {
+        insertIndex = getCategoryInsertIndex(type, targetCategory);
+    } else {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+
+        if (e.clientY >= midY) {
+            insertIndex = targetIndex + 1;
+        }
+
+        if (state.draggedIndex < insertIndex) {
+            insertIndex--;
+        }
     }
-    
-    if (state.draggedIndex < insertIndex) {
-        insertIndex--;
-    }
-    
+
     const item = arr.splice(state.draggedIndex, 1)[0];
+    if (targetCategory !== null || type === 'buff') {
+        item.category = targetCategory;
+    }
     arr.splice(insertIndex, 0, item);
-    
+
     if (type === 'buff') renderBuffs();
     else if (type === 'judge') renderPackage('judge');
     else if (type === 'attack') renderPackage('attack');
@@ -1244,10 +1307,54 @@ function handleDrop(e, targetIndex, type) {
     saveData();
 }
 
-function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
+function handleCategoryDragOver(e) {
+    if (state.draggedType !== 'buff') return;
+
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('category-drag-over');
+}
+
+function handleCategoryDragLeave(e) {
+    e.currentTarget.classList.remove('category-drag-over');
+}
+
+function handleCategoryDrop(e) {
+    if (state.draggedType !== 'buff' || state.draggedIndex === null) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const categoryKey = e.currentTarget.getAttribute('data-category') || 'none';
+    const targetCategory = categoryKey === 'none' ? null : categoryKey;
+    const buff = state.buffs[state.draggedIndex];
+
+    if (!buff) {
+        e.currentTarget.classList.remove('category-drag-over');
+        return;
+    }
+
+    if ((buff.category || null) !== targetCategory) {
+        buff.category = targetCategory;
+        renderBuffs();
+        updatePackageOutput('judge');
+        updatePackageOutput('attack');
+        saveData();
+    }
+
     state.draggedIndex = null;
     state.draggedType = null;
+    state.draggedCategory = null;
+    e.currentTarget.classList.remove('category-drag-over');
+}
+
+function handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+    document.querySelectorAll('.category-header.category-drag-over')
+        .forEach(header => header.classList.remove('category-drag-over'));
+    state.draggedIndex = null;
+    state.draggedType = null;
+    state.draggedCategory = null;
 }
 
 // ========================================
@@ -1442,11 +1549,15 @@ function renderPackage(type) {
     const config = typeConfig[type];
     const array = getCollection(type);
     if (!config || !array) return;
-    
+
     const list = document.getElementById(config.listId);
     if (!list) return;
-    
-    if (array.length === 0) {
+
+    const categoryMap = buildCategoryMap(type);
+    const categories = getCategories(type) || [];
+    const hasContent = (array.length + categories.length) > 0;
+
+    if (!hasContent) {
         list.innerHTML = `<div class="empty-message">${config.emptyMsg}</div>`;
         return;
     }
@@ -1459,9 +1570,32 @@ function renderPackage(type) {
                 <span class="item-detail">${escapeHtml(item.roll)}</span>
                 <span class="item-detail">+${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
             </span>
+    const sections = [];
+
+    sections.push(`
+        <div class="category-block uncategorized" data-category="none">
+            <div class="category-header" data-category="none">未所属</div>
+            <div class="category-body" data-category="none">
+                ${renderPackageItems(type, categoryMap['none'])}
+            </div>
         </div>
-    `).join('');
-    
+    `);
+
+    categories.forEach(name => {
+        sections.push(`
+            <details class="category-block" open data-category="${escapeHtml(name)}">
+                <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">drag_indicator</span>${escapeHtml(name)}
+                </summary>
+                <div class="category-body" data-category="${escapeHtml(name)}">
+                    ${renderPackageItems(type, categoryMap[name])}
+                </div>
+            </details>
+        `);
+    });
+
+    list.innerHTML = sections.join('');
+
     attachItemEvents(type);
 }
 
@@ -1486,7 +1620,7 @@ function attachItemEvents(type) {
     
     const listElement = document.getElementById(config.listId);
     if (!listElement) return;
-    
+
     listElement.querySelectorAll(`[data-type="${type}"]`).forEach(el => {
         const i = parseInt(el.getAttribute('data-index'));
         if (isNaN(i)) return;
@@ -1498,6 +1632,12 @@ function attachItemEvents(type) {
         el.addEventListener('drop', (e) => handleDrop(e, i, type));
         el.addEventListener('dragend', handleDragEnd);
         el.addEventListener('contextmenu', (e) => openItemContextMenu(e, type, i));
+    });
+
+    listElement.querySelectorAll('.category-body').forEach(body => {
+        body.addEventListener('dragover', (e) => handleCategoryBodyDragOver(e, type));
+        body.addEventListener('dragleave', handleCategoryBodyDragLeave);
+        body.addEventListener('drop', (e) => handleCategoryBodyDrop(e, type));
     });
 }
 
