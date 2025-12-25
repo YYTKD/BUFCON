@@ -134,12 +134,6 @@ function getCategories(type) {
     return null;
 }
 
-const itemIndexConfig = {
-    buff: { selectId: 'buffItemIndex', listId: 'buffList' },
-    judge: { selectId: 'judgeItemIndex', listId: 'judgeList' },
-    attack: { selectId: 'attackItemIndex', listId: 'attackList' }
-};
-
 // ========================================
 // ユーティリティ関数
 // ========================================
@@ -713,37 +707,6 @@ function updateBuffCategorySelect() {
     select.innerHTML = options.join('');
 }
 
-function getItemIndexSelector(categoryKey) {
-    const escaped = (typeof CSS !== 'undefined' && CSS.escape)
-        ? CSS.escape(categoryKey)
-        : categoryKey.replace(/"/g, '\\"');
-    return `[data-category="${escaped}"]`;
-}
-
-function updateItemIndexOptions(type) {
-    const config = itemIndexConfig[type];
-    if (!config) return;
-
-    const select = document.getElementById(config.selectId);
-    if (!select) return;
-
-    const prev = select.value;
-    const categories = Array.isArray(getCategories(type)) ? [...getCategories(type)] : [];
-    const categoryMap = buildCategoryMap(type);
-
-    Object.keys(categoryMap).forEach(key => {
-        if (key !== 'none' && !categories.includes(key)) {
-            categories.push(key);
-        }
-    });
-
-    const options = ['<option value="">カテゴリを選択</option>'];
-
-    if (categoryMap['none']) {
-        options.push('<option value="none">未分類</option>');
-    }
-
-    categories.forEach(name => {
 function updateJudgeCategorySelect() {
     const select = document.getElementById('judgeCategorySelect');
     if (!select) return;
@@ -754,40 +717,6 @@ function updateJudgeCategorySelect() {
     });
 
     select.innerHTML = options.join('');
-    if ([...select.options].some(opt => opt.value === prev)) {
-        select.value = prev;
-    }
-}
-
-function jumpToCategory(type, categoryKey) {
-    if (!categoryKey) return;
-
-    const config = itemIndexConfig[type];
-    if (!config) return;
-
-    const list = document.getElementById(config.listId);
-    if (!list) return;
-
-    const selector = getItemIndexSelector(categoryKey);
-    const target = list.querySelector(selector);
-
-    if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-}
-
-function initItemIndex(type) {
-    const config = itemIndexConfig[type];
-    if (!config) return;
-
-    const select = document.getElementById(config.selectId);
-    if (!select) return;
-
-    select.addEventListener('change', (event) => {
-        jumpToCategory(type, event.target.value);
-    });
-
-    updateItemIndexOptions(type);
 }
 
 function updateAttackCategorySelect() {
@@ -1279,7 +1208,6 @@ function renderBuffs() {
 
     list.innerHTML = sections.join('');
     attachBuffEvents();
-    updateItemIndexOptions('buff');
 }
 
 function attachBuffEvents() {
@@ -1761,7 +1689,6 @@ function renderPackage(type) {
     list.innerHTML = sections.join('');
 
     attachItemEvents(type);
-    updateItemIndexOptions(type);
 }
 
 function attachItemEvents(type) {
@@ -2102,12 +2029,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (targetId) copyToClipboard(targetId, this);
         });
     });
-
-    initItemIndex('buff');
-    initItemIndex('judge');
-    initItemIndex('attack');
+    
     initMultiSelect();
-    initFileDropZone();
+    initFileDropZone(); 
     loadUIState();
     loadData();
 });
