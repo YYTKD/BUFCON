@@ -28,6 +28,105 @@ function getCollection(type) {
     return null;
 }
 
+// ========================================
+// コンテキストメニュー
+// ========================================
+let contextMenuElement = null;
+
+function getContextMenu() {
+    if (contextMenuElement) return contextMenuElement;
+
+    contextMenuElement = document.createElement('div');
+    contextMenuElement.id = 'item-context-menu';
+    contextMenuElement.className = 'context-menu hidden';
+    document.body.appendChild(contextMenuElement);
+
+    document.addEventListener('click', hideContextMenu);
+    window.addEventListener('resize', hideContextMenu);
+    window.addEventListener('scroll', hideContextMenu, true);
+
+    return contextMenuElement;
+}
+
+function hideContextMenu() {
+    if (contextMenuElement) {
+        contextMenuElement.classList.add('hidden');
+    }
+}
+
+function showContextMenu(x, y, actions = []) {
+    if (!actions.length) return;
+
+    const menu = getContextMenu();
+    menu.innerHTML = '';
+
+    actions.forEach((action, index) => {
+        if (index > 0) {
+            const separator = document.createElement('div');
+            separator.className = 'context-menu-separator';
+            menu.appendChild(separator);
+        }
+
+        const button = document.createElement('button');
+        button.className = 'context-menu-item';
+        button.textContent = action.label;
+        button.addEventListener('click', () => {
+            action.onClick();
+            hideContextMenu();
+        });
+        menu.appendChild(button);
+    });
+
+    menu.classList.remove('hidden');
+    menu.style.visibility = 'hidden';
+    menu.style.left = '0px';
+    menu.style.top = '0px';
+
+    const menuWidth = menu.offsetWidth;
+    const menuHeight = menu.offsetHeight;
+    const viewportRight = window.scrollX + window.innerWidth;
+    const viewportBottom = window.scrollY + window.innerHeight;
+
+    let left = x;
+    let top = y;
+
+    if (left + menuWidth > viewportRight) {
+        left = viewportRight - menuWidth - 8;
+    }
+    if (top + menuHeight > viewportBottom) {
+        top = viewportBottom - menuHeight - 8;
+    }
+
+    left = Math.max(window.scrollX + 8, left);
+    top = Math.max(window.scrollY + 8, top);
+
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+    menu.style.visibility = 'visible';
+}
+
+function openItemContextMenu(event, type, index) {
+    event.preventDefault();
+    const actions = [];
+
+    if (type === 'buff') {
+        actions.push({ label: '編集', onClick: () => openBuffModal(index) });
+        actions.push({ label: 'テキストをコピー', onClick: () => copyItemData('buff', index) });
+        actions.push({ label: '削除', onClick: () => removeBuff(index) });
+    } else if (type === 'judge') {
+        actions.push({ label: '編集', onClick: () => openJudgeModal(index) });
+        actions.push({ label: 'テキストをコピー', onClick: () => copyItemData('judge', index) });
+        actions.push({ label: '削除', onClick: () => removeJudge(index) });
+    } else if (type === 'attack') {
+        actions.push({ label: '編集', onClick: () => openAttackModal(index) });
+        actions.push({ label: 'テキストをコピー', onClick: () => copyItemData('attack', index) });
+        actions.push({ label: '削除', onClick: () => removeAttack(index) });
+    }
+
+    hideContextMenu();
+    showContextMenu(event.pageX, event.pageY, actions);
+}
+
 function getCategories(type) {
     if (type === 'buff') return state.buffCategories;
     if (type === 'judge') return state.judgeCategories;
@@ -558,11 +657,6 @@ function renderBuffItems(entries = []) {
                 </span>
                 <span class="buff-btn">
                     <button class="toggle-btn ${item.active ? 'active' : ''}" data-toggle="${index}" data-toggle-type="buff"></button>
-                    <button class="edit-btn" data-edit="${index}" data-edit-type="buff">
-                        <span class="material-symbols-rounded" style="font-size: 16px;">edit</span>
-                    </button>
-                    <button class="copy-item-btn" data-copy="${index}" data-copy-type="buff">コピー</button>
-                    <button class="remove-btn" data-remove="${index}" data-remove-type="buff">×</button>
                 </span>
             </div>
         `;
@@ -1064,12 +1158,13 @@ function attachBuffEvents() {
     buffList.querySelectorAll('[data-type="buff"]').forEach(el => {
         const i = parseInt(el.getAttribute('data-index'));
         if (isNaN(i)) return;
-        
+
         el.addEventListener('dragstart', (e) => handleDragStart(e, i, 'buff'));
         el.addEventListener('dragover', handleDragOver);
         el.addEventListener('dragleave', handleDragLeave);
         el.addEventListener('drop', (e) => handleDrop(e, i, 'buff'));
         el.addEventListener('dragend', handleDragEnd);
+        el.addEventListener('contextmenu', (e) => openItemContextMenu(e, 'buff', i));
     });
     
     buffList.querySelectorAll('[data-toggle-type="buff"]').forEach(btn => {
@@ -1079,36 +1174,6 @@ function attachBuffEvents() {
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleBuff(i);
-        });
-    });
-    
-    buffList.querySelectorAll('[data-edit-type="buff"]').forEach(btn => {
-        const i = parseInt(btn.getAttribute('data-edit'));
-        if (isNaN(i)) return;
-        
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openBuffModal(i);
-        });
-    });
-    
-    buffList.querySelectorAll('[data-copy-type="buff"]').forEach(btn => {
-        const i = parseInt(btn.getAttribute('data-copy'));
-        if (isNaN(i)) return;
-
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            copyItemData('buff', i, btn);
-        });
-    });
-    
-    buffList.querySelectorAll('[data-remove-type="buff"]').forEach(btn => {
-        const i = parseInt(btn.getAttribute('data-remove'));
-        if (isNaN(i)) return;
-        
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            removeBuff(i);
         });
     });
 }
@@ -1394,11 +1459,6 @@ function renderPackage(type) {
                 <span class="item-detail">${escapeHtml(item.roll)}</span>
                 <span class="item-detail">+${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
             </span>
-            <button class="edit-btn" data-edit="${i}" data-edit-type="${type}">
-                <span class="material-symbols-rounded">edit</span>
-            </button>
-            <button class="copy-item-btn" data-copy="${i}" data-copy-type="${type}">コピー</button>
-            <button class="remove-btn" data-remove="${i}" data-remove-type="${type}">×</button>
         </div>
     `).join('');
     
@@ -1430,43 +1490,14 @@ function attachItemEvents(type) {
     listElement.querySelectorAll(`[data-type="${type}"]`).forEach(el => {
         const i = parseInt(el.getAttribute('data-index'));
         if (isNaN(i)) return;
-        
+
         el.addEventListener('click', () => config.onSelect(i));
         el.addEventListener('dragstart', (e) => handleDragStart(e, i, type));
         el.addEventListener('dragover', handleDragOver);
         el.addEventListener('dragleave', handleDragLeave);
         el.addEventListener('drop', (e) => handleDrop(e, i, type));
         el.addEventListener('dragend', handleDragEnd);
-    });
-    
-    listElement.querySelectorAll(`[data-edit-type="${type}"]`).forEach(btn => {
-        const i = parseInt(btn.getAttribute('data-edit'));
-        if (isNaN(i)) return;
-        
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            config.onEdit(i);
-        });
-    });
-    
-    listElement.querySelectorAll(`[data-copy-type="${type}"]`).forEach(btn => {
-        const i = parseInt(btn.getAttribute('data-copy'));
-        if (isNaN(i)) return;
-
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            copyItemData(type, i, btn);
-        });
-    });
-    
-    listElement.querySelectorAll(`[data-remove-type="${type}"]`).forEach(btn => {
-        const i = parseInt(btn.getAttribute('data-remove'));
-        if (isNaN(i)) return;
-        
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            config.onRemove(i);
-        });
+        el.addEventListener('contextmenu', (e) => openItemContextMenu(e, type, i));
     });
 }
 
