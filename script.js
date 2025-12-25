@@ -1611,14 +1611,6 @@ function renderPackage(type) {
         return;
     }
 
-    list.innerHTML = array.map((item, i) => `
-        <div class="item clickable draggable" data-index="${i}" data-type="${type}" draggable="true">
-            <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity: 0.6;">drag_indicator</span>
-            <span class="item-param">
-                <span class="item-name">${escapeHtml(item.name)}</span>
-                <span class="item-detail">${escapeHtml(item.roll)}</span>
-                <span class="item-detail">+${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
-            </span>
     const sections = [];
 
     sections.push(`
