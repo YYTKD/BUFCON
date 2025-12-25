@@ -12,6 +12,8 @@ const state = {
     draggedIndex: null,
     draggedType: null,
     draggedCategory: null,
+    draggedCategoryType: null,
+    draggedCategoryName: null,
     selectedBuffTargets: [],
     editMode: {
         active: false,
@@ -1292,9 +1294,11 @@ function attachBuffEvents() {
     });
 
     buffList.querySelectorAll('.category-header').forEach(header => {
-        header.addEventListener('dragover', handleCategoryDragOver);
+        header.addEventListener('dragstart', (e) => handleCategoryHeaderDragStart(e, 'buff'));
+        header.addEventListener('dragover', (e) => handleCategoryDragOver(e, 'buff'));
         header.addEventListener('dragleave', handleCategoryDragLeave);
-        header.addEventListener('drop', handleCategoryDrop);
+        header.addEventListener('drop', (e) => handleCategoryDrop(e, 'buff'));
+        header.addEventListener('dragend', handleCategoryHeaderDragEnd);
     });
     
     buffList.querySelectorAll('[data-toggle-type="buff"]').forEach(btn => {
@@ -1399,8 +1403,30 @@ function handleDrop(e, targetIndex, type) {
     saveData();
 }
 
-function handleCategoryDragOver(e) {
-    if (!['buff', 'judge', 'attack'].includes(state.draggedType)) return;
+function handleCategoryHeaderDragStart(e, type) {
+    const categoryName = e.currentTarget.getAttribute('data-category');
+    if (!categoryName || categoryName === 'none') return;
+
+    state.draggedCategoryType = type;
+    state.draggedCategoryName = categoryName;
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.classList.add('dragging');
+}
+
+function handleCategoryHeaderDragEnd(e) {
+    document.querySelectorAll('.category-header.dragging')
+        .forEach(header => header.classList.remove('dragging'));
+    document.querySelectorAll('.category-header.category-drag-over')
+        .forEach(header => header.classList.remove('category-drag-over'));
+    state.draggedCategoryType = null;
+    state.draggedCategoryName = null;
+}
+
+function handleCategoryDragOver(e, type) {
+    const isItemDrag = state.draggedType === type;
+    const isCategoryDrag = state.draggedCategoryType === type;
+    if (!isItemDrag && !isCategoryDrag) return;
 
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -1411,16 +1437,57 @@ function handleCategoryDragLeave(e) {
     e.currentTarget.classList.remove('category-drag-over');
 }
 
-function handleCategoryDrop(e) {
-    if (!['buff', 'judge', 'attack'].includes(state.draggedType) || state.draggedIndex === null) return;
+function reorderCategory(type, targetCategory, dropAfter) {
+    const categories = getCategories(type);
+    if (!categories) return false;
 
+    const from = categories.indexOf(state.draggedCategoryName);
+    const to = categories.indexOf(targetCategory);
+
+    if (from === -1 || to === -1 || from === to) return false;
+
+    const name = categories.splice(from, 1)[0];
+    let insertIndex = to;
+
+    if (dropAfter) insertIndex += 1;
+    if (from < insertIndex) insertIndex -= 1;
+
+    categories.splice(insertIndex, 0, name);
+    return true;
+}
+
+function handleCategoryDrop(e, type) {
     e.preventDefault();
     e.stopPropagation();
 
     const categoryKey = e.currentTarget.getAttribute('data-category') || 'none';
+
+    const isCategoryDrag = state.draggedCategoryType === type && state.draggedCategoryName;
+    if (isCategoryDrag) {
+        if (categoryKey !== 'none') {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const dropAfter = (e.clientY - rect.top) > rect.height / 2;
+            const changed = reorderCategory(type, categoryKey, dropAfter);
+
+            if (changed) {
+                if (type === 'buff') renderBuffs();
+                else renderPackage(type);
+                saveData();
+            }
+        }
+
+        handleCategoryHeaderDragEnd(e);
+        return;
+    }
+
+    if (state.draggedType !== type || state.draggedIndex === null) {
+        e.currentTarget.classList.remove('category-drag-over');
+        return;
+    }
+
     const targetCategory = categoryKey === 'none' ? null : categoryKey;
 
-    const collection = getCollection(state.draggedType);
+    const collection = getCollection(type);
     const item = collection ? collection[state.draggedIndex] : null;
 
     if (!collection || !item) {
@@ -1431,8 +1498,8 @@ function handleCategoryDrop(e) {
     if ((item.category || null) !== targetCategory) {
         item.category = targetCategory;
 
-        if (state.draggedType === 'buff') renderBuffs();
-        else renderPackage(state.draggedType);
+        if (type === 'buff') renderBuffs();
+        else renderPackage(type);
 
         updatePackageOutput('judge');
         updatePackageOutput('attack');
@@ -1442,6 +1509,8 @@ function handleCategoryDrop(e) {
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
+    state.draggedCategoryType = null;
+    state.draggedCategoryName = null;
     e.currentTarget.classList.remove('category-drag-over');
 }
 
@@ -1493,9 +1562,13 @@ function handleDragEnd(e) {
     e.target.classList.remove('dragging');
     document.querySelectorAll('.category-header.category-drag-over')
         .forEach(header => header.classList.remove('category-drag-over'));
+    document.querySelectorAll('.category-header.dragging')
+        .forEach(header => header.classList.remove('dragging'));
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
+    state.draggedCategoryType = null;
+    state.draggedCategoryName = null;
 }
 
 // ========================================
@@ -1794,9 +1867,11 @@ function attachItemEvents(type) {
     });
 
     listElement.querySelectorAll('.category-header').forEach(header => {
-        header.addEventListener('dragover', handleCategoryDragOver);
+        header.addEventListener('dragstart', (e) => handleCategoryHeaderDragStart(e, type));
+        header.addEventListener('dragover', (e) => handleCategoryDragOver(e, type));
         header.addEventListener('dragleave', handleCategoryDragLeave);
-        header.addEventListener('drop', handleCategoryDrop);
+        header.addEventListener('drop', (e) => handleCategoryDrop(e, type));
+        header.addEventListener('dragend', handleCategoryHeaderDragEnd);
     });
     
     listElement.querySelectorAll(`[data-edit-type="${type}"]`).forEach(btn => {
