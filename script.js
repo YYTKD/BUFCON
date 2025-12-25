@@ -697,6 +697,7 @@ function renderPackageItems(type, entries = []) {
                 <span class="item-name">${escapeHtml(item.name)}</span>
                 <span class="item-detail">${escapeHtml(item.roll)}</span>
                 <span class="item-detail">+${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
+            </span>
         </div>
     `).join('');
 }
@@ -1520,9 +1521,11 @@ function handleDragEnd(e) {
 
 function openJudgeModal(editIndex = null) {
     const modal = document.getElementById('judgeaddmodal');
+    if (!modal) return;
+
     const modalTitle = modal.querySelector('.section-header-title');
     const addBtn = document.getElementById('addJudgeBtn');
-    const bulkAddSection = document.getElementById('bulkAddJudgeArea').parentElement;
+    const bulkAddSection = document.getElementById('bulkAddJudgeArea')?.parentElement;
 
     updateJudgeCategorySelect();
 
@@ -1531,7 +1534,7 @@ function openJudgeModal(editIndex = null) {
         state.editMode = { active: true, type: 'judge', index: editIndex };
         modalTitle.textContent = '判定パッケージ編集';
         addBtn.textContent = '更新';
-        bulkAddSection.style.display = 'none';
+        if (bulkAddSection) bulkAddSection.style.display = 'none';
         
         const judge = state.judges[editIndex];
         document.getElementById('judgeName').value = judge.name;
@@ -1553,11 +1556,15 @@ function openJudgeModal(editIndex = null) {
         state.editMode = { active: false, type: null, index: null };
         modalTitle.textContent = '判定パッケージ追加';
         addBtn.textContent = '✚';
-        bulkAddSection.style.display = 'block';
+        if (bulkAddSection) bulkAddSection.style.display = 'block';
         resetJudgeForm();
     }
-    
-    modal.showModal();
+
+    if (typeof modal.showModal === 'function') {
+        modal.showModal();
+    } else {
+        modal.setAttribute('open', '');
+    }
 }
 
 function resetJudgeForm() {
@@ -1572,9 +1579,11 @@ function resetJudgeForm() {
 
 function openAttackModal(editIndex = null) {
     const modal = document.getElementById('attackaddmodal');
+    if (!modal) return;
+
     const modalTitle = modal.querySelector('.section-header-title');
     const addBtn = document.getElementById('addAttackBtn');
-    const bulkAddSection = document.getElementById('bulkAddAttackArea').parentElement;
+    const bulkAddSection = document.getElementById('bulkAddAttackArea')?.parentElement;
 
     updateAttackCategorySelect();
 
@@ -1583,7 +1592,7 @@ function openAttackModal(editIndex = null) {
         state.editMode = { active: true, type: 'attack', index: editIndex };
         modalTitle.textContent = '攻撃パッケージ編集';
         addBtn.textContent = '更新';
-        bulkAddSection.style.display = 'none';
+        if (bulkAddSection) bulkAddSection.style.display = 'none';
         
         const attack = state.attacks[editIndex];
         document.getElementById('attackName').value = attack.name;
@@ -1605,11 +1614,15 @@ function openAttackModal(editIndex = null) {
         state.editMode = { active: false, type: null, index: null };
         modalTitle.textContent = '攻撃パッケージ追加';
         addBtn.textContent = '✚';
-        bulkAddSection.style.display = 'block';
+        if (bulkAddSection) bulkAddSection.style.display = 'block';
         resetAttackForm();
     }
-    
-    modal.showModal();
+
+    if (typeof modal.showModal === 'function') {
+        modal.showModal();
+    } else {
+        modal.setAttribute('open', '');
+    }
 }
 
 function resetAttackForm() {
