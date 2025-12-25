@@ -685,12 +685,6 @@ function renderPackageItems(type, entries = []) {
                 <span class="item-name">${escapeHtml(item.name)}</span>
                 <span class="item-detail">${escapeHtml(item.roll)}</span>
                 <span class="item-detail">+${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
-            </span>
-            <button class="edit-btn" data-edit="${index}" data-edit-type="${type}">
-                <span class="material-symbols-rounded">edit</span>
-            </button>
-            <button class="copy-item-btn" data-copy="${index}" data-copy-type="${type}">コピー</button>
-            <button class="remove-btn" data-remove="${index}" data-remove-type="${type}">×</button>
         </div>
     `).join('');
 }
@@ -741,34 +735,35 @@ function updateBuffTargetDropdown() {
     // 判定カテゴリ
     if (state.judges.length > 0) {
         html += `<optgroup label="---判定---">`;
-        state.judges.forEach(j => {
-            const value = 'judge:' + j.name;
-            html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(j.name)}</option>`;
-        });
-
-        if (state.judgeCategories.length > 0) {
+                if (state.judgeCategories.length > 0) {
             state.judgeCategories.forEach(name => {
                 const value = `judge-category:${name}`;
                 html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>&gt;&gt;${escapeHtml(name)}</option>`;
             });
         }
+        
+        state.judges.forEach(j => {
+            const value = 'judge:' + j.name;
+            html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(j.name)}</option>`;
+        });
+
         html += `</optgroup>`;
     }
 
     // 攻撃カテゴリ
     if (state.attacks.length > 0) {
         html += `<optgroup label="---攻撃---">`;
-        state.attacks.forEach(a => {
-            const value = 'attack:' + a.name;
-            html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(a.name)}</option>`;
-        });
-
-        if (state.attackCategories.length > 0) {
+                if (state.attackCategories.length > 0) {
             state.attackCategories.forEach(name => {
                 const value = `attack-category:${name}`;
                 html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>&gt;&gt;${escapeHtml(name)}</option>`;
             });
         }
+        state.attacks.forEach(a => {
+            const value = 'attack:' + a.name;
+            html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(a.name)}</option>`;
+        });
+
         html += `</optgroup>`;
     }
     
@@ -1159,7 +1154,7 @@ function renderBuffs() {
 
     sections.push(`
         <div class="category-block uncategorized" data-category="none">
-            <div class="category-header" data-category="none">未所属</div>
+            <div class="category-header" data-category="none">ー</div>
             <div class="category-body" data-category="none">
                 ${renderBuffItems(categoryMap['none'])}
             </div>
@@ -1170,7 +1165,7 @@ function renderBuffs() {
         sections.push(`
             <details class="category-block" open data-category="${escapeHtml(name)}">
                 <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
-                    <span class="material-symbols-rounded" style="margin-right: 4px;">drag_indicator</span>${escapeHtml(name)}
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">menu</span>${escapeHtml(name)}
                 </summary>
                 <div class="category-body" data-category="${escapeHtml(name)}">
                     ${renderBuffItems(categoryMap[name])}
@@ -1615,7 +1610,7 @@ function renderPackage(type) {
 
     sections.push(`
         <div class="category-block uncategorized" data-category="none">
-            <div class="category-header" data-category="none">未所属</div>
+            <div class="category-header" data-category="none">ー</div>
             <div class="category-body" data-category="none">
                 ${renderPackageItems(type, categoryMap['none'])}
             </div>
@@ -1626,7 +1621,7 @@ function renderPackage(type) {
         sections.push(`
             <details class="category-block" open data-category="${escapeHtml(name)}">
                 <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
-                    <span class="material-symbols-rounded" style="margin-right: 4px;">drag_indicator</span>${escapeHtml(name)}
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">menu</span>${escapeHtml(name)}
                 </summary>
                 <div class="category-body" data-category="${escapeHtml(name)}">
                     ${renderPackageItems(type, categoryMap[name])}
