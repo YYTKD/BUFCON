@@ -635,6 +635,69 @@ function buildCategoryMap(type) {
     return map;
 }
 
+const categoryIndexConfig = {
+    buff: { selectId: 'buffItemIndex', listId: 'buffList' },
+    judge: { selectId: 'judgeItemIndex', listId: 'judgeList' },
+    attack: { selectId: 'attackItemIndex', listId: 'attackList' }
+};
+
+function updateCategoryIndexDropdown(type) {
+    const config = categoryIndexConfig[type];
+    if (!config) return;
+
+    const select = document.getElementById(config.selectId);
+    if (!select) return;
+
+    const categories = ['none', ...(getCategories(type) || [])];
+    const uniqueCategories = [];
+    categories.forEach(category => {
+        const key = category || 'none';
+        if (!uniqueCategories.includes(key)) {
+            uniqueCategories.push(key);
+        }
+    });
+
+    const options = ['<option value="">カテゴリに移動</option>'];
+    uniqueCategories.forEach(category => {
+        const label = category === 'none' ? '未分類' : category;
+        options.push(`<option value="${escapeHtml(category)}">${escapeHtml(label)}</option>`);
+    });
+
+    select.innerHTML = options.join('');
+    select.value = '';
+}
+
+function scrollToCategory(type, category) {
+    const config = categoryIndexConfig[type];
+    if (!config || !category) return;
+
+    const list = document.getElementById(config.listId);
+    if (!list) return;
+
+    const blocks = Array.from(list.querySelectorAll('.category-block'));
+    const targetBlock = blocks.find(block => (block.getAttribute('data-category') || 'none') === category);
+
+    if (!targetBlock) return;
+
+    if (targetBlock.tagName === 'DETAILS') {
+        targetBlock.open = true;
+    }
+
+    const listRectTop = list.getBoundingClientRect().top;
+    const blockRectTop = targetBlock.getBoundingClientRect().top;
+    const offset = blockRectTop - listRectTop + list.scrollTop;
+
+    list.scrollTo({ top: offset, behavior: 'smooth' });
+}
+
+function handleCategoryIndexChange(type, event) {
+    const category = event.target.value;
+    if (!category) return;
+
+    scrollToCategory(type, category);
+    event.target.value = '';
+}
+
 function getCategoryInsertIndex(type, categoryKey) {
     const arr = getCollection(type) || [];
     const normalizedKey = categoryKey || 'none';
@@ -1179,6 +1242,7 @@ function renderBuffs() {
 
     if (!hasContent) {
         list.innerHTML = '<div class="empty-message">バフを追加してください</div>';
+        updateCategoryIndexDropdown('buff');
         return;
     }
 
@@ -1207,6 +1271,7 @@ function renderBuffs() {
     });
 
     list.innerHTML = sections.join('');
+    updateCategoryIndexDropdown('buff');
     attachBuffEvents();
 }
 
@@ -1659,6 +1724,7 @@ function renderPackage(type) {
 
     if (!hasContent) {
         list.innerHTML = `<div class="empty-message">${config.emptyMsg}</div>`;
+        updateCategoryIndexDropdown(type);
         return;
     }
 
@@ -1688,6 +1754,7 @@ function renderPackage(type) {
 
     list.innerHTML = sections.join('');
 
+    updateCategoryIndexDropdown(type);
     attachItemEvents(type);
 }
 
@@ -1962,6 +2029,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('addBuffBtn')?.addEventListener('click', addBuff);
     document.getElementById('addBuffCategoryBtn')?.addEventListener('click', () => addCategory('buff', 'buffCategoryInput'));
     document.getElementById('turnProgressBtn')?.addEventListener('click', progressTurn);
+    document.getElementById('buffItemIndex')?.addEventListener('change', (e) => handleCategoryIndexChange('buff', e));
 
     const buffModal = document.getElementById('buffaddmodal');
     if (buffModal) {
@@ -1981,6 +2049,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('addJudgeBtn')?.addEventListener('click', addJudge);
     document.getElementById('addJudgeCategoryBtn')?.addEventListener('click', () => addCategory('judge', 'judgeCategoryInput'));
+    document.getElementById('judgeItemIndex')?.addEventListener('change', (e) => handleCategoryIndexChange('judge', e));
     document.querySelectorAll('input[name="targetType"]').forEach(radio => {
         radio.addEventListener('change', () => updatePackageOutput('judge'));
     });
@@ -2003,6 +2072,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('addAttackBtn')?.addEventListener('click', addAttack);
     document.getElementById('addAttackCategoryBtn')?.addEventListener('click', () => addCategory('attack', 'attackCategoryInput'));
+    document.getElementById('attackItemIndex')?.addEventListener('change', (e) => handleCategoryIndexChange('attack', e));
     
     const attackModal = document.getElementById('attackaddmodal');
     if (attackModal) {
