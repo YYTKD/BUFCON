@@ -1330,6 +1330,12 @@ function handleDragStart(e, index, type) {
         state.draggedCategory = buff ? (buff.category || 'none') : null;
     }
 
+    try {
+        e.dataTransfer.setData('text/plain', `${type}:${index}`);
+    } catch (_) {
+        // 一部ブラウザではsetDataが必須なためのフォールバック
+    }
+
     e.target.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
 }
@@ -1532,6 +1538,12 @@ function handleCategoryReorderDragStart(e, type) {
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
+
+    try {
+        e.dataTransfer.setData('text/plain', `${type}:category:${category}`);
+    } catch (_) {
+        // 一部ブラウザではsetDataが必須なためのフォールバック
+    }
 
     e.dataTransfer.effectAllowed = 'move';
     e.currentTarget.classList.add('dragging');
