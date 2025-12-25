@@ -1104,18 +1104,12 @@ function attachBuffEvents() {
         el.addEventListener('dragend', handleDragEnd);
     });
 
-    buffList.querySelectorAll('.category-body').forEach(body => {
-        body.addEventListener('dragover', (e) => handleCategoryBodyDragOver(e, 'buff'));
-        body.addEventListener('dragleave', handleCategoryBodyDragLeave);
-        body.addEventListener('drop', (e) => handleCategoryBodyDrop(e, 'buff'));
-    });
-
     buffList.querySelectorAll('.category-header').forEach(header => {
         header.addEventListener('dragover', handleCategoryDragOver);
         header.addEventListener('dragleave', handleCategoryDragLeave);
         header.addEventListener('drop', handleCategoryDrop);
     });
-
+    
     buffList.querySelectorAll('[data-toggle-type="buff"]').forEach(btn => {
         const i = parseInt(btn.getAttribute('data-toggle'));
         if (isNaN(i)) return;
@@ -1289,33 +1283,10 @@ function handleCategoryDrop(e) {
     e.currentTarget.classList.remove('category-drag-over');
 }
 
-function handleCategoryBodyDragOver(e, type) {
-    if (state.draggedType !== type) return;
-
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    e.currentTarget.classList.add('category-drag-over');
-}
-
-function handleCategoryBodyDragLeave(e) {
-    e.currentTarget.classList.remove('category-drag-over');
-}
-
-function handleCategoryBodyDrop(e, type) {
-    if (state.draggedType !== type) return;
-
-    e.preventDefault();
-    const categoryKey = e.currentTarget.getAttribute('data-category');
-    handleDrop(e, null, type);
-    e.currentTarget.classList.remove('category-drag-over');
-}
-
 function handleDragEnd(e) {
     e.target.classList.remove('dragging');
     document.querySelectorAll('.category-header.category-drag-over')
         .forEach(header => header.classList.remove('category-drag-over'));
-    document.querySelectorAll('.category-body.category-drag-over')
-        .forEach(body => body.classList.remove('category-drag-over'));
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
