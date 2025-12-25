@@ -657,7 +657,7 @@ function updateCategoryIndexDropdown(type) {
         }
     });
 
-    const options = ['<option value="">カテゴリに移動</option>'];
+    const options = ['<option　disabled value="">カテゴリに移動</option>'];
     uniqueCategories.forEach(category => {
         const label = category === 'none' ? '未分類' : category;
         options.push(`<option value="${escapeHtml(category)}">${escapeHtml(label)}</option>`);

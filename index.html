@@ -20,10 +20,10 @@
     --add-color: #4769b3;
     --add-hover: #3B5796;
     --secondary-color: #689F38;
+    --optional-color: #eba40a;
     --danger-color: #ff6b6b;
     --bg-light: #0e438c;
     --bg-gray: #f0f0f0;
-    --optional-color: #eba40a;
     
     /* ボーダーカラー */
     --border-color: #00000033;
@@ -443,8 +443,8 @@ input[type="number"] {
 .buff-control {
     display: flex;
     justify-content: flex-start;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--border-color-dark);
+    padding-top: 12px;
+    border-top: 2px solid var(--border-color-dark);
 }
 
 .turn-btn {
@@ -563,6 +563,39 @@ input[type="number"] {
 
 .item-list::-webkit-scrollbar {
     display: none;
+}
+
+
+
+.itemindex {
+    position: relative;
+    display: flex;
+    margin-left: auto;
+    align-items: center;
+}
+
+.itemindex  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 32px;
+    height: 32px;
+    background: #f8f9fa;
+    outline: 1px solid var(--border-color-dark);
+}
+
+.itemindex option {
+    color: var(--text-color);
+}
+        
+.itemindex > span {
+    position: absolute;
+
+    z-index: 1;
+    margin-top: 2px;
+    font-size: 32px;
+    color: var(--text-secondary);
+    pointer-events: none;
 }
 
 
@@ -1042,7 +1075,10 @@ input[type="number"] {
                     <div class="buff-control" full-width>
                         <button class="turn-btn" id="turnProgressBtn">
                             <span class="material-symbols-rounded">skip_next</span>ターン経過</button>
-                            <select id="buffItemIndex"></select>
+                        <label class="itemindex">
+                            <span class="material-symbols-rounded" style="padding-bottom: 8px;">bookmark</span>
+                            <select class="add-btn" id="buffItemIndex"></select>
+                        </label>
                     </div>
                     <div class="item-list" id="buffList">
                         <div class="empty-message">バフを追加してください</div>
@@ -1051,7 +1087,7 @@ input[type="number"] {
             </details>
 <!--バフ/デバフ モーダル-->
         <dialog class="section modal" id="buffaddmodal" closedby="any">
-            <div class="ssection section-header-m">
+            <div class="section section-header-m">
                 <span class="section-header-title">バフ追加</span>
             </div>
             <div class="section-body">
@@ -1128,7 +1164,7 @@ input[type="number"] {
                 <div class="line-udr">
                     <label for="buffCategoryInput" class="label-s">新規カテゴリ追加</label>
                     <div style="display: flex; gap: 8px;">
-                        <input type="text" id="buffCategoryInput" placeholder="例：前衛、後衛" aria-label="バフカテゴリの新規追加">
+                        <input type="text" id="buffCategoryInput" placeholder="例：魔法、装備" aria-label="バフカテゴリの新規追加">
                         <button class="add-btn" id="addBuffCategoryBtn" title="カテゴリを追加">✚</button>
                     </div>
                 </div>
@@ -1161,8 +1197,13 @@ input[type="number"] {
                     <button class="add-btn" onclick="openJudgeModal()">
                         判定パッケージを追加
                     </button>
+                    <div class="buff-control" full-width>
+                        <label class="itemindex">
+                            <span class="material-symbols-rounded">bookmark</span>
+                            <select class="add-btn" id="judgeItemIndex"></select>
+                        </label>
+                    </div>
                     <div class="m-8">
-                        <select id="judgeItemIndex"></select>
                                 <div class="item-list" id="judgeList">
                                     <div class="empty-message">判定パッケージを追加してください</div>
                                 </div>
@@ -1239,7 +1280,7 @@ input[type="number"] {
                         <div class="line-udr">
                             <label for="judgeCategoryInput" class="label-s">新規カテゴリ追加</label>
                             <div style="display: flex; gap: 8px;">
-                                <input type="text" id="judgeCategoryInput" placeholder="例：戦闘系" aria-label="判定カテゴリの新規追加">
+                                <input type="text" id="judgeCategoryInput" placeholder="例：戦闘、探索" aria-label="判定カテゴリの新規追加">
                                 <button class="add-btn" id="addJudgeCategoryBtn" title="カテゴリを追加">✚</button>
                             </div>
                         </div>
@@ -1273,8 +1314,13 @@ input[type="number"] {
                     <button class="add-btn" onclick="openAttackModal()">
                         攻撃パッケージを追加
                     </button>
+                    <div class="buff-control" full-width>
+                        <label class="itemindex">
+                            <span class="material-symbols-rounded">bookmark</span>
+                            <select class="add-btn" id="attackItemIndex"></select>
+                        </label>
+                    </div>
                     <div class="m-8">
-                    <select id="attackItemIndex"></select>
                     <div class="item-list" id="attackList">
                         <div class="empty-message">攻撃パッケージを追加してください</div>
                     </div>
@@ -1334,10 +1380,9 @@ input[type="number"] {
                         <div　class="line-udr">
                             <label for="attackCategoryInput" class="label-s">新規カテゴリ追加</label>
                             <div style="display: flex; gap: 8px;">
-                                <input type="text" id="attackCategoryInput" placeholder="例：前衛、後衛" aria-label="攻撃カテゴリの新規追加">
+                                <input type="text" id="attackCategoryInput" placeholder="例：近接、魔法" aria-label="攻撃カテゴリの新規追加">
                                 <button class="add-btn" id="addAttackCategoryBtn" title="カテゴリを追加">✚</button>
                             </div>
-                        </div>
                         <div class="m-8">
                             <div class="label-L">
                                 <span class="material-symbols-rounded">clear_all</span>
@@ -1354,6 +1399,7 @@ input[type="number"] {
                                 </div>
                             </div>
                         </div>
+                    </div>
             </dialog>
 </div>
     <details class="copyright">
