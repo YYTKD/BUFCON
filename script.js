@@ -296,6 +296,8 @@ function loadData() {
     }
 
     updateBuffCategorySelect();
+    updateJudgeCategorySelect();
+    updateAttackCategorySelect();
     renderStats();
     renderBuffs();
     renderPackage('judge');
@@ -406,6 +408,8 @@ function importData() {
         state.attackCategories = data.attackCategories || [];
 
         updateBuffCategorySelect();
+        updateJudgeCategorySelect();
+        updateAttackCategorySelect();
         renderStats();
         renderBuffs();
         renderPackage('judge');
@@ -608,8 +612,10 @@ function addCategory(type, inputId) {
         updateBuffCategorySelect();
         renderBuffs();
     } else if (type === 'judge') {
+        updateJudgeCategorySelect();
         renderPackage('judge');
     } else if (type === 'attack') {
+        updateAttackCategorySelect();
         renderPackage('attack');
     }
 
@@ -738,6 +744,12 @@ function updateItemIndexOptions(type) {
     }
 
     categories.forEach(name => {
+function updateJudgeCategorySelect() {
+    const select = document.getElementById('judgeCategorySelect');
+    if (!select) return;
+
+    const options = ['<option value="none">なし</option>'];
+    state.judgeCategories.forEach(name => {
         options.push(`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`);
     });
 
@@ -776,6 +788,18 @@ function initItemIndex(type) {
     });
 
     updateItemIndexOptions(type);
+}
+
+function updateAttackCategorySelect() {
+    const select = document.getElementById('attackCategorySelect');
+    if (!select) return;
+
+    const options = ['<option value="none">なし</option>'];
+    state.attackCategories.forEach(name => {
+        options.push(`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`);
+    });
+
+    select.innerHTML = options.join('');
 }
 
 // ========================================
@@ -1053,6 +1077,7 @@ function bulkAdd(type) {
             },
             afterAdd: () => {
                 renderPackage('judge');
+                updateJudgeCategorySelect();
                 updateBuffTargetDropdown();
             }
         },
@@ -1070,6 +1095,7 @@ function bulkAdd(type) {
             },
             afterAdd: () => {
                 renderPackage('attack');
+                updateAttackCategorySelect();
                 updateBuffTargetDropdown();
             }
         }
@@ -1488,7 +1514,9 @@ function openJudgeModal(editIndex = null) {
     const modalTitle = modal.querySelector('.section-header-title');
     const addBtn = document.getElementById('addJudgeBtn');
     const bulkAddSection = document.getElementById('bulkAddJudgeArea').parentElement;
-    
+
+    updateJudgeCategorySelect();
+
     if (editIndex !== null) {
         // 編集モード
         state.editMode = { active: true, type: 'judge', index: editIndex };
@@ -1506,6 +1534,11 @@ function openJudgeModal(editIndex = null) {
         Array.from(statSelect.options).forEach(opt => {
             opt.selected = stats.includes(opt.value);
         });
+
+        const categorySelect = document.getElementById('judgeCategorySelect');
+        if (categorySelect) {
+            categorySelect.value = judge.category || 'none';
+        }
     } else {
         // 追加モード
         state.editMode = { active: false, type: null, index: null };
@@ -1522,6 +1555,10 @@ function resetJudgeForm() {
     document.getElementById('judgeName').value = '';
     document.getElementById('judgeRoll').value = '';
     document.getElementById('judgeStat').selectedIndex = -1;
+    const categorySelect = document.getElementById('judgeCategorySelect');
+    if (categorySelect) {
+        categorySelect.value = 'none';
+    }
 }
 
 function openAttackModal(editIndex = null) {
@@ -1529,7 +1566,9 @@ function openAttackModal(editIndex = null) {
     const modalTitle = modal.querySelector('.section-header-title');
     const addBtn = document.getElementById('addAttackBtn');
     const bulkAddSection = document.getElementById('bulkAddAttackArea').parentElement;
-    
+
+    updateAttackCategorySelect();
+
     if (editIndex !== null) {
         // 編集モード
         state.editMode = { active: true, type: 'attack', index: editIndex };
@@ -1547,6 +1586,11 @@ function openAttackModal(editIndex = null) {
         Array.from(statSelect.options).forEach(opt => {
             opt.selected = stats.includes(opt.value);
         });
+
+        const categorySelect = document.getElementById('attackCategorySelect');
+        if (categorySelect) {
+            categorySelect.value = attack.category || 'none';
+        }
     } else {
         // 追加モード
         state.editMode = { active: false, type: null, index: null };
@@ -1563,6 +1607,10 @@ function resetAttackForm() {
     document.getElementById('attackName').value = '';
     document.getElementById('attackRoll').value = '';
     document.getElementById('attackStat').selectedIndex = -1;
+    const categorySelect = document.getElementById('attackCategorySelect');
+    if (categorySelect) {
+        categorySelect.value = 'none';
+    }
 }
 
 function addJudge() {
@@ -1570,7 +1618,9 @@ function addJudge() {
     const roll = document.getElementById('judgeRoll').value.trim();
     const selectedStats = Array.from(document.getElementById('judgeStat').selectedOptions).map(opt => opt.value).filter(v => v !== 'none');
     const stat = selectedStats.length > 0 ? selectedStats.join('+') : '';
-    
+    const categorySelect = document.getElementById('judgeCategorySelect');
+    const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
+
     if (!name || !roll) {
         showToast('判定名と判定ロールを入力してください', 'error');
         return;
@@ -1579,12 +1629,11 @@ function addJudge() {
     if (state.editMode.active && state.editMode.type === 'judge') {
         // 編集モード: 既存の判定を更新
         const index = state.editMode.index;
-        const currentCategory = state.judges[index].category || null;
-        state.judges[index] = { name: name, roll: roll, stat: stat, category: currentCategory };
+        state.judges[index] = { name: name, roll: roll, stat: stat, category };
         showToast('判定を更新しました', 'success');
     } else {
         // 追加モード: 新規判定を追加
-        state.judges.push({ name: name, roll: roll, stat: stat, category: null });
+        state.judges.push({ name: name, roll: roll, stat: stat, category });
     }
     
     resetJudgeForm();
@@ -1610,7 +1659,9 @@ function addAttack() {
     const roll = document.getElementById('attackRoll').value.trim();
     const selectedStats = Array.from(document.getElementById('attackStat').selectedOptions).map(opt => opt.value).filter(v => v !== 'none');
     const stat = selectedStats.length > 0 ? selectedStats.join('+') : '';
-    
+    const categorySelect = document.getElementById('attackCategorySelect');
+    const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
+
     if (!name || !roll) {
         showToast('攻撃名と攻撃ロールを入力してください', 'error');
         return;
@@ -1619,12 +1670,11 @@ function addAttack() {
     if (state.editMode.active && state.editMode.type === 'attack') {
         // 編集モード: 既存の攻撃を更新
         const index = state.editMode.index;
-        const currentCategory = state.attacks[index].category || null;
-        state.attacks[index] = { name: name, roll: roll, stat: stat, category: currentCategory };
+        state.attacks[index] = { name: name, roll: roll, stat: stat, category };
         showToast('攻撃を更新しました', 'success');
     } else {
         // 追加モード: 新規攻撃を追加
-        state.attacks.push({ name: name, roll: roll, stat: stat, category: null });
+        state.attacks.push({ name: name, roll: roll, stat: stat, category });
     }
     
     resetAttackForm();
