@@ -274,19 +274,21 @@ function loadData() {
         if (saved) {
             const data = JSON.parse(saved);
             state.stats = Array.isArray(data.stats) ? data.stats : [];
-            state.buffs = Array.isArray(data.buffs) ? data.buffs : [];
+            state.buffs = Array.isArray(data.buffs) ? data.buffs : getDefaultBuffs();
             state.buffCategories = Array.isArray(data.buffCategories) ? data.buffCategories : [];
             state.judges = Array.isArray(data.judges) ? data.judges : getDefaultJudges();
             state.judgeCategories = Array.isArray(data.judgeCategories) ? data.judgeCategories : [];
             state.attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
             state.attackCategories = Array.isArray(data.attackCategories) ? data.attackCategories : [];
         } else {
+            state.buffs = getDefaultBuffs();
             state.judges = getDefaultJudges();
             state.attacks = getDefaultAttacks();
         }
     } catch (e) {
         console.error('データの読み込みに失敗:', e);
         showToast('データの読み込みに失敗しました', 'error');
+        state.buffs = getDefaultBuffs();
         state.judges = getDefaultJudges();
         state.attacks = getDefaultAttacks();
     }
@@ -301,6 +303,14 @@ function loadData() {
     updateStatSelects();
     updateBuffTargetDropdown();
 }
+
+function getDefaultBuffs() {
+    return [
+        { name: 'キャッツアイ', description: '命中UP', effect: '+1', targets: ['judge:命中(武器A)　SAMPLE'], turn: '3', originalTurn: 3, color: '#0079FF', category: null, active: true },
+        { name: 'オーバーパワー', description: 'ダメージUP', effect: '+3', targets: ['attack:all-attack'], color: '#F7821B', category: null, active: true }
+    ];
+}
+
 
 function getDefaultJudges() {
     return [
