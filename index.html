@@ -17,12 +17,11 @@
 :root {
     /* カラーパレット */
     --primary-color: #2d2d2e;
-    --add-color: #4769b3;
-    --add-hover: #3B5796;
+    --add-color: #5884e4;
     --secondary-color: #689F38;
     --optional-color: #eba40a;
     --danger-color: #ff6b6b;
-    --bg-light: #0e438c;
+    --bg-light: #728092;
     --bg-gray: #f0f0f0;
     
     /* ボーダーカラー */
@@ -80,11 +79,10 @@ body {
 
 .context-menu {
     position: absolute;
-    min-width: 180px;
-    background: white;
-    border: 1px solid var(--border-color-light);
+    min-width: 160px;
+    background: rgba(0,0,0,0.9);
     box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-    border-radius: var(--border-radius-lg);
+    border-radius: var(--border-radius);
     padding: 4px 0;
     z-index: 1200;
 }
@@ -100,12 +98,12 @@ body {
     background: transparent;
     border: none;
     font-size: var(--font-size-md);
-    color: var(--text-color);
+    color: whitesmoke;
     cursor: pointer;
 }
 
 .context-menu-item:hover {
-    background: var(--border-color-light);
+    background: rgba(100,100,100,0.8);
 }
 
 .context-menu-separator {
@@ -150,7 +148,7 @@ p {
 .content {
     display: flex;
     flex-wrap: wrap;
-    margin-top: 60px;
+    margin-top: 40px;
     gap: var(--spacing-sm);
 }
 
@@ -177,7 +175,7 @@ header {
     justify-content: space-between;
     position: fixed;
     width: 100%;
-    height: 60px;
+    height: 40px;
     background: var(--primary-color);
     z-index: 1000;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -185,7 +183,7 @@ header {
 
 /* ロゴエリア */
 .logo {
-    margin-top: -8px;
+    margin-top: -4px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -214,6 +212,7 @@ header {
     width: 50%;
     max-width: 300px;
     min-width: 120px;
+    height: stretch;
     justify-content: flex-end;
     color: whitesmoke;
 }
@@ -224,7 +223,7 @@ header {
     align-items: center;
     justify-content: center;
     width: stretch;
-    height: 60px;
+    height: stretch;
     border-left: 2px solid rgba(245,245,245,0.3);
     color: whitesmoke;
     cursor: pointer;
@@ -443,6 +442,9 @@ input[type="number"] {
 .buff-control {
     display: flex;
     justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
     padding-top: 12px;
     border-top: 2px solid var(--border-color-dark);
 }
@@ -466,18 +468,30 @@ input[type="number"] {
     filter: brightness(90%);
 }
 
+.turn-btn:hover .tooltip {
+    opacity: 1;
+    align-items: normal;
+    bottom: 100%;
+    left: 0px;
+    transform: translateX(-10px);
+}
+
 /* トグルボタン（ON/OFF切り替え） */
 .toggle-btn {
-    display: flex;
     width: 48px;
     height: 24px;
     border-radius: 12px;
     border: none;
     cursor: pointer;
-    transition: background 0.2s;
-    flex-shrink: 0;
     box-shadow: inset 0 2px rgba(0,0,2,0.1);
     align-items: center;
+}
+
+@container (max-width: 140px) {
+  .toggle-btn {
+    position: absolute;
+    align-self: center;
+  }
 }
 
 .toggle-btn.active {
@@ -501,23 +515,6 @@ input[type="number"] {
     transform: translateX(24px);
 }
 
-/* 削除・編集ボタン */
-.remove-btn, .edit-btn, .copy-item-btn {
-    background: rgba(0,0,0,0.1);
-    color: inherit;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 8px;
-    cursor: pointer;
-    font-size: 12px;
-    flex-shrink: 0;
-    transition: background 0.2s;
-}
-
-.remove-btn:hover, .edit-btn:hover, .copy-item-btn:hover {
-    background: rgba(0,0,0,0.2);
-}
-
 /* コピーボタン */
 .copy-btn {
     position: absolute;
@@ -533,7 +530,8 @@ input[type="number"] {
 }
 
 .copy-btn:hover {
-    background: var(--add-hover);
+    filter: saturate(500%);
+    filter: brightness(90%);
 }
 
 .copy-btn.copied {
@@ -552,7 +550,7 @@ input[type="number"] {
     padding: 4px;
     height: 240px;
     min-height: 100px;
-    background: var(--border-color);
+    background: rgba(0,0,0,0.1);;
     border-radius: 4px;
     outline: 1px solid var(--border-color);
     resize: vertical;
@@ -580,24 +578,38 @@ input[type="number"] {
     -moz-appearance: none;
     width: 32px;
     height: 32px;
-    background: #f8f9fa;
+    background: var(--bg-gray);
     outline: 1px solid var(--border-color-dark);
-}
-
-.itemindex option {
     color: var(--text-color);
 }
         
 .itemindex > span {
     position: absolute;
-
     z-index: 1;
-    margin-top: 2px;
+    top: 0px;
     font-size: 32px;
     color: var(--text-secondary);
     pointer-events: none;
 }
 
+.itemindex:hover .tooltip {
+    bottom: 32px;
+    left: -40px;
+    background: var(--primary-color);
+    opacity: 1;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.itemindex:hover .tooltip::before {
+    content: "";
+    position: absolute;
+    border: 10px solid transparent;
+    border-bottom-color: rgba(0,0,0,0.8);
+    top: 8px;
+    left: 46px;
+    transform: rotate(-180deg);
+    transform-origin: bottom center;
+}
 
 /* カテゴリ */
 .category-header {
@@ -611,9 +623,17 @@ input[type="number"] {
     border-radius: 2px;
     font-size: 16px;
     font-weight: 600;
-    transition: all 0.2s;
+    transition: all 0.1s;
     position: relative;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.category-header.dragging {
+    opacity: 30% !important;
+    background: none !important;
+    outline: 1px solid var(--add-color) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    cursor: grabbing;
 }
 
 .category-header.material-symbols-rounded {
@@ -645,7 +665,7 @@ input[type="number"] {
     background: #f8f9fa;
     border-radius: 4px;
     font-size: 14px;
-    transition: all 0.2s;
+    transition: all 0.1s;
     position: relative;
     box-shadow: 0 1px rgba(0,0,0,0.3);
 }
@@ -681,7 +701,7 @@ input[type="number"] {
     align-items: normal;
     bottom: 100%;
     left: 0px;
-    transform: translateX(50px);
+    transform: translateX(-10px);
 }
 
 .item.selected {
@@ -729,6 +749,7 @@ input[type="number"] {
 .buff-item {
     position: relative;
     cursor: grab;
+    container-type: inline-size;
 }
 
 .buff-item:not(.active) {
@@ -740,8 +761,6 @@ input[type="number"] {
     opacity: 1;
     filter: none;
 }
-
-
 
 .buff-item.dragging .tooltip {
     display: none !important;
@@ -896,8 +915,8 @@ input[type="number"] {
 
 /* ヘルプ */
 .btn--help {
-    position: absolute;
-    right: 12px;
+    position: fixed;
+    right: 24px;
     background: var(--secondary-color);
 }
 
@@ -923,7 +942,7 @@ input[type="number"] {
     display: none;
 }
 
-.section-body:has(.btn--help input:checked) .add-area .note {
+.section-body:has(.btn--help input:checked) .m-8 .note {
      display: block;
  }
 
@@ -940,6 +959,7 @@ input[type="number"] {
     margin: 12px;
     font-size: var(--font-size-sm);
     color: var(--text-color);
+        cursor: pointer;
 }
 
 .copyright.summary {
@@ -953,10 +973,6 @@ input[type="number"] {
     transition: transform .25s;
 }
 
-.copyright summary:hover {
-    color: var(--add-hover);
-    cursor: pointer;
-}
 
 
 /* ========================================
@@ -991,7 +1007,6 @@ input[type="number"] {
     <header>
         <div class="logo">
             <div class="title">BUFCON</div>
-            <div class="subtitle">TRPG戦闘サポートツール</div>
         </div>
         <div class="header-menu">
             <button class="header-menu-item" style="anchor-name: --save" command="show-modal" commandfor="DataOption">
@@ -1075,9 +1090,14 @@ input[type="number"] {
                     <div class="buff-control" full-width>
                         <button class="turn-btn" id="turnProgressBtn">
                             <span class="material-symbols-rounded">skip_next</span>ターン経過</button>
-                        <label class="itemindex">
-                            <span class="material-symbols-rounded" style="padding-bottom: 8px;">bookmark</span>
-                            <select class="add-btn" id="buffItemIndex"></select>
+                        <button class="turn-btn" style="anchor-name: --reset; padding: 6px; background: var(--danger-color);" id="turnResetBtn">
+                            <div class="tooltip" style="--target: --reset">すべてのターンをリセット</div>
+                            <span class="material-symbols-rounded">replay</span></button>
+                        <label class="itemindex anchor-name: --bookmark;">
+                            <div class="tooltip" style="--target: --bookmark">カテゴリへ移動</div>
+                            <span class="material-symbols-rounded">bookmark</span>
+                            <select class="add-btn" id="buffItemIndex">
+                            </select>
                         </label>
                     </div>
                     <div class="item-list" id="buffList">
@@ -1109,17 +1129,18 @@ input[type="number"] {
                                     <label for="buffTargetSelect" class="label-s">効果先を選択</label>
                                     <select id="buffTargetSelect" multiple size="1"></select>
                                 </div>
-                                <div class="note">効果先を選択しない場合、「効果先：なし」として登録されます。
+                                <div class="note">カテゴリを選択した場合、そのカテゴリに含まれるすべてのパッケージに適用します。<br>効果先を選択しない場合、「効果先：なし」として登録されます。
                                 </div>
                                 <div>
                                     <label for="buffDescription" class="label-s">効果</label>
                                     <input type="text" id="buffDescription" placeholder="説明">
                                 </div>
-                                <div class="note">効果の概要を記入します。>
+                                <div class="note">効果の概要を記入します。
                                 </div>
                                 <div>
                                     <label for="buffEffect" class="label-s">コマンド</label>
-                                    <input type="text" id="buffEffect" placeholder="例：+2,-1d6">
+                                    <input type="text" id="buffEffect" placeholder="例：+2,-1d6,{{ダイスボーナス}}=+1">
+                                    <buton class="add-btn" style="background: var(--text-secondary);" onclick="insertText('{{NAME}}=')">{{ }}=</button>
                                 </div>
                                 <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。
                                 </div>
@@ -1174,7 +1195,8 @@ input[type="number"] {
                         <span>一括追加</span>
                     </div>
                         <p class="small-text">形式：バフ名|効果先1,効果先2|説明|効果|ターン|カラーコード<br>バフ名と効果先以外は省略可</p>
-                        <p class="small-text">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。カテゴリ指定の効果先は「&gt;&gt;カテゴリ名」と記述</p>
+                        <p class="small-text">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
+
                     <div class="add-area fd-cl m-8" id="bulkAddArea">
                         <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
                         <div>
@@ -1198,7 +1220,8 @@ input[type="number"] {
                         判定パッケージを追加
                     </button>
                     <div class="buff-control" full-width>
-                        <label class="itemindex">
+                        <label class="itemindex anchor-name: --bookmark;">
+                            <div class="tooltip" style="--target: --bookmark">カテゴリへ移動</div>
                             <span class="material-symbols-rounded">bookmark</span>
                             <select class="add-btn" id="judgeItemIndex"></select>
                         </label>
@@ -1256,24 +1279,22 @@ input[type="number"] {
                                     <label for="judgeRoll" class="label-s">判定ロール</label>
                                     <input type="text" id="judgeRoll" placeholder="例：1d20,2d6">
                                 </div>
-                                <div class="note">判定の基本となるダイスロールを記入します。システムごとの独自のコマンドも入力できます。
-                                </div>
-                                <div class="note">代入記法：<br>{{NAME}}　*NAMEは任意の文字列<br>という記述で、{{NAME}}を指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。
-                                </div>
+                                <div class="note">判定の基本となるダイスロールを記入します。システムごとの独自のコマンドも入力できます。</div>
+                                <div class="note">代入記法：<br>{{NAME}}　*NAMEは任意の文字列<br>という記述で、{{NAME}}を指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。</div>
                                 <div>
                                     <label for="judgeStat" class="label-s">参照ステータス</label>
                                     <select id="judgeStat" multiple size="1">
                                         <option>なし</option>
                                     </select>
                                 </div>
-                                <div class="note">複数選択可
-                                </div>
+                                <div class="note">複数選択可</div>
                                 <div>
                                     <label for="judgeCategorySelect" class="label-s">カテゴリを選択</label>
                                     <select id="judgeCategorySelect" size="1">
                                         <option value="none">なし</option>
                                     </select>
                                 </div>
+                                <div class="note">バフの効果先がカテゴリを指定している場合、カテゴリ内のすべての判定に適用されます。</div>
                             <button class="add-btn" id="addJudgeBtn">✚</button>
                         </div>
                         </div>
@@ -1315,7 +1336,8 @@ input[type="number"] {
                         攻撃パッケージを追加
                     </button>
                     <div class="buff-control" full-width>
-                        <label class="itemindex">
+                        <label class="itemindex anchor-name: --bookmark;">
+                            <div class="tooltip" style="--target: --bookmark">カテゴリへ移動</div>
                             <span class="material-symbols-rounded">bookmark</span>
                             <select class="add-btn" id="attackItemIndex"></select>
                         </label>
@@ -1374,15 +1396,17 @@ input[type="number"] {
                                         <option value="none">なし</option>
                                     </select>
                                 </div>
-                            <button class="add-btn" id="addAttackBtn">✚</button>
+                                <div class="note">バフの効果先がカテゴリを指定している場合、カテゴリ内のすべての攻撃に適用されます。</div>
+                            <button class="add-btn" id="addAttackBtn" full-width>✚</button>
                         </div>
                         </div>
-                        <div　class="line-udr">
+                        <div class="line-udr">
                             <label for="attackCategoryInput" class="label-s">新規カテゴリ追加</label>
                             <div style="display: flex; gap: 8px;">
                                 <input type="text" id="attackCategoryInput" placeholder="例：近接、魔法" aria-label="攻撃カテゴリの新規追加">
                                 <button class="add-btn" id="addAttackCategoryBtn" title="カテゴリを追加">✚</button>
                             </div>
+                        </div>
                         <div class="m-8">
                             <div class="label-L">
                                 <span class="material-symbols-rounded">clear_all</span>

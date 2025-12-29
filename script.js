@@ -12,6 +12,8 @@ const state = {
     draggedIndex: null,
     draggedType: null,
     draggedCategory: null,
+    draggedCategoryType: null,
+    draggedCategoryName: null,
     selectedBuffTargets: [],
     editMode: {
         active: false,
@@ -657,7 +659,7 @@ function updateCategoryIndexDropdown(type) {
         }
     });
 
-    const options = ['<option　disabled value="">カテゴリに移動</option>'];
+    const options = ['<option disabled></option>'];
     uniqueCategories.forEach(category => {
         const label = category === 'none' ? '未分類' : category;
         options.push(`<option value="${escapeHtml(category)}">${escapeHtml(label)}</option>`);
@@ -928,6 +930,11 @@ function resetBuffForm() {
     updateBuffTargetDropdown();
 }
 
+function insertText(text) {
+    const textbox = document.getElementById('buffEffect');
+            textbox.value = textbox.value + text;
+}
+
 function addBuff() {
     const name = document.getElementById('buffName').value.trim();
     const description = document.getElementById('buffDescription').value.trim();
@@ -937,7 +944,7 @@ function addBuff() {
     const color = validateColor(document.getElementById('buffColor').value);
     const categorySelect = document.getElementById('buffCategorySelect');
     const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
-    
+
     if (!name) {
         showToast('バフ名を入力してください', 'error');
         return;
@@ -1209,10 +1216,32 @@ function removeBuff(index) {
     saveData();
 }
 
+function resetBuffsToMaxTurns() {
+    let changed = false;
+
+    state.buffs.forEach(buff => {
+        if (typeof buff.originalTurn === 'number') {
+            buff.turn = buff.originalTurn;
+            buff.active = true;
+            changed = true;
+        }
+    });
+
+    if (changed) {
+        renderBuffs();
+        updatePackageOutput('judge');
+        updatePackageOutput('attack');
+        saveData();
+        showToast('すべてのバフを最大ターンにリセットしました', 'success');
+    } else {
+        showToast('ターンが設定されたバフがありません', 'error');
+    }
+}
+
 function progressTurn() {
     let changed = false;
     state.buffs.forEach(buff => {
-        if (buff.turn && buff.turn > 0) {
+        if (buff.active && buff.turn && buff.turn > 0) {
             buff.turn--;
             changed = true;
             if (buff.turn === 0) {
@@ -1228,7 +1257,7 @@ function progressTurn() {
         saveData();
         showToast('ターンを経過させました', 'success');
     } else {
-        showToast('ターンが設定されたバフがありません', 'error');
+        showToast('アクティブなバフにターンが設定されていません', 'error');
     }
 }
 
@@ -1292,9 +1321,11 @@ function attachBuffEvents() {
     });
 
     buffList.querySelectorAll('.category-header').forEach(header => {
-        header.addEventListener('dragover', handleCategoryDragOver);
+        header.addEventListener('dragstart', (e) => handleCategoryHeaderDragStart(e, 'buff'));
+        header.addEventListener('dragover', (e) => handleCategoryDragOver(e, 'buff'));
         header.addEventListener('dragleave', handleCategoryDragLeave);
-        header.addEventListener('drop', handleCategoryDrop);
+        header.addEventListener('drop', (e) => handleCategoryDrop(e, 'buff'));
+        header.addEventListener('dragend', handleCategoryHeaderDragEnd);
     });
     
     buffList.querySelectorAll('[data-toggle-type="buff"]').forEach(btn => {
@@ -1399,8 +1430,30 @@ function handleDrop(e, targetIndex, type) {
     saveData();
 }
 
-function handleCategoryDragOver(e) {
-    if (!['buff', 'judge', 'attack'].includes(state.draggedType)) return;
+function handleCategoryHeaderDragStart(e, type) {
+    const categoryName = e.currentTarget.getAttribute('data-category');
+    if (!categoryName || categoryName === 'none') return;
+
+    state.draggedCategoryType = type;
+    state.draggedCategoryName = categoryName;
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.classList.add('dragging');
+}
+
+function handleCategoryHeaderDragEnd(e) {
+    document.querySelectorAll('.category-header.dragging')
+        .forEach(header => header.classList.remove('dragging'));
+    document.querySelectorAll('.category-header.category-drag-over')
+        .forEach(header => header.classList.remove('category-drag-over'));
+    state.draggedCategoryType = null;
+    state.draggedCategoryName = null;
+}
+
+function handleCategoryDragOver(e, type) {
+    const isItemDrag = state.draggedType === type;
+    const isCategoryDrag = state.draggedCategoryType === type;
+    if (!isItemDrag && !isCategoryDrag) return;
 
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -1411,16 +1464,57 @@ function handleCategoryDragLeave(e) {
     e.currentTarget.classList.remove('category-drag-over');
 }
 
-function handleCategoryDrop(e) {
-    if (!['buff', 'judge', 'attack'].includes(state.draggedType) || state.draggedIndex === null) return;
+function reorderCategory(type, targetCategory, dropAfter) {
+    const categories = getCategories(type);
+    if (!categories) return false;
 
+    const from = categories.indexOf(state.draggedCategoryName);
+    const to = categories.indexOf(targetCategory);
+
+    if (from === -1 || to === -1 || from === to) return false;
+
+    const name = categories.splice(from, 1)[0];
+    let insertIndex = to;
+
+    if (dropAfter) insertIndex += 1;
+    if (from < insertIndex) insertIndex -= 1;
+
+    categories.splice(insertIndex, 0, name);
+    return true;
+}
+
+function handleCategoryDrop(e, type) {
     e.preventDefault();
     e.stopPropagation();
 
     const categoryKey = e.currentTarget.getAttribute('data-category') || 'none';
+
+    const isCategoryDrag = state.draggedCategoryType === type && state.draggedCategoryName;
+    if (isCategoryDrag) {
+        if (categoryKey !== 'none') {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const dropAfter = (e.clientY - rect.top) > rect.height / 2;
+            const changed = reorderCategory(type, categoryKey, dropAfter);
+
+            if (changed) {
+                if (type === 'buff') renderBuffs();
+                else renderPackage(type);
+                saveData();
+            }
+        }
+
+        handleCategoryHeaderDragEnd(e);
+        return;
+    }
+
+    if (state.draggedType !== type || state.draggedIndex === null) {
+        e.currentTarget.classList.remove('category-drag-over');
+        return;
+    }
+
     const targetCategory = categoryKey === 'none' ? null : categoryKey;
 
-    const collection = getCollection(state.draggedType);
+    const collection = getCollection(type);
     const item = collection ? collection[state.draggedIndex] : null;
 
     if (!collection || !item) {
@@ -1431,8 +1525,8 @@ function handleCategoryDrop(e) {
     if ((item.category || null) !== targetCategory) {
         item.category = targetCategory;
 
-        if (state.draggedType === 'buff') renderBuffs();
-        else renderPackage(state.draggedType);
+        if (type === 'buff') renderBuffs();
+        else renderPackage(type);
 
         updatePackageOutput('judge');
         updatePackageOutput('attack');
@@ -1442,6 +1536,8 @@ function handleCategoryDrop(e) {
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
+    state.draggedCategoryType = null;
+    state.draggedCategoryName = null;
     e.currentTarget.classList.remove('category-drag-over');
 }
 
@@ -1493,9 +1589,13 @@ function handleDragEnd(e) {
     e.target.classList.remove('dragging');
     document.querySelectorAll('.category-header.category-drag-over')
         .forEach(header => header.classList.remove('category-drag-over'));
+    document.querySelectorAll('.category-header.dragging')
+        .forEach(header => header.classList.remove('dragging'));
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
+    state.draggedCategoryType = null;
+    state.draggedCategoryName = null;
 }
 
 // ========================================
@@ -1620,12 +1720,12 @@ function addJudge() {
     }
     
     if (state.editMode.active && state.editMode.type === 'judge') {
-        // 編集モード: 既存の判定を更新
+        // 編集モード
         const index = state.editMode.index;
         state.judges[index] = { name: name, roll: roll, stat: stat, category };
         showToast('判定を更新しました', 'success');
     } else {
-        // 追加モード: 新規判定を追加
+        // 追加モード
         state.judges.push({ name: name, roll: roll, stat: stat, category });
     }
     
@@ -1661,12 +1761,12 @@ function addAttack() {
     }
     
     if (state.editMode.active && state.editMode.type === 'attack') {
-        // 編集モード: 既存の攻撃を更新
+        // 編集モード
         const index = state.editMode.index;
         state.attacks[index] = { name: name, roll: roll, stat: stat, category };
         showToast('攻撃を更新しました', 'success');
     } else {
-        // 追加モード: 新規攻撃を追加
+        // 追加モード
         state.attacks.push({ name: name, roll: roll, stat: stat, category });
     }
     
@@ -1794,9 +1894,11 @@ function attachItemEvents(type) {
     });
 
     listElement.querySelectorAll('.category-header').forEach(header => {
-        header.addEventListener('dragover', handleCategoryDragOver);
+        header.addEventListener('dragstart', (e) => handleCategoryHeaderDragStart(e, type));
+        header.addEventListener('dragover', (e) => handleCategoryDragOver(e, type));
         header.addEventListener('dragleave', handleCategoryDragLeave);
-        header.addEventListener('drop', handleCategoryDrop);
+        header.addEventListener('drop', (e) => handleCategoryDrop(e, type));
+        header.addEventListener('dragend', handleCategoryHeaderDragEnd);
     });
     
     listElement.querySelectorAll(`[data-edit-type="${type}"]`).forEach(btn => {
@@ -2029,6 +2131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('addBuffBtn')?.addEventListener('click', addBuff);
     document.getElementById('addBuffCategoryBtn')?.addEventListener('click', () => addCategory('buff', 'buffCategoryInput'));
     document.getElementById('turnProgressBtn')?.addEventListener('click', progressTurn);
+    document.getElementById('turnResetBtn')?.addEventListener('click', resetBuffsToMaxTurns);
     document.getElementById('buffItemIndex')?.addEventListener('change', (e) => handleCategoryIndexChange('buff', e));
 
     const buffModal = document.getElementById('buffaddmodal');
