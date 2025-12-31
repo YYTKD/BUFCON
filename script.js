@@ -188,7 +188,7 @@ function showToast(message, type = 'info') {
         top: ${top};
         right: 20px;
         padding: 12px 20px;
-        background: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#4dabf7'};
+        background: ${type === 'error' ? '#d9376e' : type === 'success' ? '#48c229' : '#5c59ff'};
         color: white;
         border-radius: 6px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
@@ -306,7 +306,7 @@ function loadData() {
 
 function getDefaultBuffs() {
     return [
-        { name: 'キャッツアイ', description: '命中UP', effect: '+1', targets: ['judge:命中(武器A)　SAMPLE'], turn: '3', originalTurn: 3, color: '#0079FF', category: null, active: true },
+        { name: 'キャッツアイ', description: '命中UP', effect: '+1', targets: ['judge:命中(武器A)　SAMPLE'], turn: '3', originalTurn: 3, color: '#F8F9FA', category: null, active: true },
         { name: 'オーバーパワー', description: 'ダメージUP', effect: '+3', targets: ['attack:all-attack'], color: '#F7821B', category: null, active: true }
     ];
 }
@@ -573,7 +573,7 @@ function renderStats() {
     list.innerHTML = state.stats.map((stat, i) => `
         <div class="stat-tag">
             ${escapeHtml(stat.name)}
-            <button onclick="removeStat(${i})">×</button>
+            <button class="material-symbols-rounded" onclick="removeStat(${i})">disabled_by_default</button>
         </div>
     `).join('');
 }
@@ -741,7 +741,7 @@ function renderBuffItems(entries = []) {
                  draggable="true"
                  data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}">
                 <div class="tooltip" style="--target: --no${index};">${escapeHtml(tooltipText)}</div>
-                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity:0.6;">drag_indicator</span>
+                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: 12px; opacity:0.6;">drag_indicator</span>
                 <span class="item-param">
                     <span class="item-name">${escapeHtml(item.name)}</span>
                     ${item.description ? `<span class="item-description">${escapeHtml(item.description)}</span>` : ''}
@@ -761,7 +761,7 @@ function renderPackageItems(type, entries = []) {
 
     return entries.map(({ item, index }) => `
         <div class="item clickable draggable" data-index="${index}" data-type="${type}" data-category="${escapeHtml(item.category || 'none')}" draggable="true">
-            <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity: 0.6;">drag_indicator</span>
+            <span class="material-symbols-rounded" style="position: relative; left: -8px; width: 12px; opacity: 0.6;">drag_indicator</span>
             <span class="item-param">
                 <span class="item-name">${escapeHtml(item.name)}</span>
                 <span class="item-detail">${escapeHtml(item.roll)}</span>
@@ -921,7 +921,7 @@ function openBuffModal(editIndex = null) {
         // 追加モード
         state.editMode = { active: false, type: null, index: null };
         modalTitle.textContent = 'バフ追加';
-        addBtn.textContent = '✚';
+        addBtn.textContent = '追加';
         bulkAddSection.style.display = 'block';
         resetBuffForm();
     }
@@ -934,7 +934,7 @@ function resetBuffForm() {
     document.getElementById('buffDescription').value = '';
     document.getElementById('buffEffect').value = '';
     document.getElementById('buffTurn').value = '';
-    document.getElementById('buffColor').value = '#0079FF';
+    document.getElementById('buffColor').value = '#F8F9FA';
     document.getElementById('buffCategorySelect').value = 'none';
     state.selectedBuffTargets = [];
     updateBuffTargetDropdown();
@@ -1288,19 +1288,21 @@ function renderBuffs() {
     const sections = [];
 
     sections.push(`
-        <div class="category-block uncategorized" data-category="none">
-            <div class="category-header" data-category="none">ー</div>
+        <details class="category-block uncategorized" data-category="none" open>
+            <summary class="category-header" data-category="none">
+                <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
+            </summary>
             <div class="category-body" data-category="none">
                 ${renderBuffItems(categoryMap['none'])}
             </div>
-        </div>
+        </details>
     `);
 
     state.buffCategories.forEach(name => {
         sections.push(`
             <details class="category-block" open data-category="${escapeHtml(name)}">
                 <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
-                    <span class="material-symbols-rounded" style="margin-right: 4px;">menu</span>${escapeHtml(name)}
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span><span style="word-break: break-all;">${escapeHtml(name)}</span>
                 </summary>
                 <div class="category-body" data-category="${escapeHtml(name)}">
                     ${renderBuffItems(categoryMap[name])}
@@ -1646,7 +1648,7 @@ function openJudgeModal(editIndex = null) {
         // 追加モード
         state.editMode = { active: false, type: null, index: null };
         modalTitle.textContent = '判定パッケージ追加';
-        addBtn.textContent = '✚';
+        addBtn.textContent = '追加';
         bulkAddSection.style.display = 'block';
         resetJudgeForm();
     }
@@ -1698,7 +1700,7 @@ function openAttackModal(editIndex = null) {
         // 追加モード
         state.editMode = { active: false, type: null, index: null };
         modalTitle.textContent = '攻撃パッケージ追加';
-        addBtn.textContent = '✚';
+        addBtn.textContent = '追加';
         bulkAddSection.style.display = 'block';
         resetAttackForm();
     }
@@ -1841,19 +1843,21 @@ function renderPackage(type) {
     const sections = [];
 
     sections.push(`
-        <div class="category-block uncategorized" data-category="none">
-            <div class="category-header" data-category="none">ー</div>
+        <details class="category-block uncategorized" data-category="none" open>
+            <summary class="category-header" data-category="none">
+                <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
+            </summary>
             <div class="category-body" data-category="none">
                 ${renderPackageItems(type, categoryMap['none'])}
             </div>
-        </div>
+        </details>
     `);
 
     categories.forEach(name => {
         sections.push(`
             <details class="category-block" open data-category="${escapeHtml(name)}">
                 <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
-                    <span class="material-symbols-rounded" style="margin-right: 4px;">menu</span>${escapeHtml(name)}
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span><span style="word-break: break-all;">${escapeHtml(name)}</span>
                 </summary>
                 <div class="category-body" data-category="${escapeHtml(name)}">
                     ${renderPackageItems(type, categoryMap[name])}
