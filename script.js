@@ -129,6 +129,19 @@ function openItemContextMenu(event, type, index) {
     showContextMenu(event.pageX, event.pageY, actions);
 }
 
+function openCategoryContextMenu(event, type, categoryName) {
+    event.preventDefault();
+
+    const actions = [
+        { label: '編集', onClick: () => editCategory(type, categoryName) },
+        { label: 'カテゴリ名をコピー', onClick: () => copyCategoryName(categoryName) },
+        { label: '削除', onClick: () => removeCategory(type, categoryName) }
+    ];
+
+    hideContextMenu();
+    showContextMenu(event.pageX, event.pageY, actions);
+}
+
 function getCategories(type) {
     if (type === 'buff') return state.buffCategories;
     if (type === 'judge') return state.judgeCategories;
@@ -191,6 +204,7 @@ function showToast(message, type = 'info') {
         background: ${type === 'error' ? '#d9376e' : type === 'success' ? '#48c229' : '#5c59ff'};
         color: white;
         border-radius: 6px;
+        border: 2px solid var(--primary-color-1);
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         z-index: 10000;
         animation: slideIn 0.3s ease-out;
@@ -628,6 +642,103 @@ function addCategory(type, inputId) {
     updateBuffTargetDropdown();
     saveData();
 }
+
+function replaceCategoryOnItems(type, from, to) {
+    const items = getCollection(type) || [];
+    items.forEach(item => {
+        if (item.category === from) {
+            item.category = to;
+        }
+    });
+}
+
+function replaceBuffTargetsForCategory(type, from, to) {
+    if (type !== 'judge' && type !== 'attack') return;
+
+    const prefix = type === 'judge' ? 'judge-category:' : 'attack-category:';
+    const fromKey = prefix + from;
+    const toKey = to ? prefix + to : null;
+
+    state.buffs.forEach(buff => {
+        buff.targets = buff.targets
+            .map(target => target === fromKey ? toKey : target)
+            .filter(Boolean);
+    });
+
+    if (Array.isArray(state.selectedBuffTargets)) {
+        state.selectedBuffTargets = state.selectedBuffTargets
+            .map(target => target === fromKey ? toKey : target)
+            .filter(Boolean);
+    }
+}
+
+function refreshCategoryViews(type) {
+    if (type === 'buff') {
+        renderBuffs();
+        updateBuffCategorySelect();
+    } else if (type === 'judge') {
+        renderPackage('judge');
+        updateJudgeCategorySelect();
+    } else if (type === 'attack') {
+        renderPackage('attack');
+        updateAttackCategorySelect();
+    }
+
+    updateBuffTargetDropdown();
+    updatePackageOutput('judge');
+    updatePackageOutput('attack');
+    saveData();
+}
+
+function editCategory(type, oldName) {
+    const categories = getCategories(type);
+    if (!categories || !categories.includes(oldName)) return;
+
+    const newName = prompt('カテゴリ名を編集', oldName);
+    if (newName === null) return;
+
+    const trimmed = newName.trim();
+    if (!trimmed) {
+        showToast('カテゴリ名を入力してください', 'error');
+        return;
+    }
+
+    if (categories.includes(trimmed)) {
+        showToast('同名のカテゴリが既に存在します', 'error');
+        return;
+    }
+
+    const idx = categories.indexOf(oldName);
+    categories[idx] = trimmed;
+
+    replaceCategoryOnItems(type, oldName, trimmed);
+    replaceBuffTargetsForCategory(type, oldName, trimmed);
+    refreshCategoryViews(type);
+    showToast('カテゴリ名を変更しました', 'success');
+}
+
+function removeCategory(type, name) {
+    const categories = getCategories(type);
+    if (!categories || !categories.includes(name)) return;
+
+    const confirmed = confirm(`カテゴリ「${name}」を削除しますか？`);
+    if (!confirmed) return;
+
+    categories.splice(categories.indexOf(name), 1);
+    replaceCategoryOnItems(type, name, null);
+    replaceBuffTargetsForCategory(type, name, null);
+    refreshCategoryViews(type);
+    showToast('カテゴリを削除しました', 'success');
+}
+
+function copyCategoryName(name) {
+    if (!name) return;
+
+    navigator.clipboard.writeText(name)
+        .then(() => showToast('カテゴリ名をコピーしました', 'success'))
+        .catch(() => showToast('コピーに失敗しました', 'error'));
+}
+
 
 function buildCategoryMap(type) {
     const map = { 'none': [] };
@@ -1338,6 +1449,10 @@ function attachBuffEvents() {
         header.addEventListener('dragleave', handleCategoryDragLeave);
         header.addEventListener('drop', (e) => handleCategoryDrop(e, 'buff'));
         header.addEventListener('dragend', handleCategoryHeaderDragEnd);
+        const categoryName = header.getAttribute('data-category');
+        if (categoryName && categoryName !== 'none') {
+            header.addEventListener('contextmenu', (e) => openCategoryContextMenu(e, 'buff', categoryName));
+        }
     });
     
     buffList.querySelectorAll('[data-toggle-type="buff"]').forEach(btn => {
@@ -1913,6 +2028,10 @@ function attachItemEvents(type) {
         header.addEventListener('dragleave', handleCategoryDragLeave);
         header.addEventListener('drop', (e) => handleCategoryDrop(e, type));
         header.addEventListener('dragend', handleCategoryHeaderDragEnd);
+        const categoryName = header.getAttribute('data-category');
+        if (categoryName && categoryName !== 'none') {
+            header.addEventListener('contextmenu', (e) => openCategoryContextMenu(e, type, categoryName));
+        }
     });
     
     listElement.querySelectorAll(`[data-edit-type="${type}"]`).forEach(btn => {

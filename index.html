@@ -31,6 +31,18 @@
 
 /*基本設定・デフォルト使用削除*/
 
+input[type="text"], 
+select,
+input[type="number"] {
+    padding: 6px 8px;
+    border: 1px solid var(--primary-color-3);
+    border-radius: 4px;
+    background: white;
+    font-size: 14px;
+    height: 40px;
+    width: 100%;
+}
+
 button {
     background-color: transparent;
     border: none;
@@ -88,11 +100,6 @@ body {
     height: 1px;
     background: var(--bg-color);
     margin: 4px 0;
-}
-
-p {
-  margin-left: 3em;
-  text-indent: -3em;
 }
 
 .material-symbols-rounded {
@@ -321,6 +328,7 @@ header {
     height: stretch;
     justify-content: flex-end;
     color: var(--secondary-color-1);
+    position-anchor: ;
 }
 
 .header-menu-item {
@@ -330,7 +338,6 @@ header {
     justify-content: center;
     width: stretch;
     height: stretch;
-    border-left: 2px solid var(--bg-color);
     color: var(--secondary-color-1);
     cursor: pointer;
     opacity: 1;
@@ -386,18 +393,20 @@ header {
     border-radius: 4px 4px 0 0;
     font-weight: 600;
     font-size: 18px;
-    outline: 1px solid var(--primary-color-3);
+    outline: 2px solid var(--primary-color-2);
     color: var(--primary-color-1);
     cursor: pointer;
     user-select: none;
     display: flex;
     justify-content: flex-start;
-    align-items: end;
+    align-items: center;
 }
 
 .section-header-m {
     position: fixed;
     width: calc(100% - 16px);
+    outline: 2px solid var(--primary-color-2);
+    anchor-name: --S-header;
 }
 input[type="radio"] {
     display: none;
@@ -410,7 +419,8 @@ input[type="radio"] {
     gap: 8px;
     padding: 12px;
     border-radius: 0 0 4px 4px;
-    outline: 1px solid var(--primary-color-3);
+    outline: 2px solid var(--primary-color-2);
+    margin-top: 2px;
     background: var(--bg-color);
     height: auto;
     transition:
@@ -426,7 +436,7 @@ input[type="radio"] {
 }
 
 dialog .section-body {
-    margin-top: 24px;
+    margin-top: 40px;
     width: 100%;
 }
 
@@ -472,22 +482,25 @@ dialog .section-body {
 /* 入力フォーム */
 .add-area {
     display: flex;
+    padding: 8px;
     gap: 8px;
-    flex-direction: column;
+    flex-wrap: wrap;
     padding-bottom: 12px;
-    border-bottom: 2px solid var(--primary-color-1-);
+    border: 2px solid var(--primary-color-3);
+    border-radius: 8px;
 }
 
-input[type="text"], 
-select,
-input[type="number"] {
-    padding: 6px 8px;
-    border: 1px solid var(--primary-color-3);
-    border-radius: 4px;
-    background: white;
-    font-size: 14px;
-    height: 40px;
-    width: 100%;
+.add-area > div {
+    flex-direction: column;
+	width: calc(50% - 4px);
+}
+
+.add-area label {
+    word-break: keep-all;
+}
+
+.add-area input {
+    min-width: 64px;
 }
 
 .add-area input:focus, 
@@ -502,8 +515,6 @@ input[type="number"] {
     width: 60px;
     cursor: pointer;
 }
-
-/* ファイルドロップ領域 */
 
 /* ラジオボタンオプション */
 .target-options {
@@ -545,6 +556,7 @@ input[type="number"] {
 }
 
 .radio-option:has(input:checked)  {
+    background: var(--p);
     outline: 2px solid var(--primary-color-1);
 }
 
@@ -554,6 +566,7 @@ input[type="number"] {
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+    container-type: inline-size;
 }
 
 .buff-control > *:not(div) {
@@ -684,7 +697,7 @@ input[type="number"] {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: var(--bg-color);
+    background: var(--secondary-color-1);
     border: none;
     color: var(--primary-color-1);
 }
@@ -695,6 +708,12 @@ input[type="number"] {
     font-size: 32px;
     color: var(--primary-color-1);
     pointer-events: none;
+}
+
+@container (259.8px < width < 300px) {
+  #judgeSection .itemindex {
+    margin-left: auto;
+  }
 }
 
 .itemindex:hover > span {
@@ -726,7 +745,7 @@ input[type="number"] {
     display: flex;
     align-items: center;
     padding: 2px 4px;
-    background: var(--bg-color);
+    background: var(--secondary-color-1);
     outline: 1px solid var(--primary-color-1);
     border-radius: 2px;
     font-size: 16px;
@@ -959,10 +978,16 @@ input[type="number"] {
 /* ヘルプ */
 .btn-help {
     position: fixed;
-    right: 20px;
+    right: calc(anchor(right) + 12px);
+    top: calc(anchor(bottom) + 8px);
     background: var(--secondary-color-1);
     height: 40px;
     width: 40px;
+    position-anchor: --S-header;
+}
+
+.btn-help:hover {
+    background: var(--pickup-color);
 }
 
 .btn-help span {
@@ -986,7 +1011,6 @@ input[type="number"] {
     border: 1px solid #ffc107;
     border-radius: 4px;
     padding: 8px;
-    margin-left: 32px;
     font-size: 12px;
     color: #856404;
     display: none;
@@ -1030,16 +1054,18 @@ input[type="number"] {
    ======================================== */
 
 .full-width { width: 100%; }
-.line-udr { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 2px solid var(--primary-color-1);}
+.harf-width { width: 50%; }
+.iine-area { border: 2px solid var(--primary-color-3); padding: 8px; border-radius: 8px; }
 .hidden { display: none; }
 .m-8 { margin: 8px 0; }
 .m-4 { margin: 4px 4; }
 .mb-12 { margin-bottom: 12px; }
 .pt-12 { padding-top: 12px; }
 .bt-top { border-top: 2px solid var(--primary-color-1); }
-.textarea-mono { width: 100%; padding: 8px; border: 1px solid var(--primary-color-1); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; }
+.textarea-mono { width: 100%; padding: 8px; border: 1px solid var(--primary-color-3); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; }
 .row-controls { display: flex; gap: 6px; margin-top: 6px; }
 .flex-1 { flex: 1; }
+.fd-rw { flex-direction: row; }
 .fd-cl { flex-direction: column; }
 .jc-end { justify-content: flex-end; }
 .pt-R {justify-items: flex-end;margin-left: auto;}
@@ -1084,7 +1110,7 @@ input[type="number"] {
                         <span class="material-symbols-rounded">checkbook</span>
                         <span class="section-header-title">データ管理</span>
                     </div>
-                    <div class="section-body">
+                    <div class="section-body" style="margin-top: 32px;">
                         <div class="mb-12">
                             <label class="label-s">クリップボードから貼り付けて読み込み:</label>
                                 <textarea id="importText" placeholder='.txtまたは.jsonファイルを直接ドロップしても読み込めます' class="textarea-mono" style="height:120px; flex: 3;"></textarea>
@@ -1120,7 +1146,7 @@ input[type="number"] {
                                     <label class="label-s">ステータス名 (,区切りで複数追加可)</label>
                                     <input type="text" id="statName" placeholder="変数名（筋力、STR、冒険者レベルなど）">
                                 </div>
-                            <span type="button" class="add-btn" id="addStatBtn">
+                            <span type="button" class="add-btn harf-width" id="addStatBtn">
                             <span>追加</span>
                             </span>
                     </div>
@@ -1177,6 +1203,7 @@ input[type="number"] {
                                     </label>
                             </div>
                             <div class="add-area">
+                            <div>
                                 <div>
                                     <label for="buffName" class="label-s">バフ名</label>
                                     <input type="text" id="buffName" placeholder="名前">
@@ -1206,29 +1233,30 @@ input[type="number"] {
                                 </div>
                                 <div class="note">代入記法は「,」で区切ることで、一つのバフから複数の場所へ代入を指示することができます。<br>通常の記法とも併用できます。<br>例：{{ダイスボーナス}}=+1,{{ダイスの種類}}=20,-2
                                 </div>
-                                <div>
-                                    <label for="buffTurn" class="label-s">ターン</label>
-                                    <input type="number" id="buffTurn" placeholder="数値">
-                                </div>
-                                <div class="note">効果時間がターンで決められている場合、効果の続くターン数を指定します。
-                                </div>
-                                <div>
-                                    <label for="buffColor" class="label-s">ラベルの色を選択</label>
-                                    <input type="color" id="buffColor" value="#0079FF" list="buffColor-list">
-                                    <datalist id="buffColor-list">
-                                        <option value="#0079FF"></option>
-                                        <option value="#953D96"></option>
-                                        <option value="#F64E9D"></option>
-                                        <option value="#DF383E"></option>
-                                        <option value="#F7821B"></option>
-                                        <option value="#FEC626"></option>
-                                        <option value="#62BA46"></option>
-                                        <option value="#F8F9FA"></option>
-                                    <option value="#141414"></option>
-                                    <option value="#595959"></option>
-                                </datalist>
-                                </div>
-                                <div class="note">その他からより詳細に色を指定できます。
+                                <div class="fd-rw">
+                                    <div style="width: 50%;">
+                                        <label for="buffTurn" class="label-s">ターン</label>
+                                        <input type="number" id="buffTurn" placeholder="数値">
+                                    </div>
+                                    <div class="note">効果時間がターンで決められている場合、効果の続くターン数を指定します。
+                                    </div>
+                                    <div style="width: 50%;">
+                                        <label for="buffColor" class="label-s">ラベルの色を選択</label>
+                                        <input type="color" id="buffColor" value="#0079FF" list="buffColor-list">
+                                        <datalist id="buffColor-list">
+                                            <option value="#0079FF"></option>
+                                            <option value="#953D96"></option>
+                                            <option value="#F64E9D"></option>
+                                            <option value="#DF383E"></option>
+                                            <option value="#F7821B"></option>
+                                            <option value="#FEC626"></option>
+                                            <option value="#62BA46"></option>
+                                            <option value="#F8F9FA"></option>
+                                        <option value="#141414"></option>
+                                        <option value="#595959"></option>
+                                        </datalist>
+                                    </div>
+                                    <div class="note">その他からより詳細に色を指定できます。</div>
                                 </div>
                                 <div>
                                     <label for="buffCategorySelect" class="label-s">カテゴリを選択</label>
@@ -1237,14 +1265,19 @@ input[type="number"] {
                                     </select>
                                 </div>
                                 <div class="note">カテゴリを指定すると、そのカテゴリに入った状態で登録されます。</div>
-                            <span type="button" class="add-btn" id="addBuffBtn">追加</span>
+                            </div>
+                                <div>
+                                    <label class="label-s">メモ欄</label>
+                                    <textarea id="buffMemo" class="textarea-mono" style="height: calc(100% - 20px);"></textarea>
+                                </div>
+                            <div type="button" class="add-btn" id="addBuffBtn">追加</div>
                         </div>
                     </div>
-                <div class="line-udr">
+                <div class="iine-area">
                     <label for="buffCategoryInput" class="label-s">新規カテゴリ追加</label>
-                    <div style="display: flex; gap: 8px;">
+                    <div style="display: flex; gap: 8px; flex-direction: column;">
                         <input type="text" id="buffCategoryInput" placeholder="例：魔法、装備" aria-label="バフカテゴリの新規追加">
-                        <span type="button" class="add-btn" id="addBuffCategoryBtn" title="カテゴリを追加">追加</span>
+                        <span type="button" class="add-btn harf-width" id="addBuffCategoryBtn" title="カテゴリを追加">追加</span>
                     </div>
                 </div>
                 <div class="m-8">
@@ -1252,15 +1285,12 @@ input[type="number"] {
                         <span class="material-symbols-rounded">clear_all</span>
                         <span>一括追加</span>
                     </div>
-                        <p class="small-text">形式：バフ名|効果先1,効果先2|説明|効果|ターン|カラーコード<br>バフ名と効果先以外は省略可</p>
-                        <p class="small-text">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
-
+                        <p class="small-text" style="margin-left: 3em; text-indent: -3em;">形式：バフ名|効果先1,効果先2|説明|効果|ターン|カラーコード<br>バフ名と効果先以外は省略可</p>
+                        <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                     <div class="add-area fd-cl m-8" id="bulkAddArea">
                         <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
-                        <div>
                         <div class="row-controls">
                             <span type="button" class="add-btn flex-1" id="bulkAddConfirm">追加を実行</span>
-                        </div>
                         </div>
                     </div>
                 </div>
@@ -1273,7 +1303,7 @@ input[type="number"] {
                     <span class="section-header-title">判定</span>
             </label>
 <!--判定-->
-            <div class="section-body tab-content">
+            <div class="section-body tab-content" id="judgeSection">
                     <div class="buff-control" full-width>
                         <div class="target-options">
                             <span class="label-s">目標値：</span>
@@ -1330,6 +1360,7 @@ input[type="number"] {
                                 </label>
                             </div>
                         <div class="add-area">
+                            <div>
                                 <div>
                                     <label for="judgeName" class="label-s">判定名</label>
                                     <input type="text" id="judgeName" placeholder="例：命中、回避">
@@ -1354,14 +1385,19 @@ input[type="number"] {
                                     </select>
                                 </div>
                                 <div class="note">バフの効果先がカテゴリを指定している場合、カテゴリ内のすべての判定に適用されます。</div>
-                            <span type="button" class="add-btn" id="addJudgeBtn">追加</span>
+                            </div>
+                            <div>
+                                    <label class="label-s">メモ欄</label>
+                                    <textarea id="judgeMemo" class="textarea-mono" style="height: calc(100% - 20px);"></textarea>
+                            </div>
+                            <div type="button" class="add-btn" id="addJudgeBtn">追加</div>
                         </div>
                         </div>
-                        <div class="line-udr">
+                        <div class="iine-area">
                             <label for="judgeCategoryInput" class="label-s">新規カテゴリ追加</label>
-                            <div style="display: flex; gap: 8px;">
+                            <div style="display: flex; gap: 8px; flex-direction: column;">
                                 <input type="text" id="judgeCategoryInput" placeholder="例：戦闘、探索" aria-label="判定カテゴリの新規追加">
-                                <span type="button" class="add-btn" id="addJudgeCategoryBtn" title="カテゴリを追加">追加</span>
+                                <span type="button" class="add-btn harf-width" id="addJudgeCategoryBtn" title="カテゴリを追加">追加</span>
                             </div>
                         </div>
                         <div class="m-8">
@@ -1370,7 +1406,7 @@ input[type="number"] {
                                 <span>一括追加</span>
                             </div>
                                 <p class="small-text">形式：判定名|判定ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
-                                <p class="small-text">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了</p>
+                                <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="add-area fd-cl m-8" id="bulkAddJudgeArea">
                                 <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1|器用度&#10;回避判定|1d20|DEX" class="textarea-mono" style="height:80px;"></textarea>
                                 <div>
@@ -1427,7 +1463,8 @@ input[type="number"] {
                                         <span class="material-symbols-rounded">help</span>
                                     </label>
                             </div>
-                                        <div class="add-area">
+                            <div class="add-area">
+                            <div>
                                 <div>
                                     <label for="attackName" class="label-s">攻撃名</label>
                                     <input type="text" id="attackName" placeholder="例：ソード(1H)">
@@ -1455,14 +1492,19 @@ input[type="number"] {
                                     </select>
                                 </div>
                                 <div class="note">バフの効果先がカテゴリを指定している場合、カテゴリ内のすべての攻撃に適用されます。</div>
-                            <span type="button" class="add-btn" id="addAttackBtn" full-width>追加</span>
+                            </div>
+                                <div>
+                                    <label class="label-s">メモ欄</label>
+                                    <textarea id="attackMemo" class="textarea-mono" style="height: calc(100% - 20px);"></textarea>
+                                </div>
+                            <div type="button" class="add-btn" id="addAttackBtn">追加</div>
                         </div>
-                        </div>
-                        <div class="line-udr">
+                        </div>      
+                        <div class="iine-area">
                             <label for="attackCategoryInput" class="label-s">新規カテゴリ追加</label>
-                            <div style="display: flex; gap: 8px;">
+                            <div style="display: flex; gap: 8px; flex-direction: column;">
                                 <input type="text" id="attackCategoryInput" placeholder="例：近接、魔法" aria-label="攻撃カテゴリの新規追加">
-                                <span type="button"n class="add-btn" id="addAttackCategoryBtn" title="カテゴリを追加">追加</span>
+                                <span type="button"n class="add-btn harf-width" id="addAttackCategoryBtn" title="カテゴリを追加">追加</span>
                             </div>
                         </div>
                         <div class="m-8">
@@ -1471,7 +1513,7 @@ input[type="number"] {
                                 <span>一括追加</span>
                             </div>
                                 <p class="small-text">形式：攻撃名|攻撃ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
-                                <p class="small-text">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了</p>
+                                <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="add-area fd-cl m-8" id="bulkAddAttackArea">
                                 <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10|筋力B&#10;ファイアボール|1d6+3|INT" class="textarea-mono" style="height:80px;"></textarea>
                                 <div>
