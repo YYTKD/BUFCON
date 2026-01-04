@@ -129,6 +129,19 @@ function openItemContextMenu(event, type, index) {
     showContextMenu(event.pageX, event.pageY, actions);
 }
 
+function openCategoryContextMenu(event, type, categoryName) {
+    event.preventDefault();
+
+    const actions = [
+        { label: '編集', onClick: () => editCategory(type, categoryName) },
+        { label: 'カテゴリ名をコピー', onClick: () => copyCategoryName(categoryName) },
+        { label: '削除', onClick: () => removeCategory(type, categoryName) }
+    ];
+
+    hideContextMenu();
+    showContextMenu(event.pageX, event.pageY, actions);
+}
+
 function getCategories(type) {
     if (type === 'buff') return state.buffCategories;
     if (type === 'judge') return state.judgeCategories;
@@ -188,9 +201,10 @@ function showToast(message, type = 'info') {
         top: ${top};
         right: 20px;
         padding: 12px 20px;
-        background: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#4dabf7'};
+        background: ${type === 'error' ? '#d9376e' : type === 'success' ? '#48c229' : '#5c59ff'};
         color: white;
         border-radius: 6px;
+        border: 2px solid var(--primary-color-1);
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         z-index: 10000;
         animation: slideIn 0.3s ease-out;
@@ -306,7 +320,7 @@ function loadData() {
 
 function getDefaultBuffs() {
     return [
-        { name: 'キャッツアイ', description: '命中UP', effect: '+1', targets: ['judge:命中(武器A)　SAMPLE'], turn: '3', originalTurn: 3, color: '#0079FF', category: null, active: true },
+        { name: 'キャッツアイ', description: '命中UP', effect: '+1', targets: ['judge:命中(武器A)　SAMPLE'], turn: '3', originalTurn: 3, color: '#F8F9FA', category: null, active: true },
         { name: 'オーバーパワー', description: 'ダメージUP', effect: '+3', targets: ['attack:all-attack'], color: '#F7821B', category: null, active: true }
     ];
 }
@@ -573,7 +587,7 @@ function renderStats() {
     list.innerHTML = state.stats.map((stat, i) => `
         <div class="stat-tag">
             ${escapeHtml(stat.name)}
-            <button onclick="removeStat(${i})">×</button>
+            <button class="material-symbols-rounded" onclick="removeStat(${i})">disabled_by_default</button>
         </div>
     `).join('');
 }
@@ -628,6 +642,103 @@ function addCategory(type, inputId) {
     updateBuffTargetDropdown();
     saveData();
 }
+
+function replaceCategoryOnItems(type, from, to) {
+    const items = getCollection(type) || [];
+    items.forEach(item => {
+        if (item.category === from) {
+            item.category = to;
+        }
+    });
+}
+
+function replaceBuffTargetsForCategory(type, from, to) {
+    if (type !== 'judge' && type !== 'attack') return;
+
+    const prefix = type === 'judge' ? 'judge-category:' : 'attack-category:';
+    const fromKey = prefix + from;
+    const toKey = to ? prefix + to : null;
+
+    state.buffs.forEach(buff => {
+        buff.targets = buff.targets
+            .map(target => target === fromKey ? toKey : target)
+            .filter(Boolean);
+    });
+
+    if (Array.isArray(state.selectedBuffTargets)) {
+        state.selectedBuffTargets = state.selectedBuffTargets
+            .map(target => target === fromKey ? toKey : target)
+            .filter(Boolean);
+    }
+}
+
+function refreshCategoryViews(type) {
+    if (type === 'buff') {
+        renderBuffs();
+        updateBuffCategorySelect();
+    } else if (type === 'judge') {
+        renderPackage('judge');
+        updateJudgeCategorySelect();
+    } else if (type === 'attack') {
+        renderPackage('attack');
+        updateAttackCategorySelect();
+    }
+
+    updateBuffTargetDropdown();
+    updatePackageOutput('judge');
+    updatePackageOutput('attack');
+    saveData();
+}
+
+function editCategory(type, oldName) {
+    const categories = getCategories(type);
+    if (!categories || !categories.includes(oldName)) return;
+
+    const newName = prompt('カテゴリ名を編集', oldName);
+    if (newName === null) return;
+
+    const trimmed = newName.trim();
+    if (!trimmed) {
+        showToast('カテゴリ名を入力してください', 'error');
+        return;
+    }
+
+    if (categories.includes(trimmed)) {
+        showToast('同名のカテゴリが既に存在します', 'error');
+        return;
+    }
+
+    const idx = categories.indexOf(oldName);
+    categories[idx] = trimmed;
+
+    replaceCategoryOnItems(type, oldName, trimmed);
+    replaceBuffTargetsForCategory(type, oldName, trimmed);
+    refreshCategoryViews(type);
+    showToast('カテゴリ名を変更しました', 'success');
+}
+
+function removeCategory(type, name) {
+    const categories = getCategories(type);
+    if (!categories || !categories.includes(name)) return;
+
+    const confirmed = confirm(`カテゴリ「${name}」を削除しますか？`);
+    if (!confirmed) return;
+
+    categories.splice(categories.indexOf(name), 1);
+    replaceCategoryOnItems(type, name, null);
+    replaceBuffTargetsForCategory(type, name, null);
+    refreshCategoryViews(type);
+    showToast('カテゴリを削除しました', 'success');
+}
+
+function copyCategoryName(name) {
+    if (!name) return;
+
+    navigator.clipboard.writeText(name)
+        .then(() => showToast('カテゴリ名をコピーしました', 'success'))
+        .catch(() => showToast('コピーに失敗しました', 'error'));
+}
+
 
 function buildCategoryMap(type) {
     const map = { 'none': [] };
@@ -741,7 +852,7 @@ function renderBuffItems(entries = []) {
                  draggable="true"
                  data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}">
                 <div class="tooltip" style="--target: --no${index};">${escapeHtml(tooltipText)}</div>
-                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity:0.6;">drag_indicator</span>
+                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: 12px; opacity:0.6;">drag_indicator</span>
                 <span class="item-param">
                     <span class="item-name">${escapeHtml(item.name)}</span>
                     ${item.description ? `<span class="item-description">${escapeHtml(item.description)}</span>` : ''}
@@ -761,7 +872,7 @@ function renderPackageItems(type, entries = []) {
 
     return entries.map(({ item, index }) => `
         <div class="item clickable draggable" data-index="${index}" data-type="${type}" data-category="${escapeHtml(item.category || 'none')}" draggable="true">
-            <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity: 0.6;">drag_indicator</span>
+            <span class="material-symbols-rounded" style="position: relative; left: -8px; width: 12px; opacity: 0.6;">drag_indicator</span>
             <span class="item-param">
                 <span class="item-name">${escapeHtml(item.name)}</span>
                 <span class="item-detail">${escapeHtml(item.roll)}</span>
@@ -921,7 +1032,7 @@ function openBuffModal(editIndex = null) {
         // 追加モード
         state.editMode = { active: false, type: null, index: null };
         modalTitle.textContent = 'バフ追加';
-        addBtn.textContent = '✚';
+        addBtn.textContent = '追加';
         bulkAddSection.style.display = 'block';
         resetBuffForm();
     }
@@ -934,7 +1045,7 @@ function resetBuffForm() {
     document.getElementById('buffDescription').value = '';
     document.getElementById('buffEffect').value = '';
     document.getElementById('buffTurn').value = '';
-    document.getElementById('buffColor').value = '#0079FF';
+    document.getElementById('buffColor').value = '#F8F9FA';
     document.getElementById('buffCategorySelect').value = 'none';
     state.selectedBuffTargets = [];
     updateBuffTargetDropdown();
@@ -1288,19 +1399,21 @@ function renderBuffs() {
     const sections = [];
 
     sections.push(`
-        <div class="category-block uncategorized" data-category="none">
-            <div class="category-header" data-category="none">ー</div>
+        <details class="category-block uncategorized" data-category="none" open>
+            <summary class="category-header" data-category="none">
+                <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
+            </summary>
             <div class="category-body" data-category="none">
                 ${renderBuffItems(categoryMap['none'])}
             </div>
-        </div>
+        </details>
     `);
 
     state.buffCategories.forEach(name => {
         sections.push(`
             <details class="category-block" open data-category="${escapeHtml(name)}">
                 <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
-                    <span class="material-symbols-rounded" style="margin-right: 4px;">menu</span>${escapeHtml(name)}
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span><span style="word-break: break-all;">${escapeHtml(name)}</span>
                 </summary>
                 <div class="category-body" data-category="${escapeHtml(name)}">
                     ${renderBuffItems(categoryMap[name])}
@@ -1336,6 +1449,10 @@ function attachBuffEvents() {
         header.addEventListener('dragleave', handleCategoryDragLeave);
         header.addEventListener('drop', (e) => handleCategoryDrop(e, 'buff'));
         header.addEventListener('dragend', handleCategoryHeaderDragEnd);
+        const categoryName = header.getAttribute('data-category');
+        if (categoryName && categoryName !== 'none') {
+            header.addEventListener('contextmenu', (e) => openCategoryContextMenu(e, 'buff', categoryName));
+        }
     });
     
     buffList.querySelectorAll('[data-toggle-type="buff"]').forEach(btn => {
@@ -1646,7 +1763,7 @@ function openJudgeModal(editIndex = null) {
         // 追加モード
         state.editMode = { active: false, type: null, index: null };
         modalTitle.textContent = '判定パッケージ追加';
-        addBtn.textContent = '✚';
+        addBtn.textContent = '追加';
         bulkAddSection.style.display = 'block';
         resetJudgeForm();
     }
@@ -1698,7 +1815,7 @@ function openAttackModal(editIndex = null) {
         // 追加モード
         state.editMode = { active: false, type: null, index: null };
         modalTitle.textContent = '攻撃パッケージ追加';
-        addBtn.textContent = '✚';
+        addBtn.textContent = '追加';
         bulkAddSection.style.display = 'block';
         resetAttackForm();
     }
@@ -1841,19 +1958,21 @@ function renderPackage(type) {
     const sections = [];
 
     sections.push(`
-        <div class="category-block uncategorized" data-category="none">
-            <div class="category-header" data-category="none">ー</div>
+        <details class="category-block uncategorized" data-category="none" open>
+            <summary class="category-header" data-category="none">
+                <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
+            </summary>
             <div class="category-body" data-category="none">
                 ${renderPackageItems(type, categoryMap['none'])}
             </div>
-        </div>
+        </details>
     `);
 
     categories.forEach(name => {
         sections.push(`
             <details class="category-block" open data-category="${escapeHtml(name)}">
                 <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
-                    <span class="material-symbols-rounded" style="margin-right: 4px;">menu</span>${escapeHtml(name)}
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span><span style="word-break: break-all;">${escapeHtml(name)}</span>
                 </summary>
                 <div class="category-body" data-category="${escapeHtml(name)}">
                     ${renderPackageItems(type, categoryMap[name])}
@@ -1909,6 +2028,10 @@ function attachItemEvents(type) {
         header.addEventListener('dragleave', handleCategoryDragLeave);
         header.addEventListener('drop', (e) => handleCategoryDrop(e, type));
         header.addEventListener('dragend', handleCategoryHeaderDragEnd);
+        const categoryName = header.getAttribute('data-category');
+        if (categoryName && categoryName !== 'none') {
+            header.addEventListener('contextmenu', (e) => openCategoryContextMenu(e, type, categoryName));
+        }
     });
     
     listElement.querySelectorAll(`[data-edit-type="${type}"]`).forEach(btn => {
