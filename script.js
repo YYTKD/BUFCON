@@ -282,27 +282,48 @@ function loadUIState() {
 // データ管理
 // ========================================
 
+function normalizeBuff(buff) {
+    const memoText = typeof buff.memo === 'string'
+        ? buff.memo
+        : (typeof buff.description === 'string' ? buff.description : '');
+    const showSimpleMemo = typeof buff.showSimpleMemo === 'boolean'
+        ? buff.showSimpleMemo
+        : Boolean(buff.description);
+
+    const { description, ...rest } = buff;
+    return {
+        ...rest,
+        memo: memoText,
+        showSimpleMemo
+    };
+}
+
+function normalizeBuffs(buffs = []) {
+    if (!Array.isArray(buffs)) return [];
+    return buffs.map(normalizeBuff);
+}
+
 function loadData() {
     try {
         const saved = localStorage.getItem('trpgData');
         if (saved) {
             const data = JSON.parse(saved);
             state.stats = Array.isArray(data.stats) ? data.stats : [];
-            state.buffs = Array.isArray(data.buffs) ? data.buffs : getDefaultBuffs();
+            state.buffs = normalizeBuffs(Array.isArray(data.buffs) ? data.buffs : getDefaultBuffs());
             state.buffCategories = Array.isArray(data.buffCategories) ? data.buffCategories : [];
             state.judges = Array.isArray(data.judges) ? data.judges : getDefaultJudges();
             state.judgeCategories = Array.isArray(data.judgeCategories) ? data.judgeCategories : [];
             state.attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
             state.attackCategories = Array.isArray(data.attackCategories) ? data.attackCategories : [];
         } else {
-            state.buffs = getDefaultBuffs();
+            state.buffs = normalizeBuffs(getDefaultBuffs());
             state.judges = getDefaultJudges();
             state.attacks = getDefaultAttacks();
         }
     } catch (e) {
         console.error('データの読み込みに失敗:', e);
         showToast('データの読み込みに失敗しました', 'error');
-        state.buffs = getDefaultBuffs();
+        state.buffs = normalizeBuffs(getDefaultBuffs());
         state.judges = getDefaultJudges();
         state.attacks = getDefaultAttacks();
     }
@@ -320,8 +341,8 @@ function loadData() {
 
 function getDefaultBuffs() {
     return [
-        { name: 'キャッツアイ', description: '命中UP', effect: '+1', targets: ['judge:命中(武器A)　SAMPLE'], turn: '3', originalTurn: 3, color: '#F8F9FA', category: null, active: true },
-        { name: 'オーバーパワー', description: 'ダメージUP', effect: '+3', targets: ['attack:all-attack'], color: '#F7821B', category: null, active: true }
+        { name: 'キャッツアイ', memo: '命中UP', showSimpleMemo: true, effect: '+1', targets: ['judge:命中(武器A)　SAMPLE'], turn: '3', originalTurn: 3, color: '#F8F9FA', category: null, active: true },
+        { name: 'オーバーパワー', memo: 'ダメージUP', showSimpleMemo: true, effect: '+3', targets: ['attack:all-attack'], color: '#F7821B', category: null, active: true }
     ];
 }
 
@@ -420,7 +441,7 @@ function importData() {
         }
 
         state.stats = data.stats || [];
-        state.buffs = data.buffs || [];
+        state.buffs = normalizeBuffs(data.buffs || []);
         state.buffCategories = data.buffCategories || [];
         state.judges = data.judges || [];
         state.judgeCategories = data.judgeCategories || [];
@@ -843,26 +864,39 @@ function renderBuffItems(entries = []) {
             const text = getTargetText(t);
             return text === "none" ? "なし" : text;
         });
-        const tooltipText = '効果先: ' + targetTexts.join(', ');
         const turnDisplay = item.turn ? `<span class="turn-badge" style="outline:2px solid ${item.color};"><span>${item.turn}</span></span>` : '';
+        const simpleMemo = getBuffSimpleMemo(item);
+        const memoText = getBuffMemoText(item);
+        const memoHtml = memoText ? escapeHtml(memoText).replace(/\n/g, '<br>') : '<span class="memo-empty">メモはありません</span>';
+        const maxTurnText = item.originalTurn ?? item.turn;
+        const maxTurnDisplay = (maxTurnText === undefined || maxTurnText === null || maxTurnText === '') ? 'なし' : maxTurnText;
+        const targetsText = targetTexts.length ? targetTexts.join(', ') : 'なし';
+        const effectText = item.effect ? item.effect : 'なし';
 
         return `
-            <div class="item buff-item draggable ${item.active ? 'active' : ''}"
-                 style="background-color: ${bgColor}; color: ${textColor}; anchor-name: --no${index};"
-                 draggable="true"
-                 data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}">
-                <div class="tooltip" style="--target: --no${index};">${escapeHtml(tooltipText)}</div>
-                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: 12px; opacity:0.6;">drag_indicator</span>
-                <span class="item-param">
-                    <span class="item-name">${escapeHtml(item.name)}</span>
-                    ${item.description ? `<span class="item-description">${escapeHtml(item.description)}</span>` : ''}
-                    ${item.effect ? `<span class="item-effect">${escapeHtml(item.effect)}</span>` : ''}
+            <details class="item buff-item draggable ${item.active ? 'active' : ''}"
+                     style="background-color: ${bgColor}; color: ${textColor}; anchor-name: --no${index};"
+                     draggable="true"
+                     data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}">
+                <summary class="buff-summary">
+                    <span class="material-symbols-rounded drag-handle">drag_indicator</span>
+                    <span class="item-param">
+                        <span class="item-name">${escapeHtml(item.name)}</span>
+                        ${simpleMemo ? `<span class="item-description">/${escapeHtml(simpleMemo)}</span>` : ''}
+                    </span>
                     ${turnDisplay}
-                </span>
-                <span class="buff-btn">
-                    <button class="toggle-btn ${item.active ? 'active' : ''}" data-toggle="${index}" data-toggle-type="buff"></button>
-                </span>
-            </div>
+                    <span class="buff-btn">
+                        <button class="toggle-btn ${item.active ? 'active' : ''}" data-toggle="${index}" data-toggle-type="buff"></button>
+                    </span>
+                </summary>
+                <div class="buff-detail-body">
+                    <div class="item-detail">効果先：${escapeHtml(targetsText)} / コマンド：${escapeHtml(effectText)} / 最大ターン：${escapeHtml(String(maxTurnDisplay))}</div>
+                    <div class="item-detail buff-memo">
+                        <span class="item-detail-label">メモ</span>
+                        <div class="item-memo-text">${memoHtml}</div>
+                    </div>
+                </div>
+            </details>
         `;
     }).join('');
 }
@@ -1003,6 +1037,20 @@ function getTargetText(target) {
 // バフ管理
 // ========================================
 
+function getBuffMemoText(buff) {
+    if (!buff) return '';
+    if (typeof buff.memo === 'string') return buff.memo;
+    if (typeof buff.description === 'string') return buff.description;
+    return '';
+}
+
+function getBuffSimpleMemo(buff) {
+    if (!buff || buff.showSimpleMemo === false) return '';
+    const memoText = getBuffMemoText(buff);
+    const firstLine = memoText.split(/\r?\n/)[0]?.trim() || '';
+    return firstLine;
+}
+
 function openBuffModal(editIndex = null) {
     const modal = document.getElementById('buffaddmodal');
     const modalTitle = modal.querySelector('.section-header-title');
@@ -1015,16 +1063,17 @@ function openBuffModal(editIndex = null) {
         modalTitle.textContent = 'バフ編集';
         addBtn.textContent = '更新';
         bulkAddSection.style.display = 'none';
-        
+
         const buff = state.buffs[editIndex];
         updateBuffCategorySelect();
         document.getElementById('buffName').value = buff.name;
-        document.getElementById('buffDescription').value = buff.description || '';
         document.getElementById('buffEffect').value = buff.effect || '';
         document.getElementById('buffTurn').value = buff.originalTurn || '';
         document.getElementById('buffColor').value = buff.color;
         document.getElementById('buffCategorySelect').value = buff.category || 'none';
-        
+        document.getElementById('buffMemo').value = getBuffMemoText(buff);
+        document.getElementById('buffSimpleMemoToggle').checked = buff.showSimpleMemo ?? Boolean(buff.description);
+
         // 効果先の選択状態を復元
         state.selectedBuffTargets = [...buff.targets];
         updateBuffTargetDropdown();
@@ -1042,11 +1091,12 @@ function openBuffModal(editIndex = null) {
 
 function resetBuffForm() {
     document.getElementById('buffName').value = '';
-    document.getElementById('buffDescription').value = '';
     document.getElementById('buffEffect').value = '';
     document.getElementById('buffTurn').value = '';
     document.getElementById('buffColor').value = '#F8F9FA';
     document.getElementById('buffCategorySelect').value = 'none';
+    document.getElementById('buffMemo').value = '';
+    document.getElementById('buffSimpleMemoToggle').checked = false;
     state.selectedBuffTargets = [];
     updateBuffTargetDropdown();
 }
@@ -1058,13 +1108,14 @@ function insertText(text) {
 
 function addBuff() {
     const name = document.getElementById('buffName').value.trim();
-    const description = document.getElementById('buffDescription').value.trim();
     const effect = document.getElementById('buffEffect').value.trim();
     const targets = [...state.selectedBuffTargets];
     const turn = document.getElementById('buffTurn').value.trim();
     const color = validateColor(document.getElementById('buffColor').value);
     const categorySelect = document.getElementById('buffCategorySelect');
     const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
+    const memo = document.getElementById('buffMemo').value;
+    const showSimpleMemo = document.getElementById('buffSimpleMemoToggle').checked;
 
     if (!name) {
         showToast('バフ名を入力してください', 'error');
@@ -1080,31 +1131,33 @@ function addBuff() {
         const index = state.editMode.index;
         const oldTurn = state.buffs[index].turn;
         const oldOriginalTurn = state.buffs[index].originalTurn;
-        
+
         state.buffs[index] = {
             name: name,
-            description: description,
             effect: effect,
             targets: targets,
             turn: turn ? parseInt(turn) : oldTurn,
             originalTurn: turn ? parseInt(turn) : oldOriginalTurn,
             color: color,
             category: category,
+            memo: memo,
+            showSimpleMemo,
             active: state.buffs[index].active
         };
-        
+
         showToast('バフを更新しました', 'success');
     } else {
         // 追加モード:
         state.buffs.push({
             name: name,
-            description: description,
             effect: effect,
             targets: targets,
             turn: turn ? parseInt(turn) : null,
             originalTurn: turn ? parseInt(turn) : null,
             color: color,
             category: category,
+            memo: memo,
+            showSimpleMemo,
             active: true
         });
     }
@@ -1129,13 +1182,14 @@ function bulkAdd(type) {
             parser: (parts, index, category) => {
                 const name = parts[0];
                 const targetStr = parts[1] || '';
-                const description = parts[2] || '';
-                const effect = parts[3] || '';
-                const turn = parts[4] ? parseInt(parts[4]) : null;
-                const color = validateColor(parts[5] || '#0079FF');
-                
+                const hasSimpleMemoField = parts.length >= 6;
+                const memo = hasSimpleMemoField ? (parts[2] || '') : '';
+                const effect = hasSimpleMemoField ? (parts[3] || '') : (parts[2] || '');
+                const turn = hasSimpleMemoField ? (parts[4] ? parseInt(parts[4]) : null) : (parts[3] ? parseInt(parts[3]) : null);
+                const color = validateColor(hasSimpleMemoField ? (parts[5] || '#0079FF') : (parts[4] || '#0079FF'));
+
                 if (!name) throw `行${index + 1}: バフ名が空です`;
-                
+
                 const targetNames = targetStr.split(',').map(t => t.trim());
                 const targets = [];
 
@@ -1172,8 +1226,16 @@ function bulkAdd(type) {
                 if (targets.length === 0) throw `行${index + 1}: 有効な効果先がありません`;
 
                 return {
-                    name, description, effect, targets, turn, originalTurn: turn,
-                    color, active: true, category
+                    name,
+                    memo,
+                    showSimpleMemo: Boolean(memo),
+                    effect,
+                    targets,
+                    turn,
+                    originalTurn: turn,
+                    color,
+                    active: true,
+                    category
                 };
             },
             afterAdd: () => {
@@ -1458,9 +1520,10 @@ function attachBuffEvents() {
     buffList.querySelectorAll('[data-toggle-type="buff"]').forEach(btn => {
         const i = parseInt(btn.getAttribute('data-toggle'));
         if (isNaN(i)) return;
-        
+
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
+            e.preventDefault();
             toggleBuff(i);
         });
     });
@@ -2180,11 +2243,12 @@ function formatTargetsForBulk(targets) {
 function formatBuffForBulk(buff) {
     const targetText = formatTargetsForBulk(buff.targets);
     const turnText = buff.originalTurn ?? buff.turn ?? '';
+    const simpleMemo = getBuffSimpleMemo(buff);
 
     return [
         buff.name || '',
         targetText,
-        buff.description || '',
+        simpleMemo,
         buff.effect || '',
         turnText,
         buff.color || '#0079FF'

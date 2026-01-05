@@ -895,6 +895,61 @@ dialog .section-body {
     cursor: grabbing;
 }
 
+.buff-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.buff-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.drag-handle {
+    position: relative;
+    left: -8px;
+    width: 12px;
+    opacity: 0.6;
+}
+
+.buff-detail-body {
+    padding: 8px 12px 12px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: inherit;
+}
+
+.buff-memo {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.item-detail-label {
+    font-weight: 700;
+    color: inherit;
+}
+
+.item-memo-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: inherit;
+}
+
+.memo-empty {
+    opacity: 0.7;
+}
+
+.memo-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
 /* アイテム内要素 */
 .item-name {
     font-size: 17px;
@@ -1270,12 +1325,15 @@ dialog .section-body {
                                 <div class="note">カテゴリを指定すると、そのカテゴリに入った状態で登録されます。</div>
                             </div>
                                 <div>
-                                    <label class="label-s">メモ欄</label>
-                                    <label class="radio-option add-btn">
-                                        <input type="checkbox">
-                                        <label class="label-s">簡易メモを表示</label>
-                                    </label>
+                                    <div class="memo-header">
+                                        <label class="label-s" for="buffMemo">メモ欄</label>
+                                        <label class="radio-option add-btn">
+                                            <input type="checkbox" id="buffSimpleMemoToggle">
+                                            <span class="label-s">簡易メモを表示</span>
+                                        </label>
+                                    </div>
                                     <textarea id="buffMemo" class="textarea-mono" style="height: calc(100% - 22px);"></textarea>
+                                    <div class="note">簡易メモにはメモの1行目を使用します。</div>
                                 </div>
                             <div type="button" class="add-btn" id="addBuffBtn">追加</div>
                         </div>
@@ -1294,7 +1352,7 @@ dialog .section-body {
                         <span class="material-symbols-rounded">clear_all</span>
                         <span>一括追加</span>
                     </div>
-                        <p class="small-text" style="margin-left: 3em; text-indent: -3em;">形式：バフ名|効果先1,効果先2|コマンド|ターン|カラーコード<br>バフ名と効果先以外は省略可</p>
+                        <p class="small-text" style="margin-left: 3em; text-indent: -3em;">形式：バフ名|効果先1,効果先2|簡易メモ|コマンド|ターン|カラーコード<br>簡易メモを省略する場合は「バフ名|効果先1,効果先2|コマンド|ターン|カラーコード」も使用できます。バフ名と効果先以外は省略可</p>
                         <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                     <div class="add-area fd-cl m-8" id="bulkAddArea">
                         <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
