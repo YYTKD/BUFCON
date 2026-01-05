@@ -1182,11 +1182,19 @@ function bulkAdd(type) {
             parser: (parts, index, category) => {
                 const name = parts[0];
                 const targetStr = parts[1] || '';
-                const hasSimpleMemoField = parts.length >= 6;
-                const memo = hasSimpleMemoField ? (parts[2] || '') : '';
-                const effect = hasSimpleMemoField ? (parts[3] || '') : (parts[2] || '');
-                const turn = hasSimpleMemoField ? (parts[4] ? parseInt(parts[4]) : null) : (parts[3] ? parseInt(parts[3]) : null);
-                const color = validateColor(hasSimpleMemoField ? (parts[5] || '#0079FF') : (parts[4] || '#0079FF'));
+                const colorPattern = /^#[0-9A-Fa-f]{6}$/;
+                const colorIndex = parts.findIndex((part, idx) => idx >= 2 && colorPattern.test(part));
+                const memoAfterColor = (colorIndex >= 0 && colorIndex + 1 < parts.length) ? (parts[colorIndex + 1] || '') : '';
+                const color = validateColor(colorIndex >= 0 ? (parts[colorIndex] || '#0079FF') : (parts[4] || '#0079FF'));
+
+                const payloadEnd = colorIndex >= 0 ? colorIndex : parts.length;
+                const payload = parts.slice(2, payloadEnd);
+                const hasSimpleMemoField = payload.length >= 3;
+
+                const simpleMemo = hasSimpleMemoField ? (payload[0] || '') : '';
+                const effect = hasSimpleMemoField ? (payload[1] || '') : (payload[0] || '');
+                const turn = hasSimpleMemoField ? (payload[2] ? parseInt(payload[2]) : null) : (payload[1] ? parseInt(payload[1]) : null);
+                const memo = simpleMemo ? `${simpleMemo}${memoAfterColor ? `\n${memoAfterColor}` : ''}` : memoAfterColor;
 
                 if (!name) throw `行${index + 1}: バフ名が空です`;
 

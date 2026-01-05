@@ -1352,10 +1352,10 @@ dialog .section-body {
                         <span class="material-symbols-rounded">clear_all</span>
                         <span>一括追加</span>
                     </div>
-                        <p class="small-text" style="margin-left: 3em; text-indent: -3em;">形式：バフ名|効果先1,効果先2|簡易メモ|コマンド|ターン|カラーコード<br>簡易メモを省略する場合は「バフ名|効果先1,効果先2|コマンド|ターン|カラーコード」も使用できます。バフ名と効果先以外は省略可</p>
+                        <p class="small-text" style="margin-left: 3em; text-indent: -3em;">形式：バフ名|効果先1,効果先2|簡易メモ|コマンド|ターン|カラーコード|メモ<br>簡易メモを省略する場合は「バフ名|効果先1,効果先2|コマンド|ターン|カラーコード|メモ」も使用できます。カラーコードとメモは省略可</p>
                         <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                     <div class="add-area fd-cl m-8" id="bulkAddArea">
-                        <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
+                        <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E|メモの1行目が簡易メモになります&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5|#F7821B|任意のメモ" class="textarea-mono" style="height:100px;"></textarea>
                         <div class="row-controls">
                             <span type="button" class="add-btn flex-1" id="bulkAddConfirm">追加を実行</span>
                         </div>
