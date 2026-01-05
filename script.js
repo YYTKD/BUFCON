@@ -2115,7 +2115,7 @@ function updatePackageOutput(type, selectedIndex = null) {
         const effects = buff.effect.split(',').map(e => e.trim());
         
         effects.forEach(effect => {
-            const slotMatch = effect.match(/\{\{([^}]+)\}\}=(.+)/);
+            const slotMatch = effect.match(/\/\/([^/]+)=(.+)/);
             
             if (slotMatch) {
                 const slotName = slotMatch[1];
@@ -2131,7 +2131,7 @@ function updatePackageOutput(type, selectedIndex = null) {
         });
     });
     
-    command = command.replace(/\{\{([^}]+)\}\}/g, (match, slotName) => {
+    command = command.replace(/\/\/([^/]+)\/\//g, (match, slotName) => {
         if (slotMap[slotName] && slotMap[slotName].length > 0) {
             return slotMap[slotName].join('');
         }

@@ -30,13 +30,16 @@
 }
 
 /*基本設定・デフォルト使用削除*/
-
+input {
+    border: none;
+}
+        
 input[type="text"], 
 select,
 input[type="number"] {
     padding: 6px 8px;
-    border: 1px solid var(--primary-color-3);
     border-radius: 4px;
+    border: none;
     background: white;
     font-size: 14px;
     height: 40px;
@@ -62,7 +65,7 @@ details summary::marker {
 }
 
 body {
-    font-family: 'Zen Maru Gothic', system-ui, sans-serif;
+    font-family: 'Kosugi Maru', system-ui, sans-serif;
     background: var(--bg-color);
     padding: 0;
     box-sizing: border-box !important;
@@ -199,12 +202,22 @@ input[type="number"]::-webkit-outer-spin-button {
     flex-wrap: wrap;
 }
 
+/* プルダウン矢印 */
+
 details .material-symbols-rounded {
     transition: transform 0.1s ease-out;
 }
 
 details[open] summary .material-symbols-rounded {
     transform: rotate(90deg);
+}
+
+/* 区切り線 */
+.section-line {
+    display: flex;
+    align-self: center;
+    border: 1px solid var(--primary-color-3);
+    width: calc(100% + 16px);
 }
 
 /* モーダル */
@@ -361,7 +374,7 @@ header {
 
 .header-menu-item span {
     font-size: 32px;
-    opacity: 0.8;
+    font-variation-settings: 'FILL' 1;
 }
 
 
@@ -417,7 +430,7 @@ input[type="radio"] {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 12px;
+    padding: 8px;
     border-radius: 0 0 4px 4px;
     outline: 2px solid var(--primary-color-2);
     margin-top: 2px;
@@ -482,11 +495,8 @@ dialog .section-body {
 /* 入力フォーム */
 .add-area {
     display: flex;
-    padding: 8px;
     gap: 8px;
     flex-wrap: wrap;
-    padding-bottom: 12px;
-    border: 2px solid var(--primary-color-3);
     border-radius: 8px;
 }
 
@@ -1055,14 +1065,13 @@ dialog .section-body {
 
 .full-width { width: 100%; }
 .harf-width { width: 50%; }
-.iine-area { border: 2px solid var(--primary-color-3); padding: 8px; border-radius: 8px; }
 .hidden { display: none; }
 .m-8 { margin: 8px 0; }
 .m-4 { margin: 4px 4; }
 .mb-12 { margin-bottom: 12px; }
 .pt-12 { padding-top: 12px; }
 .bt-top { border-top: 2px solid var(--primary-color-1); }
-.textarea-mono { width: 100%; padding: 8px; border: 1px solid var(--primary-color-3); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; }
+.textarea-mono { width: 100%; padding: 8px; border: none; border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; }
 .row-controls { display: flex; gap: 6px; margin-top: 6px; }
 .flex-1 { flex: 1; }
 .fd-rw { flex-direction: row; }
@@ -1073,8 +1082,8 @@ dialog .section-body {
 .btn--info { background: var(--primary-color-3); color: var(--secondary-color-1);}
 .btn--danger { background: var(--danger-color); width: 30%; color: var(--secondary-color-1);}
 .small-text { font-size: 11px; color: var(--primary-color-1); margin-top: 6px; }
-.label-s { font-size: 12px; font-weight: 600; color: var(--primary-color-2); display: block; margin: 0 0 4px 2px;}
-.label-L { font-size: 16px; font-weight: 600; color: var(--primary-color-2); display: flex; margin: 0 0 4px 2px; gap: 8px;}
+.label-s { font-size: 12px; font-weight: 600; color: var(--primary-color-2); display: block; margin: 8px 0 2px 2px;}
+.label-L { font-size: 16px; font-weight: 600; color: var(--primary-color-2); display: flex; margin: 0 0 4px 2px; gap: 8px; align-items: center; }
 .input-compact { width: 60px; padding: 4px 6px; border: 1px solid var(--primary-color-1); border-radius: 4px; }
 
 </style>
@@ -1215,23 +1224,17 @@ dialog .section-body {
                                 <div class="note">カテゴリを選択した場合、そのカテゴリに含まれるすべてのパッケージに適用します。<br>効果先を選択しない場合、「効果先：なし」として登録されます。
                                 </div>
                                 <div>
-                                    <label for="buffDescription" class="label-s">効果</label>
-                                    <input type="text" id="buffDescription" placeholder="説明">
-                                </div>
-                                <div class="note">効果の概要を記入します。
-                                </div>
-                                <div >
                                     <label for="buffEffect" class="label-s">コマンド</label>
                                     <div style="display: flex;">
-                                        <input type="text" id="buffEffect" placeholder="例：+2,-1d6,{{ダイスボーナス}}=+1">
-                                        <button class="add-btn btn--muted" onclick="insertText('{{NAME}}=')">{{ }}=</button>
+                                        <input type="text" id="buffEffect" placeholder="例：+2,-1d6,//ダイスボーナス}=+1">
+                                        <button class="add-btn btn--muted" onclick="insertText('//NAME=')">//=</button>
                                     </div>
                                     </div>
                                 <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。
                                 </div>
-                                <div class="note">代入記法：<br>{{NAME}}=コマンド　*NAMEは任意の文字列<br>という記述で、判定や攻撃の基本ロール内にある{{NAME}}にコマンドが代入されます。これにより、判定や計算式の任意の位置にバフの効果を挿入することができます。<br>同じ変数を指定したバフが複数あるときは、バフの並び順にしたがって全て代入されます。
+                                <div class="note">代入記法：<br>//NAME=コマンド　*NAMEは任意の文字列<br>という記述で、判定や攻撃の基本ロール内にある//NAME//にコマンドが代入されます。これにより、判定や計算式の任意の位置にバフの効果を挿入することができます。<br>同じ変数を指定したバフが複数あるときは、バフの並び順にしたがって全て代入されます。
                                 </div>
-                                <div class="note">代入記法は「,」で区切ることで、一つのバフから複数の場所へ代入を指示することができます。<br>通常の記法とも併用できます。<br>例：{{ダイスボーナス}}=+1,{{ダイスの種類}}=20,-2
+                                <div class="note">代入記法は「,」で区切ることで、一つのバフから複数の場所へ代入を指示することができます。<br>通常の記法とも併用できます。<br>例：//ダイスボーナス=+1,//ダイスの種類=20,-2
                                 </div>
                                 <div class="fd-rw">
                                     <div style="width: 50%;">
@@ -1268,24 +1271,30 @@ dialog .section-body {
                             </div>
                                 <div>
                                     <label class="label-s">メモ欄</label>
-                                    <textarea id="buffMemo" class="textarea-mono" style="height: calc(100% - 20px);"></textarea>
+                                    <label class="radio-option add-btn">
+                                        <input type="checkbox">
+                                        <label class="label-s">簡易メモを表示</label>
+                                    </label>
+                                    <textarea id="buffMemo" class="textarea-mono" style="height: calc(100% - 22px);"></textarea>
                                 </div>
                             <div type="button" class="add-btn" id="addBuffBtn">追加</div>
                         </div>
                     </div>
-                <div class="iine-area">
+                <div class="section-line"></div>
+                <div class="m-8">
                     <label for="buffCategoryInput" class="label-s">新規カテゴリ追加</label>
                     <div style="display: flex; gap: 8px; flex-direction: column;">
                         <input type="text" id="buffCategoryInput" placeholder="例：魔法、装備" aria-label="バフカテゴリの新規追加">
                         <span type="button" class="add-btn harf-width" id="addBuffCategoryBtn" title="カテゴリを追加">追加</span>
                     </div>
                 </div>
+                <div class="section-line"></div>
                 <div class="m-8">
                     <div class="label-L">
                         <span class="material-symbols-rounded">clear_all</span>
                         <span>一括追加</span>
                     </div>
-                        <p class="small-text" style="margin-left: 3em; text-indent: -3em;">形式：バフ名|効果先1,効果先2|説明|効果|ターン|カラーコード<br>バフ名と効果先以外は省略可</p>
+                        <p class="small-text" style="margin-left: 3em; text-indent: -3em;">形式：バフ名|効果先1,効果先2|コマンド|ターン|カラーコード<br>バフ名と効果先以外は省略可</p>
                         <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                     <div class="add-area fd-cl m-8" id="bulkAddArea">
                         <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
@@ -1310,7 +1319,6 @@ dialog .section-body {
                             <label class="radio-option add-btn">
                                 <input type="radio" name="targetType" id="targetNone" value="none" checked>
                                 <label for="targetNone" class="label-s">＼</label>
-                            </button>
                             </label>
                             <label class="radio-option add-btn">
                                 <input type="radio" name="targetType" id="targetGte" value="gte">
@@ -1370,7 +1378,7 @@ dialog .section-body {
                                     <input type="text" id="judgeRoll" placeholder="例：1d20,2d6">
                                 </div>
                                 <div class="note">判定の基本となるダイスロールを記入します。システムごとの独自のコマンドも入力できます。</div>
-                                <div class="note">代入記法：<br>{{NAME}}　*NAMEは任意の文字列<br>という記述で、{{NAME}}を指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。</div>
+                                <div class="note">代入記法：<br>//NAME//　*NAMEは任意の文字列<br>という記述で、//NAME//を指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。</div>
                                 <div>
                                     <label for="judgeStat" class="label-s">補正ステータス</label>
                                     <select id="judgeStat" multiple size="1">
@@ -1388,18 +1396,24 @@ dialog .section-body {
                             </div>
                             <div>
                                     <label class="label-s">メモ欄</label>
+                                    <label class="radio-option add-btn">
+                                        <input type="checkbox">
+                                        <label class="label-s">簡易メモを表示</label>
+                                    </label>
                                     <textarea id="judgeMemo" class="textarea-mono" style="height: calc(100% - 20px);"></textarea>
                             </div>
                             <div type="button" class="add-btn" id="addJudgeBtn">追加</div>
                         </div>
                         </div>
-                        <div class="iine-area">
+                        <div class="section-line"></div>
+                        <div class="m-8">
                             <label for="judgeCategoryInput" class="label-s">新規カテゴリ追加</label>
                             <div style="display: flex; gap: 8px; flex-direction: column;">
                                 <input type="text" id="judgeCategoryInput" placeholder="例：戦闘、探索" aria-label="判定カテゴリの新規追加">
                                 <span type="button" class="add-btn harf-width" id="addJudgeCategoryBtn" title="カテゴリを追加">追加</span>
                             </div>
                         </div>
+                        <div class="section-line"></div>
                         <div class="m-8">
                             <div class="label-L">
                                 <span class="material-symbols-rounded">clear_all</span>
@@ -1475,7 +1489,7 @@ dialog .section-body {
                                 </div>
                                 <div class="note">攻撃の基本となるダイスロールや固定値を記入できます。
                                 </div>
-                                <div class="note">代入記法：<br>{{NAME}}　*NAMEは任意の文字列<br>という記述で、{{NAME}}を指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。
+                                <div class="note">代入記法：<br>//NAME　*NAMEは任意の文字列<br>という記述で、//NAMEを指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。
                                 </div>
                                 <div>
                                     <label for="judgeStat" class="label-s">補正ステータス</label>
@@ -1495,18 +1509,24 @@ dialog .section-body {
                             </div>
                                 <div>
                                     <label class="label-s">メモ欄</label>
+                                    <label class="radio-option add-btn">
+                                        <input type="checkbox">
+                                        <label class="label-s">簡易メモを表示</label>
+                                    </label>
                                     <textarea id="attackMemo" class="textarea-mono" style="height: calc(100% - 20px);"></textarea>
                                 </div>
                             <div type="button" class="add-btn" id="addAttackBtn">追加</div>
                         </div>
-                        </div>      
-                        <div class="iine-area">
+                        </div>
+                        <div class="section-line"></div>
+                        <div class="m-8">
                             <label for="attackCategoryInput" class="label-s">新規カテゴリ追加</label>
                             <div style="display: flex; gap: 8px; flex-direction: column;">
                                 <input type="text" id="attackCategoryInput" placeholder="例：近接、魔法" aria-label="攻撃カテゴリの新規追加">
                                 <span type="button"n class="add-btn harf-width" id="addAttackCategoryBtn" title="カテゴリを追加">追加</span>
                             </div>
                         </div>
+                        <div class="section-line"></div>
                         <div class="m-8">
                             <div class="label-L">
                                 <span class="material-symbols-rounded">clear_all</span>
@@ -1530,8 +1550,8 @@ dialog .section-body {
 </div>
     <details class="copyright">
         <summary>Copyright</summary>
-            <div class="copyright"> (c) 2025 竹田ユウヤ/n
-
+            <div class="copyright"> (c) 2025 竹田ユウヤ<br>
+<br>
         本ソフトウェアおよび関連する文書のファイル（以下「ソフトウェア」）の複製を取得した全ての人物に対し、以下の条件に従うことを前提に、ソフトウェアを無制限に扱うことを無償で許可します。これには、ソフトウェアの複製を使用、複製、改変、結合、公開、頒布、再許諾、および/または販売する権利、およびソフトウェアを提供する人物に同様の行為を許可する権利が含まれますが、これらに限定されません。<br>
         上記の著作権表示および本許諾表示を、ソフトウェアの全ての複製または実質的な部分に記載するものとします。<br>
         ソフトウェアは「現状有姿」で提供され、商品性、特定目的への適合性、および権利の非侵害性に関する保証を含むがこれらに限定されず、明示的であるか黙示的であるかを問わず、いかなる種類の保証も行われません。著作者または著作権者は、契約、不法行為、またはその他の行為であるかを問わず、ソフトウェアまたはソフトウェアの使用もしくはその他に取り扱いに起因または関連して生じるいかなる請求、損害賠償、その他の責任について、一切の責任を負いません。<br>
