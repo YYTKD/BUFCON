@@ -1271,12 +1271,11 @@ dialog .section-body {
                         <span class="section-header-title">ユーザーマクロ</span>
                     </div>
                     <div class="section-body" style="margin-top: 32px; display: flex; flex-direction: column; gap: 16px;">
-                        <div class="m-8" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div class="m-8" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
                             <div>
-                                <label for="macroValue" class="label-s">登録文字列</label>
-                                <input type="text" id="macroValue" placeholder="例：2d6+5 または #FF0000">
-                                <p class="small-text">/を入力すると候補が表示されます。//では反応せず、///で再度表示されます。</p>
-                                <p class="small-text">カラーコードを登録しておくと色入力欄にも貼り付けやすくなります。</p>
+                                <label for="macroValue" class="label-s">オートコンプリート用文字列</label>
+                                <input type="text" id="macroValue" placeholder="例：({筋力}+//筋力修正//)/6">
+                                <p class="small-text">フォーカス時に直近で使ったもの上位3件、入力中は部分一致の候補を表示します。</p>
                             </div>
                         </div>
                         <div class="row-controls" style="justify-content: flex-end; gap: 8px;">
@@ -1290,6 +1289,31 @@ dialog .section-body {
                                 <span>登録済みマクロ</span>
                             </div>
                             <div id="macroList" class="item-list" style="max-height: 200px; overflow-y: auto;"></div>
+                        </div>
+                        <div class="section-line"></div>
+                        <div class="m-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label for="colorVariableName" class="label-s">カラー変数名</label>
+                                <input type="text" id="colorVariableName" placeholder="例：バフ色">
+                                <p class="small-text">バフなどのカラー入力欄でプルダウンから選択できます。</p>
+                            </div>
+                            <div>
+                                <label for="colorVariableCode" class="label-s">カラーコード</label>
+                                <input type="text" id="colorVariableCode" placeholder="#RRGGBB">
+                                <p class="small-text">#RRGGBB 形式で指定してください。</p>
+                            </div>
+                        </div>
+                        <div class="row-controls" style="justify-content: flex-end; gap: 8px;">
+                            <button class="add-btn secondary-btn" id="addColorVariableBtn">登録 / 更新</button>
+                            <button class="add-btn btn--muted" id="clearColorVariableInputs">リセット</button>
+                        </div>
+                        <div class="section-line"></div>
+                        <div class="m-8">
+                            <div class="label-L" style="margin-bottom: 8px;">
+                                <span class="material-symbols-rounded">palette</span>
+                                <span>登録済みカラー変数</span>
+                            </div>
+                            <div id="colorVariableList" class="item-list" style="max-height: 200px; overflow-y: auto;"></div>
                         </div>
                         <div class="row-controls" style="justify-content: flex-end;">
                             <button class="add-btn secondary-btn" id="userMacroClose">閉じる</button>
@@ -1367,16 +1391,47 @@ dialog .section-body {
                                 </div>
                                 <div class="note">代入記法は「,」で区切ることで、一つのバフから複数の場所へ代入を指示することができます。<br>通常の記法とも併用できます。<br>例：//ダイスボーナス=+1,//ダイスの種類=20,-2
                                 </div>
-                                <div class="fd-rw">
-                                    <div style="width: 50%;">
-                                        <label for="buffTurn" class="label-s">ターン</label>
-                                        <input type="number" id="buffTurn" placeholder="数値">
+                                    <div class="fd-rw">
+                                        <div style="width: 50%;">
+                                            <label for="buffTurn" class="label-s">ターン</label>
+                                            <input type="number" id="buffTurn" placeholder="数値">
+                                        </div>
+                                        <div class="note">効果時間がターンで決められている場合、効果の続くターン数を指定します。
+                                        </div>
+                                        <div style="width: 50%; display: flex; gap: 8px; align-items: center;">
+                                            <div style="flex: 1;">
+                                                <label for="buffColor" class="label-s">ラベルの色を選択</label>
+                                                <input type="text" id="buffColor" value="#0079FF" list="buffColor-list" placeholder="#RRGGBB">
+                                                <datalist id="buffColor-list">
+                                                    <option value="#0079FF"></option>
+                                                    <option value="#953D96"></option>
+                                                    <option value="#F64E9D"></option>
+                                                    <option value="#DF383E"></option>
+                                                    <option value="#F7821B"></option>
+                                                    <option value="#FEC626"></option>
+                                                    <option value="#62BA46"></option>
+                                                    <option value="#F8F9FA"></option>
+                                                <option value="#141414"></option>
+                                                <option value="#595959"></option>
+                                                </datalist>
+                                            </div>
+                                            <div style="width: 140px;">
+                                                <label for="buffColorVariableSelect" class="label-s">カラー変数</label>
+                                                <select id="buffColorVariableSelect">
+                                                    <option value="">未選択</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="note">カラー変数を選ぶとその色が適用されます。</div>
                                     </div>
-                                    <div class="note">効果時間がターンで決められている場合、効果の続くターン数を指定します。
-                                    </div>
                                     <div style="width: 50%;">
-                                        <label for="buffColor" class="label-s">ラベルの色を選択</label>
-                                        <input type="text" id="buffColor" value="#0079FF" list="buffColor-list" placeholder="#RRGGBB またはマクロ名">
+                                    <label for="buffColor" class="label-s">ラベルの色を選択</label>
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                        <input type="text" id="buffColor" value="#0079FF" list="buffColor-list" placeholder="#RRGGBB またはカラー変数/マクロ名" style="flex: 1 1 220px;">
+                                        <select id="buffColorVariableSelect" data-color-variable-select style="flex: 1 1 160px; min-width: 180px;">
+                                            <option value="">カラー変数を選択</option>
+                                        </select>
+                                    </div>
                                         <datalist id="buffColor-list">
                                             <option value="#0079FF"></option>
                                             <option value="#953D96"></option>

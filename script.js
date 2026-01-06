@@ -6,7 +6,7 @@ const state = {
     judges: [],
     attacks: [],
     macros: [],
-    macroKeyLookup: {},
+    colorVariables: [],
     buffCategories: [],
     judgeCategories: [],
     attackCategories: [],
@@ -242,28 +242,42 @@ function validateColor(color) {
     return hexPattern.test(color) ? color : '#ff6b6b';
 }
 
-function resolveMacroValue(value) {
-    if (typeof value !== 'string') return value;
-    const trimmed = value.trim();
-    if (state.macros.includes(trimmed)) {
-        return trimmed;
-    }
-
-    const legacyHit = state.macroKeyLookup?.[trimmed];
-    return legacyHit || trimmed;
-}
-
 function resolveColorValue(value) {
     if (typeof value !== 'string') return '#ff6b6b';
     const trimmed = value.trim();
-    const resolved = resolveMacroValue(trimmed);
-    if (/^#[0-9A-Fa-f]{6}$/.test(resolved)) {
-        return resolved;
+    const colorVariable = state.colorVariables.find(v => v.name === trimmed);
+
+    if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
+        return trimmed;
     }
+
+    if (colorVariable) {
+        return colorVariable.code;
+    }
+
     if (trimmed) {
-        showToast('カラーコードが不正です。#RRGGBBを指定してください', 'error');
+        showToast('カラーコードが不正です。#RRGGBBまたは登録済みカラー変数名を指定してください', 'error');
     }
     return '#ff6b6b';
+}
+
+function resolveColorValueOrThrow(value, contextLabel = 'カラーコード') {
+    if (typeof value !== 'string') {
+        throw `${contextLabel}が空です`;
+    }
+
+    const trimmed = value.trim();
+    const colorVariable = state.colorVariables.find(v => v.name === trimmed);
+
+    if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
+        return trimmed;
+    }
+
+    if (colorVariable) {
+        return colorVariable.code;
+    }
+
+    throw `${contextLabel}が不正です。#RRGGBB または登録済みのカラー変数名を指定してください`;
 }
 
 /**
@@ -388,62 +402,38 @@ function normalizeBuffs(buffs = []) {
 }
 
 function normalizeMacros(macros = []) {
-    if (!Array.isArray(macros)) {
-        return { values: [], legacyMap: {} };
-    }
-
-    const legacyMap = {};
-    const values = macros.map((macro) => {
-        if (typeof macro === 'string') {
-            return macro.trim();
-        }
-
-        if (macro && typeof macro === 'object') {
-            const key = typeof macro.key === 'string' ? macro.key.trim() : '';
-            const value = typeof macro.value === 'string' ? macro.value.trim() : '';
-
-            if (key && value) {
-                legacyMap[key] = value;
+    if (!Array.isArray(macros)) return [];
+    return macros
+        .map(m => {
+            if (typeof m === 'string') {
+                return { value: m, lastUsedAt: 0 };
             }
-
-            return value || key;
-        }
-
-        return '';
-    }).filter(Boolean);
-
-    const uniqueValues = Array.from(new Set(values));
-    return { values: uniqueValues, legacyMap };
+            const value = typeof m.value === 'string' ? m.value : (typeof m.key === 'string' ? m.key : '');
+            const lastUsedAt = typeof m.lastUsedAt === 'number' ? m.lastUsedAt : 0;
+            return { value, lastUsedAt };
+        })
+        .filter(m => m.value);
 }
 
-function applyNormalizedMacros(normalized) {
-    state.macros = normalized?.values || [];
-    state.macroKeyLookup = normalized?.legacyMap || {};
+function normalizeColorVariables(vars = []) {
+    if (!Array.isArray(vars)) return [];
+    const hexPattern = /^#[0-9A-Fa-f]{6}$/;
+    return vars
+        .map(v => ({
+            name: typeof v.name === 'string' ? v.name.trim() : '',
+            code: typeof v.code === 'string' && hexPattern.test(v.code.trim()) ? v.code.trim() : ''
+        }))
+        .filter(v => v.name && v.code);
 }
 
-function syncLegacyMacroLookup() {
-    if (!state.macroKeyLookup) {
-        state.macroKeyLookup = {};
-        return;
-    }
-
-    const valueSet = new Set(state.macros);
-    Object.keys(state.macroKeyLookup).forEach((key) => {
-        if (!valueSet.has(state.macroKeyLookup[key])) {
-            delete state.macroKeyLookup[key];
-        }
-    });
-}
-
-function migrateLegacyMacroReferences() {
-    if (!state.macroKeyLookup || Object.keys(state.macroKeyLookup).length === 0) return;
-
-    state.buffs = state.buffs.map((buff) => {
-        if (typeof buff.color !== 'string') return buff;
-        const resolved = resolveMacroValue(buff.color);
-        if (resolved === buff.color) return buff;
-        return { ...buff, color: resolved };
-    });
+function normalizeColorVariables(variables = []) {
+    if (!Array.isArray(variables)) return [];
+    return variables
+        .map(v => ({
+            name: typeof v.name === 'string' ? v.name : '',
+            code: typeof v.code === 'string' && /^#[0-9A-Fa-f]{6}$/.test(v.code) ? v.code.toUpperCase() : ''
+        }))
+        .filter(v => v.name && v.code);
 }
 
 function loadData() {
@@ -457,12 +447,14 @@ function loadData() {
             state.judgeCategories = Array.isArray(data.judgeCategories) ? data.judgeCategories : [];
             state.attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
             state.attackCategories = Array.isArray(data.attackCategories) ? data.attackCategories : [];
-            applyNormalizedMacros(normalizeMacros(Array.isArray(data.macros) ? data.macros : []));
+            state.macros = normalizeMacros(Array.isArray(data.macros) ? data.macros : []);
+            state.colorVariables = normalizeColorVariables(Array.isArray(data.colorVariables) ? data.colorVariables : []);
         } else {
             state.buffs = normalizeBuffs(getDefaultBuffs());
             state.judges = getDefaultJudges();
             state.attacks = getDefaultAttacks();
-            applyNormalizedMacros(normalizeMacros(getDefaultMacros()));
+            state.macros = getDefaultMacros();
+            state.colorVariables = getDefaultColorVariables();
         }
     } catch (e) {
         console.error('データの読み込みに失敗:', e);
@@ -470,7 +462,8 @@ function loadData() {
         state.buffs = normalizeBuffs(getDefaultBuffs());
         state.judges = getDefaultJudges();
         state.attacks = getDefaultAttacks();
-        applyNormalizedMacros(normalizeMacros(getDefaultMacros()));
+        state.macros = getDefaultMacros();
+        state.colorVariables = getDefaultColorVariables();
     }
 
     migrateLegacyMacroReferences();
@@ -483,6 +476,8 @@ function loadData() {
     renderPackage('attack');
     updateBuffTargetDropdown();
     renderMacroList();
+    renderColorVariableList();
+    updateColorVariableSelect();
 }
 
 function getDefaultBuffs() {
@@ -507,6 +502,10 @@ function getDefaultAttacks() {
 }
 
 function getDefaultMacros() {
+    return normalizeMacros(['//=']);
+}
+
+function getDefaultColorVariables() {
     return [];
 }
 
@@ -518,7 +517,8 @@ function saveData() {
         judgeCategories: state.judgeCategories,
         attacks: state.attacks,
         attackCategories: state.attackCategories,
-        macros: state.macros
+        macros: state.macros,
+        colorVariables: state.colorVariables
     };
     
     try {
@@ -565,7 +565,8 @@ function exportData() {
         judgeCategories: state.judgeCategories,
         attacks: state.attacks,
         attackCategories: state.attackCategories,
-        macros: state.macros
+        macros: state.macros,
+        colorVariables: state.colorVariables
     };
     const json = JSON.stringify(data, null, 2);
     
@@ -596,8 +597,8 @@ function importData() {
         state.judgeCategories = data.judgeCategories || [];
         state.attacks = data.attacks || [];
         state.attackCategories = data.attackCategories || [];
-        applyNormalizedMacros(normalizeMacros(data.macros || []));
-        migrateLegacyMacroReferences();
+        state.macros = normalizeMacros(data.macros || []);
+        state.colorVariables = normalizeColorVariables(data.colorVariables || []);
 
         updateBuffCategorySelect();
         updateJudgeCategorySelect();
@@ -607,6 +608,8 @@ function importData() {
         renderPackage('attack');
         updateBuffTargetDropdown();
         renderMacroList();
+        renderColorVariableList();
+        updateColorVariableSelectors();
         saveData();
         
         document.getElementById('importText').value = '';
@@ -636,7 +639,7 @@ function renderMacroList() {
         return `
             <div class="item" data-macro-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
                 <div class="item-param" data-edit-macro="${index}" style="cursor: pointer;">
-                    <div class="item-name">${escapeHtml(macroValue)}</div>
+                    <div class="item-name">${escapeHtml(macro.value)}</div>
                 </div>
                 <div class="row-controls" style="gap: 6px; align-items:center;">
                     ${colorBadge}
@@ -657,12 +660,12 @@ function renderMacroList() {
     list.querySelectorAll('[data-edit-macro]').forEach(area => {
         const idx = parseInt(area.dataset.editMacro);
         area.addEventListener('click', () => {
-            const macroValue = state.macros[idx];
-            if (!macroValue) return;
-            const input = document.getElementById('macroValue');
-            if (!input) return;
-            input.value = macroValue;
-            state.macroEditIndex = idx;
+            const macro = state.macros[idx];
+            if (!macro) return;
+            const valueInput = document.getElementById('macroValue');
+            if (!valueInput) return;
+            valueInput.value = macro.value;
+            valueInput.dataset.editingIndex = idx;
         });
     });
 }
@@ -674,31 +677,25 @@ function addMacro() {
     const value = valueInput.value.trim();
 
     if (!value) {
-        showToast('登録する文字列を入力してください', 'error');
+        showToast('オートコンプリート用文字列を入力してください', 'error');
         return;
     }
 
-    const existingIndex = state.macros.findIndex(m => m === value);
-
-    if (state.macroEditIndex !== null && state.macroEditIndex >= 0) {
-        if (existingIndex >= 0 && existingIndex !== state.macroEditIndex) {
-            showToast('同じ内容のマクロがすでに存在します', 'error');
-            return;
-        }
-
-        state.macros[state.macroEditIndex] = value;
+    const editingIndex = parseInt(valueInput.dataset.editingIndex ?? '-1');
+    if (!isNaN(editingIndex) && editingIndex >= 0 && state.macros[editingIndex]) {
+        state.macros[editingIndex] = { ...state.macros[editingIndex], value };
         showToast('マクロを更新しました', 'success');
     } else {
-        if (existingIndex >= 0) {
-            showToast('同じ内容のマクロがすでに存在します', 'error');
-            return;
+        const duplicateIndex = state.macros.findIndex(m => m.value === value);
+        if (duplicateIndex >= 0) {
+            state.macros[duplicateIndex] = { ...state.macros[duplicateIndex], value };
+            showToast('既存のマクロを更新しました', 'success');
+        } else {
+            state.macros.push({ value, lastUsedAt: 0 });
+            showToast('マクロを追加しました', 'success');
         }
-
-        state.macros.push(value);
-        showToast('マクロを追加しました', 'success');
     }
 
-    syncLegacyMacroLookup();
     resetMacroInputs();
     renderMacroList();
     saveData();
@@ -708,36 +705,273 @@ function removeMacro(index) {
     if (index < 0 || index >= state.macros.length) return;
     const removed = state.macros[index];
     state.macros.splice(index, 1);
-
-    if (state.macroEditIndex === index) {
-        resetMacroInputs();
-    } else if (state.macroEditIndex !== null && state.macroEditIndex > index) {
-        state.macroEditIndex -= 1;
-    }
-
-    Object.keys(state.macroKeyLookup).forEach((key) => {
-        if (state.macroKeyLookup[key] === removed) {
-            delete state.macroKeyLookup[key];
-        }
-    });
-
+    resetMacroInputs();
     renderMacroList();
     saveData();
 }
 
 function resetMacroInputs() {
     const input = document.getElementById('macroValue');
-    if (input) {
-        input.value = '';
+    if (!input) return;
+    input.value = '';
+    delete input.dataset.editingIndex;
+}
+
+// ========================================
+// カラー変数
+// ========================================
+
+function renderColorVariableList() {
+    const list = document.getElementById('colorVariableList');
+    if (!list) return;
+
+    if (!state.colorVariables.length) {
+        list.innerHTML = '<div class="empty-message">カラー変数が登録されていません</div>';
+        return;
     }
-    state.macroEditIndex = null;
+
+    list.innerHTML = state.colorVariables.map((variable, index) => `
+        <div class="item" data-color-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
+            <div class="item-param" data-edit-color="${index}" style="cursor:pointer; display:flex; gap:8px; align-items:center;">
+                <span style="background:${escapeHtml(variable.code)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>
+                <div>
+                    <div class="item-name">${escapeHtml(variable.name)}</div>
+                    <div class="item-detail">${escapeHtml(variable.code)}</div>
+                </div>
+            </div>
+            <button class="material-symbols-rounded add-btn btn--danger" data-remove-color="${index}" title="削除">delete</button>
+        </div>
+    `).join('');
+
+    list.querySelectorAll('[data-edit-color]').forEach(area => {
+        const idx = parseInt(area.dataset.editColor);
+        area.addEventListener('click', () => {
+            const variable = state.colorVariables[idx];
+            if (!variable) return;
+            const nameInput = document.getElementById('colorVariableName');
+            const codeInput = document.getElementById('colorVariableCode');
+            if (!nameInput || !codeInput) return;
+            nameInput.value = variable.name;
+            nameInput.dataset.editingIndex = idx;
+            codeInput.value = variable.code;
+        });
+    });
+
+    list.querySelectorAll('[data-remove-color]').forEach(btn => {
+        const idx = parseInt(btn.dataset.removeColor);
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeColorVariable(idx);
+        });
+    });
+}
+
+function addColorVariable() {
+    const nameInput = document.getElementById('colorVariableName');
+    const codeInput = document.getElementById('colorVariableCode');
+    if (!nameInput || !codeInput) return;
+
+    const name = nameInput.value.trim();
+    const code = codeInput.value.trim();
+    const hexPattern = /^#[0-9A-Fa-f]{6}$/;
+
+    if (!name || !code) {
+        showToast('カラー変数名とカラーコードを入力してください', 'error');
+        return;
+    }
+
+    if (!hexPattern.test(code)) {
+        showToast('#RRGGBB形式でカラーコードを入力してください', 'error');
+        return;
+    }
+
+    const editingIndex = parseInt(nameInput.dataset.editingIndex ?? '-1');
+    if (!isNaN(editingIndex) && editingIndex >= 0 && state.colorVariables[editingIndex]) {
+        state.colorVariables[editingIndex] = { name, code };
+        showToast('カラー変数を更新しました', 'success');
+    } else {
+        const duplicateIndex = state.colorVariables.findIndex(v => v.name === name);
+        if (duplicateIndex >= 0) {
+            state.colorVariables[duplicateIndex] = { name, code };
+            showToast('同名のカラー変数を更新しました', 'success');
+        } else {
+            state.colorVariables.push({ name, code });
+            showToast('カラー変数を追加しました', 'success');
+        }
+    }
+
+    updateColorVariableSelect();
+    renderColorVariableList();
+    resetColorVariableInputs();
+    saveData();
+}
+
+function removeColorVariable(index) {
+    if (index < 0 || index >= state.colorVariables.length) return;
+    state.colorVariables.splice(index, 1);
+    resetColorVariableInputs();
+    updateColorVariableSelect();
+    renderColorVariableList();
+    saveData();
+}
+
+function resetColorVariableInputs() {
+    const nameInput = document.getElementById('colorVariableName');
+    const codeInput = document.getElementById('colorVariableCode');
+    if (nameInput) {
+        nameInput.value = '';
+        delete nameInput.dataset.editingIndex;
+    }
+    if (codeInput) {
+        codeInput.value = '';
+    }
+}
+
+function updateColorVariableSelect() {
+    const select = document.getElementById('buffColorVariableSelect');
+    if (!select) return;
+
+    const options = ['<option value="">未選択</option>'];
+    state.colorVariables.forEach(variable => {
+        options.push(`<option value="${escapeHtml(variable.name)}">${escapeHtml(variable.name)}</option>`);
+    });
+    select.innerHTML = options.join('');
+}
+
+function applyColorVariableSelection(event) {
+    const name = event.target.value;
+    if (!name) return;
+    const variable = state.colorVariables.find(v => v.name === name);
+    if (!variable) return;
+    const colorInput = document.getElementById('buffColor');
+    if (colorInput) {
+        colorInput.value = variable.code;
+    }
+}
+
+// ========================================
+// カラー変数管理
+// ========================================
+
+function renderColorVariableList() {
+    const list = document.getElementById('colorVariableList');
+    if (!list) return;
+
+    if (!state.colorVariables.length) {
+        list.innerHTML = '<div class="empty-message">カラー変数が登録されていません</div>';
+        return;
+    }
+
+    list.innerHTML = state.colorVariables.map((variable, index) => `
+        <div class="item" data-color-variable-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
+            <div class="item-param" data-edit-color-variable="${index}" style="cursor: pointer;">
+                <div class="item-name">${escapeHtml(variable.name)}</div>
+                <div class="item-detail" style="display:flex; align-items:center; gap:8px;">
+                    <span style="background:${escapeHtml(variable.code)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>
+                    <span>${escapeHtml(variable.code)}</span>
+                </div>
+            </div>
+            <div class="item-controls">
+                <button class="material-symbols-rounded add-btn btn--danger" data-remove-color-variable="${index}" title="削除">delete</button>
+            </div>
+        </div>
+    `).join('');
+
+    list.querySelectorAll('[data-remove-color-variable]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(btn.dataset.removeColorVariable);
+            removeColorVariable(idx);
+        });
+    });
+
+    list.querySelectorAll('[data-edit-color-variable]').forEach(area => {
+        area.addEventListener('click', () => {
+            const idx = parseInt(area.dataset.editColorVariable);
+            const variable = state.colorVariables[idx];
+            if (!variable) return;
+            document.getElementById('colorVariableName').value = variable.name;
+            document.getElementById('colorVariableCode').value = variable.code;
+        });
+    });
+}
+
+function addColorVariable() {
+    const name = document.getElementById('colorVariableName').value.trim();
+    const codeInput = document.getElementById('colorVariableCode').value.trim();
+
+    if (!name || !codeInput) {
+        showToast('カラー変数名とカラーコードを入力してください', 'error');
+        return;
+    }
+
+    if (!/^#[0-9A-Fa-f]{6}$/.test(codeInput)) {
+        showToast('カラーコードは#RRGGBB形式で入力してください', 'error');
+        return;
+    }
+
+    const existingIndex = state.colorVariables.findIndex(v => v.name === name);
+    const variable = { name, code: codeInput.toUpperCase() };
+
+    if (existingIndex >= 0) {
+        state.colorVariables[existingIndex] = variable;
+        showToast('カラー変数を更新しました', 'success');
+    } else {
+        state.colorVariables.push(variable);
+        showToast('カラー変数を追加しました', 'success');
+    }
+
+    resetColorVariableInputs();
+    renderColorVariableList();
+    updateColorVariableSelectors();
+    saveData();
+}
+
+function removeColorVariable(index) {
+    if (index < 0 || index >= state.colorVariables.length) return;
+    state.colorVariables.splice(index, 1);
+    renderColorVariableList();
+    updateColorVariableSelectors();
+    saveData();
+}
+
+function resetColorVariableInputs() {
+    document.getElementById('colorVariableName').value = '';
+    document.getElementById('colorVariableCode').value = '';
+}
+
+function updateColorVariableSelectors() {
+    const options = ['<option value="">カラー変数を選択</option>', ...state.colorVariables.map(v => `<option value="${escapeHtml(v.name)}">${escapeHtml(v.name)} (${escapeHtml(v.code)})</option>`)];
+    document.querySelectorAll('[data-color-variable-select]').forEach(select => {
+        const current = select.value;
+        select.innerHTML = options.join('');
+        if (state.colorVariables.some(v => v.name === current)) {
+            select.value = current;
+        } else {
+            select.value = '';
+        }
+    });
+}
+
+function attachColorVariableSelector(selectId, inputId) {
+    const select = document.getElementById(selectId);
+    const input = document.getElementById(inputId);
+    if (!select || !input) return;
+    select.dataset.colorVariableSelect = 'true';
+    select.addEventListener('change', () => {
+        const selectedName = select.value;
+        const variable = state.colorVariables.find(v => v.name === selectedName);
+        if (variable) {
+            input.value = variable.code;
+        }
+    });
 }
 
 // ========================================
 // マクロ補完UI
 // ========================================
 
-const macroSuggestionState = { target: null, activeIndex: 0 };
+const macroSuggestionState = { target: null, activeIndex: 0, items: [] };
 let macroSuggestionBox = null;
 
 function getMacroSuggestionBox() {
@@ -753,6 +987,7 @@ function hideMacroSuggestions() {
     if (!macroSuggestionBox) return;
     macroSuggestionBox.classList.add('hidden');
     macroSuggestionState.target = null;
+    macroSuggestionState.items = [];
 }
 
 function moveMacroSelection(delta) {
@@ -766,24 +1001,60 @@ function moveMacroSelection(delta) {
     });
 }
 
+function highlightMatch(text, query) {
+    if (!query) return escapeHtml(text);
+    const lowerText = text.toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    const index = lowerText.indexOf(lowerQuery);
+
+    if (index === -1) return escapeHtml(text);
+
+    const before = escapeHtml(text.slice(0, index));
+    const match = escapeHtml(text.slice(index, index + query.length));
+    const after = escapeHtml(text.slice(index + query.length));
+    return `${before}<strong>${match}</strong>${after}`;
+}
+
+function getRecentMacros(limit = 3) {
+    const sorted = [...state.macros]
+        .sort((a, b) => (b.lastUsedAt || 0) - (a.lastUsedAt || 0))
+        .filter(m => m.lastUsedAt);
+    if (sorted.length) return sorted.slice(0, limit);
+    return [...state.macros].slice(0, limit);
+}
+
+function getMatchingMacros(query) {
+    const lower = query.toLowerCase();
+    return state.macros
+        .filter(m => m.value.toLowerCase().includes(lower))
+        .sort((a, b) => {
+            const aIndex = a.value.toLowerCase().indexOf(lower);
+            const bIndex = b.value.toLowerCase().indexOf(lower);
+            if (aIndex !== bIndex) return aIndex - bIndex;
+            return (b.lastUsedAt || 0) - (a.lastUsedAt || 0);
+        });
+}
+
 function applyMacroSuggestion(index) {
     const target = macroSuggestionState.target;
     if (!target) return;
-    const macro = state.macros[index];
+    const macro = macroSuggestionState.items[index];
     if (!macro) return;
 
-    const caret = target.selectionStart ?? target.value.length;
-    const before = target.value.slice(0, caret);
-    const after = target.value.slice(caret);
-    const newBefore = before.slice(0, -1) + macro;
-    target.value = newBefore + after;
-
-    const pos = newBefore.length;
+    target.value = macro.value;
+    const pos = macro.value.length;
     target.setSelectionRange(pos, pos);
+
+    const stateMacro = state.macros.find(m => m.value === macro.value);
+    if (stateMacro) {
+        stateMacro.lastUsedAt = Date.now();
+        saveData();
+    }
+
     hideMacroSuggestions();
 }
 
-function showMacroSuggestions(target) {
+function showMacroSuggestions(target, query = '') {
     const box = getMacroSuggestionBox();
     box.innerHTML = '';
 
@@ -792,9 +1063,18 @@ function showMacroSuggestions(target) {
         return;
     }
 
-    box.innerHTML = state.macros.map((macro, index) => `
+    const trimmed = query.trim();
+    const items = trimmed ? getMatchingMacros(trimmed) : getRecentMacros();
+
+    if (!items.length) {
+        hideMacroSuggestions();
+        return;
+    }
+
+    macroSuggestionState.items = items;
+    box.innerHTML = items.map((macro, index) => `
         <button class="macro-suggestion-item ${index === 0 ? 'active' : ''}" data-macro-index="${index}" type="button">
-            <span>${escapeHtml(macro)}</span>
+            <span>${highlightMatch(macro.value, trimmed)}</span>
         </button>
     `).join('');
 
@@ -811,19 +1091,6 @@ function showMacroSuggestions(target) {
     box.style.left = `${rect.left + window.scrollX}px`;
     box.style.top = `${rect.bottom + window.scrollY + 4}px`;
     box.classList.remove('hidden');
-}
-
-function handleMacroTrigger(target) {
-    const caret = target.selectionStart ?? target.value.length;
-    const before = target.value.slice(0, caret);
-    const slashMatch = before.match(/\/+$/);
-
-    if (!slashMatch || slashMatch[0].length % 2 === 0) {
-        hideMacroSuggestions();
-        return;
-    }
-
-    showMacroSuggestions(target);
 }
 
 function handleMacroKeydown(event) {
@@ -843,9 +1110,20 @@ function handleMacroKeydown(event) {
     }
 }
 
+function handleMacroInput(event) {
+    const target = event.target;
+    showMacroSuggestions(target, target.value);
+}
+
+function handleMacroFocus(event) {
+    const target = event.target;
+    showMacroSuggestions(target, target.value);
+}
+
 function attachMacroSuggestions(input) {
     if (!input) return;
-    input.addEventListener('input', () => handleMacroTrigger(input));
+    input.addEventListener('focus', handleMacroFocus);
+    input.addEventListener('input', handleMacroInput);
     input.addEventListener('keydown', handleMacroKeydown);
     input.addEventListener('blur', () => setTimeout(hideMacroSuggestions, 150));
 }
@@ -854,6 +1132,7 @@ function setupMacroSuggestions() {
     attachMacroSuggestions(document.getElementById('buffEffect'));
     attachMacroSuggestions(document.getElementById('judgeRoll'));
     attachMacroSuggestions(document.getElementById('attackRoll'));
+    attachMacroSuggestions(document.getElementById('macroValue'));
 
     document.addEventListener('click', (e) => {
         if (macroSuggestionBox && !macroSuggestionBox.contains(e.target)) {
@@ -1385,6 +1664,11 @@ function openBuffModal(editIndex = null) {
         document.getElementById('buffEffect').value = buff.effect || '';
         document.getElementById('buffTurn').value = buff.originalTurn || '';
         document.getElementById('buffColor').value = buff.color;
+        const colorSelect = document.getElementById('buffColorVariableSelect');
+        if (colorSelect) {
+            const matchedVariable = state.colorVariables.find(v => v.code === buff.color);
+            colorSelect.value = matchedVariable ? matchedVariable.name : '';
+        }
         document.getElementById('buffCategorySelect').value = buff.category || 'none';
         document.getElementById('buffMemo').value = getBuffMemoText(buff);
         document.getElementById('buffSimpleMemoToggle').checked = buff.showSimpleMemo ?? Boolean(buff.description);
@@ -1409,6 +1693,8 @@ function resetBuffForm() {
     document.getElementById('buffEffect').value = '';
     document.getElementById('buffTurn').value = '';
     document.getElementById('buffColor').value = '#0079FF';
+    const colorSelect = document.getElementById('buffColorVariableSelect');
+    if (colorSelect) colorSelect.value = '';
     document.getElementById('buffCategorySelect').value = 'none';
     document.getElementById('buffMemo').value = '';
     document.getElementById('buffSimpleMemoToggle').checked = false;
@@ -1492,10 +1778,12 @@ function bulkAdd(type) {
             parser: (parts, index, category) => {
                 const name = parts[0];
                 const targetStr = parts[1] || '';
-                                const colorPattern = /^#[0-9A-Fa-f]{6}$/;
-                const colorIndex = parts.findIndex((part, idx) => idx >= 2 && colorPattern.test(part));
+                const colorPattern = /^#[0-9A-Fa-f]{6}$/;
+                const isColorToken = (token) => colorPattern.test(token) || state.colorVariables.some(v => v.name === token);
+                const colorIndex = parts.findIndex((part, idx) => idx >= 2 && isColorToken(part));
+                const colorToken = colorIndex >= 0 ? (parts[colorIndex] || '#0079FF') : (parts[4] || '#0079FF');
                 const memoAfterColor = (colorIndex >= 0 && colorIndex + 1 < parts.length) ? (parts[colorIndex + 1] || '') : '';
-                const color = validateColor(colorIndex >= 0 ? (parts[colorIndex] || '#0079FF') : (parts[4] || '#0079FF'));
+                const color = validateColor(resolveColorValueOrThrow(colorToken, `行${index + 1}のカラーコード`));
 
                 const payloadEnd = colorIndex >= 0 ? colorIndex : parts.length;
                 const payload = parts.slice(2, payloadEnd);
@@ -2607,6 +2895,7 @@ function copyToClipboard(elementId, button) {
 document.addEventListener('DOMContentLoaded', () => {
     setupSettingsMenu();
     setupMacroSuggestions();
+    attachColorVariableSelector('buffColorVariableSelect', 'buffColor');
 
     document.querySelectorAll('.section-header').forEach(header => {
         header.addEventListener('click', () => toggleSection(header));
@@ -2684,7 +2973,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('addMacroBtn')?.addEventListener('click', addMacro);
     document.getElementById('clearMacroInputs')?.addEventListener('click', resetMacroInputs);
-    
+    document.getElementById('addColorVariableBtn')?.addEventListener('click', addColorVariable);
+    document.getElementById('clearColorVariableInputs')?.addEventListener('click', resetColorVariableInputs);
+    document.getElementById('buffColorVariableSelect')?.addEventListener('change', applyColorVariableSelection);
+
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const targetId = this.getAttribute('data-target');
