@@ -6,6 +6,7 @@ const state = {
     judges: [],
     attacks: [],
     macros: [],
+    macroKeyLookup: {},
     buffCategories: [],
     judgeCategories: [],
     attackCategories: [],
@@ -15,6 +16,7 @@ const state = {
     draggedCategoryType: null,
     draggedCategoryName: null,
     selectedBuffTargets: [],
+    macroEditIndex: null,
     editMode: {
         active: false,
         type: null,
@@ -242,8 +244,13 @@ function validateColor(color) {
 
 function resolveMacroValue(value) {
     if (typeof value !== 'string') return value;
-    const hit = state.macros.find(m => m.key === value.trim());
-    return hit ? hit.value : value;
+    const trimmed = value.trim();
+    if (state.macros.includes(trimmed)) {
+        return trimmed;
+    }
+
+    const legacyHit = state.macroKeyLookup?.[trimmed];
+    return legacyHit || trimmed;
 }
 
 function resolveColorValue(value) {
@@ -254,7 +261,7 @@ function resolveColorValue(value) {
         return resolved;
     }
     if (trimmed) {
-        showToast('カラーコードが不正です。#RRGGBBまたはマクロ名を指定してください', 'error');
+        showToast('カラーコードが不正です。#RRGGBBを指定してください', 'error');
     }
     return '#ff6b6b';
 }
@@ -381,10 +388,62 @@ function normalizeBuffs(buffs = []) {
 }
 
 function normalizeMacros(macros = []) {
-    if (!Array.isArray(macros)) return [];
-    return macros
-        .map(m => ({ key: typeof m.key === 'string' ? m.key : '', value: typeof m.value === 'string' ? m.value : '' }))
-        .filter(m => m.key && m.value);
+    if (!Array.isArray(macros)) {
+        return { values: [], legacyMap: {} };
+    }
+
+    const legacyMap = {};
+    const values = macros.map((macro) => {
+        if (typeof macro === 'string') {
+            return macro.trim();
+        }
+
+        if (macro && typeof macro === 'object') {
+            const key = typeof macro.key === 'string' ? macro.key.trim() : '';
+            const value = typeof macro.value === 'string' ? macro.value.trim() : '';
+
+            if (key && value) {
+                legacyMap[key] = value;
+            }
+
+            return value || key;
+        }
+
+        return '';
+    }).filter(Boolean);
+
+    const uniqueValues = Array.from(new Set(values));
+    return { values: uniqueValues, legacyMap };
+}
+
+function applyNormalizedMacros(normalized) {
+    state.macros = normalized?.values || [];
+    state.macroKeyLookup = normalized?.legacyMap || {};
+}
+
+function syncLegacyMacroLookup() {
+    if (!state.macroKeyLookup) {
+        state.macroKeyLookup = {};
+        return;
+    }
+
+    const valueSet = new Set(state.macros);
+    Object.keys(state.macroKeyLookup).forEach((key) => {
+        if (!valueSet.has(state.macroKeyLookup[key])) {
+            delete state.macroKeyLookup[key];
+        }
+    });
+}
+
+function migrateLegacyMacroReferences() {
+    if (!state.macroKeyLookup || Object.keys(state.macroKeyLookup).length === 0) return;
+
+    state.buffs = state.buffs.map((buff) => {
+        if (typeof buff.color !== 'string') return buff;
+        const resolved = resolveMacroValue(buff.color);
+        if (resolved === buff.color) return buff;
+        return { ...buff, color: resolved };
+    });
 }
 
 function loadData() {
@@ -398,12 +457,12 @@ function loadData() {
             state.judgeCategories = Array.isArray(data.judgeCategories) ? data.judgeCategories : [];
             state.attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
             state.attackCategories = Array.isArray(data.attackCategories) ? data.attackCategories : [];
-            state.macros = normalizeMacros(Array.isArray(data.macros) ? data.macros : []);
+            applyNormalizedMacros(normalizeMacros(Array.isArray(data.macros) ? data.macros : []));
         } else {
             state.buffs = normalizeBuffs(getDefaultBuffs());
             state.judges = getDefaultJudges();
             state.attacks = getDefaultAttacks();
-            state.macros = getDefaultMacros();
+            applyNormalizedMacros(normalizeMacros(getDefaultMacros()));
         }
     } catch (e) {
         console.error('データの読み込みに失敗:', e);
@@ -411,8 +470,10 @@ function loadData() {
         state.buffs = normalizeBuffs(getDefaultBuffs());
         state.judges = getDefaultJudges();
         state.attacks = getDefaultAttacks();
-        state.macros = getDefaultMacros();
+        applyNormalizedMacros(normalizeMacros(getDefaultMacros()));
     }
+
+    migrateLegacyMacroReferences();
 
     updateBuffCategorySelect();
     updateJudgeCategorySelect();
@@ -535,7 +596,8 @@ function importData() {
         state.judgeCategories = data.judgeCategories || [];
         state.attacks = data.attacks || [];
         state.attackCategories = data.attackCategories || [];
-        state.macros = normalizeMacros(data.macros || []);
+        applyNormalizedMacros(normalizeMacros(data.macros || []));
+        migrateLegacyMacroReferences();
 
         updateBuffCategorySelect();
         updateJudgeCategorySelect();
@@ -568,14 +630,13 @@ function renderMacroList() {
         return;
     }
 
-    list.innerHTML = state.macros.map((macro, index) => {
-        const isColor = /^#[0-9A-Fa-f]{6}$/.test(macro.value.trim());
-        const colorBadge = isColor ? `<span style="background:${escapeHtml(macro.value)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>` : '';
+    list.innerHTML = state.macros.map((macroValue, index) => {
+        const isColor = /^#[0-9A-Fa-f]{6}$/.test(macroValue.trim());
+        const colorBadge = isColor ? `<span style="background:${escapeHtml(macroValue)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>` : '';
         return `
             <div class="item" data-macro-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
                 <div class="item-param" data-edit-macro="${index}" style="cursor: pointer;">
-                    <div class="item-name">${escapeHtml(macro.key)}</div>
-                    <div class="item-detail">${escapeHtml(macro.value)}</div>
+                    <div class="item-name">${escapeHtml(macroValue)}</div>
                 </div>
                 <div class="row-controls" style="gap: 6px; align-items:center;">
                     ${colorBadge}
@@ -596,50 +657,80 @@ function renderMacroList() {
     list.querySelectorAll('[data-edit-macro]').forEach(area => {
         const idx = parseInt(area.dataset.editMacro);
         area.addEventListener('click', () => {
-            const macro = state.macros[idx];
-            if (!macro) return;
-            document.getElementById('macroKey').value = macro.key;
-            document.getElementById('macroValue').value = macro.value;
+            const macroValue = state.macros[idx];
+            if (!macroValue) return;
+            const input = document.getElementById('macroValue');
+            if (!input) return;
+            input.value = macroValue;
+            state.macroEditIndex = idx;
         });
     });
 }
 
 function addMacro() {
-    const keyInput = document.getElementById('macroKey');
     const valueInput = document.getElementById('macroValue');
-    if (!keyInput || !valueInput) return;
+    if (!valueInput) return;
 
-    const key = keyInput.value.trim();
     const value = valueInput.value.trim();
 
-    if (!key || !value) {
-        showToast('マクロ名と展開文字列を入力してください', 'error');
+    if (!value) {
+        showToast('登録する文字列を入力してください', 'error');
         return;
     }
 
-    const existingIndex = state.macros.findIndex(m => m.key === key);
-    if (existingIndex >= 0) {
-        state.macros[existingIndex] = { key, value };
+    const existingIndex = state.macros.findIndex(m => m === value);
+
+    if (state.macroEditIndex !== null && state.macroEditIndex >= 0) {
+        if (existingIndex >= 0 && existingIndex !== state.macroEditIndex) {
+            showToast('同じ内容のマクロがすでに存在します', 'error');
+            return;
+        }
+
+        state.macros[state.macroEditIndex] = value;
         showToast('マクロを更新しました', 'success');
     } else {
-        state.macros.push({ key, value });
+        if (existingIndex >= 0) {
+            showToast('同じ内容のマクロがすでに存在します', 'error');
+            return;
+        }
+
+        state.macros.push(value);
         showToast('マクロを追加しました', 'success');
     }
 
+    syncLegacyMacroLookup();
+    resetMacroInputs();
     renderMacroList();
     saveData();
 }
 
 function removeMacro(index) {
     if (index < 0 || index >= state.macros.length) return;
+    const removed = state.macros[index];
     state.macros.splice(index, 1);
+
+    if (state.macroEditIndex === index) {
+        resetMacroInputs();
+    } else if (state.macroEditIndex !== null && state.macroEditIndex > index) {
+        state.macroEditIndex -= 1;
+    }
+
+    Object.keys(state.macroKeyLookup).forEach((key) => {
+        if (state.macroKeyLookup[key] === removed) {
+            delete state.macroKeyLookup[key];
+        }
+    });
+
     renderMacroList();
     saveData();
 }
 
 function resetMacroInputs() {
-    document.getElementById('macroKey').value = '';
-    document.getElementById('macroValue').value = '';
+    const input = document.getElementById('macroValue');
+    if (input) {
+        input.value = '';
+    }
+    state.macroEditIndex = null;
 }
 
 // ========================================
@@ -684,7 +775,7 @@ function applyMacroSuggestion(index) {
     const caret = target.selectionStart ?? target.value.length;
     const before = target.value.slice(0, caret);
     const after = target.value.slice(caret);
-    const newBefore = before.slice(0, -1) + macro.value;
+    const newBefore = before.slice(0, -1) + macro;
     target.value = newBefore + after;
 
     const pos = newBefore.length;
@@ -703,8 +794,7 @@ function showMacroSuggestions(target) {
 
     box.innerHTML = state.macros.map((macro, index) => `
         <button class="macro-suggestion-item ${index === 0 ? 'active' : ''}" data-macro-index="${index}" type="button">
-            <span>${escapeHtml(macro.key)}</span>
-            <small>${escapeHtml(macro.value)}</small>
+            <span>${escapeHtml(macro)}</span>
         </button>
     `).join('');
 

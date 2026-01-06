@@ -1271,16 +1271,12 @@ dialog .section-body {
                         <span class="section-header-title">ユーザーマクロ</span>
                     </div>
                     <div class="section-body" style="margin-top: 32px; display: flex; flex-direction: column; gap: 16px;">
-                        <div class="m-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div class="m-8" style="display: flex; flex-direction: column; gap: 12px;">
                             <div>
-                                <label for="macroKey" class="label-s">マクロ名</label>
-                                <input type="text" id="macroKey" placeholder="例：//必殺技">
-                                <p class="small-text">/を入力すると候補が表示されます。//では反応せず、///で再度表示されます。</p>
-                            </div>
-                            <div>
-                                <label for="macroValue" class="label-s">展開文字列</label>
+                                <label for="macroValue" class="label-s">登録文字列</label>
                                 <input type="text" id="macroValue" placeholder="例：2d6+5 または #FF0000">
-                                <p class="small-text">カラーコードを指定すると色入力欄でマクロ名を使って指定できます。</p>
+                                <p class="small-text">/を入力すると候補が表示されます。//では反応せず、///で再度表示されます。</p>
+                                <p class="small-text">カラーコードを登録しておくと色入力欄にも貼り付けやすくなります。</p>
                             </div>
                         </div>
                         <div class="row-controls" style="justify-content: flex-end; gap: 8px;">
