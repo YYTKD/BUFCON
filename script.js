@@ -16,6 +16,7 @@ const state = {
     draggedCategoryType: null,
     draggedCategoryName: null,
     selectedBuffTargets: [],
+    macroEditIndex: null,
     editMode: {
         active: false,
         type: null,
@@ -465,6 +466,8 @@ function loadData() {
         state.colorVariables = getDefaultColorVariables();
     }
 
+    migrateLegacyMacroReferences();
+
     updateBuffCategorySelect();
     updateJudgeCategorySelect();
     updateAttackCategorySelect();
@@ -630,9 +633,9 @@ function renderMacroList() {
         return;
     }
 
-    list.innerHTML = state.macros.map((macro, index) => {
-        const isColor = /^#[0-9A-Fa-f]{6}$/.test(macro.value.trim());
-        const colorBadge = isColor ? `<span style="background:${escapeHtml(macro.value)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>` : '';
+    list.innerHTML = state.macros.map((macroValue, index) => {
+        const isColor = /^#[0-9A-Fa-f]{6}$/.test(macroValue.trim());
+        const colorBadge = isColor ? `<span style="background:${escapeHtml(macroValue)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>` : '';
         return `
             <div class="item" data-macro-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
                 <div class="item-param" data-edit-macro="${index}" style="cursor: pointer;">
@@ -700,6 +703,7 @@ function addMacro() {
 
 function removeMacro(index) {
     if (index < 0 || index >= state.macros.length) return;
+    const removed = state.macros[index];
     state.macros.splice(index, 1);
     resetMacroInputs();
     renderMacroList();
