@@ -589,35 +589,6 @@
             color: #856404;
         }
         
-        .stat-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: var(--spacing-sm);
-        }
-        
-        .stat-tag {
-            background: #e7f3ff;
-            color: var(--add-color);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .stat-tag button {
-            background: none;
-            border: none;
-            color: var(--add-color);
-            cursor: pointer;
-            font-size: 14px;
-            padding: 0;
-            line-height: 1;
-        }
-
         /* ---ユーティリティクラス--- */
         .full-width { width: 100%; }
         .hidden { display: none; }
@@ -659,7 +630,7 @@
                     </div>
                     <div>
                         <label class="label-muted">JSONを貼り付けて読み込み:</label>
-                        <textarea id="importText" placeholder='{"stats":[...],"buffs":[...],...}' class="textarea-mono" style="height:120px;"></textarea>
+                        <textarea id="importText" placeholder='{"buffs":[...],"judges":[...],"attacks":[...]}' class="textarea-mono" style="height:120px;"></textarea>
                         <button class="add-btn btn--secondary full-width mt-6" id="importConfirm">読み込み実行</button>
                     </div>
                     <div class="mt-12 pt-12 bt-top">
@@ -667,25 +638,6 @@
                             <span class="material-symbols-rounded">delete_forever</span>
                             すべて初期化
                         </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <div class="section-header">
-                    <span class="material-symbols-rounded">analytics</span>
-                    <span class="section-header-title">ステータス</span>
-                    <span class="arrow">▼</span>
-                </div>
-                <div class="section-body">
-                    <div class="add-area">
-                            <div class="add-area-inputs">
-                                <input type="text" id="statName" placeholder="ステータス名 (,区切りで複数追加可)">
-                            </div>
-                            <button class="add-btn" id="addStatBtn">✚</button>
-                    </div>
-                    <div class="stat-tags" id="statList">
-                        <div class="empty-message">ステータスを追加してください</div>
                     </div>
                 </div>
             </div>
@@ -765,9 +717,6 @@
                             <div class="add-area-inputs">
                                 <input type="text" id="judgeName" placeholder="判定名">
                                 <input type="text" id="judgeRoll" placeholder="判定ロール (例: 1d20)">
-                                <select id="judgeStat" class="input-narrow">
-                                    <option value="">なし</option>
-                                </select>
                             </div>
                             <button class="add-btn" id="addJudgeBtn">✚</button>
                         </div>
@@ -778,12 +727,12 @@
                                 一括追加 ▼</button>
                             </span>
                             <div id="bulkAddJudgeArea" class="hidden mt-8">
-                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1|器用度&#10;回避判定|1d20|DEX" class="textarea-mono" style="height:80px;"></textarea>
+                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1&#10;回避判定|1d20" class="textarea-mono" style="height:80px;"></textarea>
                                 <div class="row-controls">
                                     <button class="add-btn flex-1" id="bulkAddJudgeConfirm">追加を実行</button>
                                     <button class="add-btn btn--muted flex-1" id="bulkAddJudgeCancel">キャンセル</button>
                                 </div>
-                                <div class="small-text">形式: 判定名|判定ロール|ステータス名<br>※ステータス名は省略可</div>
+                                <div class="small-text">形式: 判定名|判定ロール</div>
                             </div>
                         </div>
                     </details>
@@ -825,9 +774,6 @@
                             <div class="add-area-inputs">
                                 <input type="text" id="attackName" placeholder="攻撃名">
                                 <input type="text" id="attackRoll" placeholder="攻撃ロール (例: 2d6,K20@10)">
-                                <select id="attackStat" class="input-narrow">
-                                    <option value="">なし</option>
-                                </select>
                             </div>
                             <button class="add-btn" id="addAttackBtn">✚</button>
                         </div>
@@ -837,12 +783,12 @@
                                 <span class="material-symbols-rounded">list</span>
                                 一括追加 ▼</button>
                             </span>                            <div id="bulkAddAttackArea" class="hidden mt-8">
-                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10|筋力B&#10;ファイアボール|1d6+3|INT" class="textarea-mono" style="height:80px;"></textarea>
+                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10&#10;ファイアボール|1d6+3" class="textarea-mono" style="height:80px;"></textarea>
                                 <div class="row-controls">
                                     <button class="add-btn flex-1" id="bulkAddAttackConfirm">追加を実行</button>
                                     <button class="add-btn btn--muted flex-1" id="bulkAddAttackCancel">キャンセル</button>
                                 </div>
-                                <div class="small-text">形式: 攻撃名|攻撃ロール|ステータス名<br>※ステータス名は省略可</div>
+                                <div class="small-text">形式: 攻撃名|攻撃ロール</div>
                             </div>
                         </div>
                     </details>
