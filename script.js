@@ -241,30 +241,42 @@ function validateColor(color) {
     return hexPattern.test(color) ? color : '#ff6b6b';
 }
 
-function resolveMacroValue(value) {
-    if (typeof value !== 'string') return value;
-    const hit = state.macros.find(m => m.key === value.trim());
-    return hit ? hit.value : value;
-}
-
 function resolveColorValue(value) {
     if (typeof value !== 'string') return '#ff6b6b';
     const trimmed = value.trim();
-    if (!trimmed) return '#ff6b6b';
+    const colorVariable = state.colorVariables.find(v => v.name === trimmed);
 
-    const variableHit = state.colorVariables.find(v => v.name === trimmed);
-    if (variableHit) return variableHit.code;
-
-    const resolved = resolveMacroValue(trimmed);
-    if (/^#[0-9A-Fa-f]{6}$/.test(resolved)) {
-        return resolved;
+    if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
+        return trimmed;
     }
 
-    const nestedVariable = state.colorVariables.find(v => v.name === resolved);
-    if (nestedVariable) return nestedVariable.code;
+    if (colorVariable) {
+        return colorVariable.code;
+    }
 
-    showToast('カラーコードが不正です。#RRGGBBまたは登録済みのカラー変数名/マクロ名を指定してください', 'error');
+    if (trimmed) {
+        showToast('カラーコードが不正です。#RRGGBBまたは登録済みカラー変数名を指定してください', 'error');
+    }
     return '#ff6b6b';
+}
+
+function resolveColorValueOrThrow(value, contextLabel = 'カラーコード') {
+    if (typeof value !== 'string') {
+        throw `${contextLabel}が空です`;
+    }
+
+    const trimmed = value.trim();
+    const colorVariable = state.colorVariables.find(v => v.name === trimmed);
+
+    if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
+        return trimmed;
+    }
+
+    if (colorVariable) {
+        return colorVariable.code;
+    }
+
+    throw `${contextLabel}が不正です。#RRGGBB または登録済みのカラー変数名を指定してください`;
 }
 
 /**
@@ -391,8 +403,26 @@ function normalizeBuffs(buffs = []) {
 function normalizeMacros(macros = []) {
     if (!Array.isArray(macros)) return [];
     return macros
-        .map(m => ({ key: typeof m.key === 'string' ? m.key : '', value: typeof m.value === 'string' ? m.value : '' }))
-        .filter(m => m.key && m.value);
+        .map(m => {
+            if (typeof m === 'string') {
+                return { value: m, lastUsedAt: 0 };
+            }
+            const value = typeof m.value === 'string' ? m.value : (typeof m.key === 'string' ? m.key : '');
+            const lastUsedAt = typeof m.lastUsedAt === 'number' ? m.lastUsedAt : 0;
+            return { value, lastUsedAt };
+        })
+        .filter(m => m.value);
+}
+
+function normalizeColorVariables(vars = []) {
+    if (!Array.isArray(vars)) return [];
+    const hexPattern = /^#[0-9A-Fa-f]{6}$/;
+    return vars
+        .map(v => ({
+            name: typeof v.name === 'string' ? v.name.trim() : '',
+            code: typeof v.code === 'string' && hexPattern.test(v.code.trim()) ? v.code.trim() : ''
+        }))
+        .filter(v => v.name && v.code);
 }
 
 function normalizeColorVariables(variables = []) {
@@ -423,7 +453,7 @@ function loadData() {
             state.judges = getDefaultJudges();
             state.attacks = getDefaultAttacks();
             state.macros = getDefaultMacros();
-            state.colorVariables = [];
+            state.colorVariables = getDefaultColorVariables();
         }
     } catch (e) {
         console.error('データの読み込みに失敗:', e);
@@ -432,7 +462,7 @@ function loadData() {
         state.judges = getDefaultJudges();
         state.attacks = getDefaultAttacks();
         state.macros = getDefaultMacros();
-        state.colorVariables = [];
+        state.colorVariables = getDefaultColorVariables();
     }
 
     updateBuffCategorySelect();
@@ -444,7 +474,7 @@ function loadData() {
     updateBuffTargetDropdown();
     renderMacroList();
     renderColorVariableList();
-    updateColorVariableSelectors();
+    updateColorVariableSelect();
 }
 
 function getDefaultBuffs() {
@@ -469,6 +499,10 @@ function getDefaultAttacks() {
 }
 
 function getDefaultMacros() {
+    return normalizeMacros(['//=']);
+}
+
+function getDefaultColorVariables() {
     return [];
 }
 
@@ -602,8 +636,7 @@ function renderMacroList() {
         return `
             <div class="item" data-macro-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
                 <div class="item-param" data-edit-macro="${index}" style="cursor: pointer;">
-                    <div class="item-name">${escapeHtml(macro.key)}</div>
-                    <div class="item-detail">${escapeHtml(macro.value)}</div>
+                    <div class="item-name">${escapeHtml(macro.value)}</div>
                 </div>
                 <div class="row-controls" style="gap: 6px; align-items:center;">
                     ${colorBadge}
@@ -626,34 +659,41 @@ function renderMacroList() {
         area.addEventListener('click', () => {
             const macro = state.macros[idx];
             if (!macro) return;
-            document.getElementById('macroKey').value = macro.key;
-            document.getElementById('macroValue').value = macro.value;
+            const valueInput = document.getElementById('macroValue');
+            if (!valueInput) return;
+            valueInput.value = macro.value;
+            valueInput.dataset.editingIndex = idx;
         });
     });
 }
 
 function addMacro() {
-    const keyInput = document.getElementById('macroKey');
     const valueInput = document.getElementById('macroValue');
-    if (!keyInput || !valueInput) return;
+    if (!valueInput) return;
 
-    const key = keyInput.value.trim();
     const value = valueInput.value.trim();
 
-    if (!key || !value) {
-        showToast('マクロ名と展開文字列を入力してください', 'error');
+    if (!value) {
+        showToast('オートコンプリート用文字列を入力してください', 'error');
         return;
     }
 
-    const existingIndex = state.macros.findIndex(m => m.key === key);
-    if (existingIndex >= 0) {
-        state.macros[existingIndex] = { key, value };
+    const editingIndex = parseInt(valueInput.dataset.editingIndex ?? '-1');
+    if (!isNaN(editingIndex) && editingIndex >= 0 && state.macros[editingIndex]) {
+        state.macros[editingIndex] = { ...state.macros[editingIndex], value };
         showToast('マクロを更新しました', 'success');
     } else {
-        state.macros.push({ key, value });
-        showToast('マクロを追加しました', 'success');
+        const duplicateIndex = state.macros.findIndex(m => m.value === value);
+        if (duplicateIndex >= 0) {
+            state.macros[duplicateIndex] = { ...state.macros[duplicateIndex], value };
+            showToast('既存のマクロを更新しました', 'success');
+        } else {
+            state.macros.push({ value, lastUsedAt: 0 });
+            showToast('マクロを追加しました', 'success');
+        }
     }
 
+    resetMacroInputs();
     renderMacroList();
     saveData();
 }
@@ -661,13 +701,148 @@ function addMacro() {
 function removeMacro(index) {
     if (index < 0 || index >= state.macros.length) return;
     state.macros.splice(index, 1);
+    resetMacroInputs();
     renderMacroList();
     saveData();
 }
 
 function resetMacroInputs() {
-    document.getElementById('macroKey').value = '';
-    document.getElementById('macroValue').value = '';
+    const input = document.getElementById('macroValue');
+    if (!input) return;
+    input.value = '';
+    delete input.dataset.editingIndex;
+}
+
+// ========================================
+// カラー変数
+// ========================================
+
+function renderColorVariableList() {
+    const list = document.getElementById('colorVariableList');
+    if (!list) return;
+
+    if (!state.colorVariables.length) {
+        list.innerHTML = '<div class="empty-message">カラー変数が登録されていません</div>';
+        return;
+    }
+
+    list.innerHTML = state.colorVariables.map((variable, index) => `
+        <div class="item" data-color-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
+            <div class="item-param" data-edit-color="${index}" style="cursor:pointer; display:flex; gap:8px; align-items:center;">
+                <span style="background:${escapeHtml(variable.code)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>
+                <div>
+                    <div class="item-name">${escapeHtml(variable.name)}</div>
+                    <div class="item-detail">${escapeHtml(variable.code)}</div>
+                </div>
+            </div>
+            <button class="material-symbols-rounded add-btn btn--danger" data-remove-color="${index}" title="削除">delete</button>
+        </div>
+    `).join('');
+
+    list.querySelectorAll('[data-edit-color]').forEach(area => {
+        const idx = parseInt(area.dataset.editColor);
+        area.addEventListener('click', () => {
+            const variable = state.colorVariables[idx];
+            if (!variable) return;
+            const nameInput = document.getElementById('colorVariableName');
+            const codeInput = document.getElementById('colorVariableCode');
+            if (!nameInput || !codeInput) return;
+            nameInput.value = variable.name;
+            nameInput.dataset.editingIndex = idx;
+            codeInput.value = variable.code;
+        });
+    });
+
+    list.querySelectorAll('[data-remove-color]').forEach(btn => {
+        const idx = parseInt(btn.dataset.removeColor);
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeColorVariable(idx);
+        });
+    });
+}
+
+function addColorVariable() {
+    const nameInput = document.getElementById('colorVariableName');
+    const codeInput = document.getElementById('colorVariableCode');
+    if (!nameInput || !codeInput) return;
+
+    const name = nameInput.value.trim();
+    const code = codeInput.value.trim();
+    const hexPattern = /^#[0-9A-Fa-f]{6}$/;
+
+    if (!name || !code) {
+        showToast('カラー変数名とカラーコードを入力してください', 'error');
+        return;
+    }
+
+    if (!hexPattern.test(code)) {
+        showToast('#RRGGBB形式でカラーコードを入力してください', 'error');
+        return;
+    }
+
+    const editingIndex = parseInt(nameInput.dataset.editingIndex ?? '-1');
+    if (!isNaN(editingIndex) && editingIndex >= 0 && state.colorVariables[editingIndex]) {
+        state.colorVariables[editingIndex] = { name, code };
+        showToast('カラー変数を更新しました', 'success');
+    } else {
+        const duplicateIndex = state.colorVariables.findIndex(v => v.name === name);
+        if (duplicateIndex >= 0) {
+            state.colorVariables[duplicateIndex] = { name, code };
+            showToast('同名のカラー変数を更新しました', 'success');
+        } else {
+            state.colorVariables.push({ name, code });
+            showToast('カラー変数を追加しました', 'success');
+        }
+    }
+
+    updateColorVariableSelect();
+    renderColorVariableList();
+    resetColorVariableInputs();
+    saveData();
+}
+
+function removeColorVariable(index) {
+    if (index < 0 || index >= state.colorVariables.length) return;
+    state.colorVariables.splice(index, 1);
+    resetColorVariableInputs();
+    updateColorVariableSelect();
+    renderColorVariableList();
+    saveData();
+}
+
+function resetColorVariableInputs() {
+    const nameInput = document.getElementById('colorVariableName');
+    const codeInput = document.getElementById('colorVariableCode');
+    if (nameInput) {
+        nameInput.value = '';
+        delete nameInput.dataset.editingIndex;
+    }
+    if (codeInput) {
+        codeInput.value = '';
+    }
+}
+
+function updateColorVariableSelect() {
+    const select = document.getElementById('buffColorVariableSelect');
+    if (!select) return;
+
+    const options = ['<option value="">未選択</option>'];
+    state.colorVariables.forEach(variable => {
+        options.push(`<option value="${escapeHtml(variable.name)}">${escapeHtml(variable.name)}</option>`);
+    });
+    select.innerHTML = options.join('');
+}
+
+function applyColorVariableSelection(event) {
+    const name = event.target.value;
+    if (!name) return;
+    const variable = state.colorVariables.find(v => v.name === name);
+    if (!variable) return;
+    const colorInput = document.getElementById('buffColor');
+    if (colorInput) {
+        colorInput.value = variable.code;
+    }
 }
 
 // ========================================
@@ -792,7 +967,7 @@ function attachColorVariableSelector(selectId, inputId) {
 // マクロ補完UI
 // ========================================
 
-const macroSuggestionState = { target: null, activeIndex: 0 };
+const macroSuggestionState = { target: null, activeIndex: 0, items: [] };
 let macroSuggestionBox = null;
 
 function getMacroSuggestionBox() {
@@ -808,6 +983,7 @@ function hideMacroSuggestions() {
     if (!macroSuggestionBox) return;
     macroSuggestionBox.classList.add('hidden');
     macroSuggestionState.target = null;
+    macroSuggestionState.items = [];
 }
 
 function moveMacroSelection(delta) {
@@ -821,24 +997,60 @@ function moveMacroSelection(delta) {
     });
 }
 
+function highlightMatch(text, query) {
+    if (!query) return escapeHtml(text);
+    const lowerText = text.toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    const index = lowerText.indexOf(lowerQuery);
+
+    if (index === -1) return escapeHtml(text);
+
+    const before = escapeHtml(text.slice(0, index));
+    const match = escapeHtml(text.slice(index, index + query.length));
+    const after = escapeHtml(text.slice(index + query.length));
+    return `${before}<strong>${match}</strong>${after}`;
+}
+
+function getRecentMacros(limit = 3) {
+    const sorted = [...state.macros]
+        .sort((a, b) => (b.lastUsedAt || 0) - (a.lastUsedAt || 0))
+        .filter(m => m.lastUsedAt);
+    if (sorted.length) return sorted.slice(0, limit);
+    return [...state.macros].slice(0, limit);
+}
+
+function getMatchingMacros(query) {
+    const lower = query.toLowerCase();
+    return state.macros
+        .filter(m => m.value.toLowerCase().includes(lower))
+        .sort((a, b) => {
+            const aIndex = a.value.toLowerCase().indexOf(lower);
+            const bIndex = b.value.toLowerCase().indexOf(lower);
+            if (aIndex !== bIndex) return aIndex - bIndex;
+            return (b.lastUsedAt || 0) - (a.lastUsedAt || 0);
+        });
+}
+
 function applyMacroSuggestion(index) {
     const target = macroSuggestionState.target;
     if (!target) return;
-    const macro = state.macros[index];
+    const macro = macroSuggestionState.items[index];
     if (!macro) return;
 
-    const caret = target.selectionStart ?? target.value.length;
-    const before = target.value.slice(0, caret);
-    const after = target.value.slice(caret);
-    const newBefore = before.slice(0, -1) + macro.value;
-    target.value = newBefore + after;
-
-    const pos = newBefore.length;
+    target.value = macro.value;
+    const pos = macro.value.length;
     target.setSelectionRange(pos, pos);
+
+    const stateMacro = state.macros.find(m => m.value === macro.value);
+    if (stateMacro) {
+        stateMacro.lastUsedAt = Date.now();
+        saveData();
+    }
+
     hideMacroSuggestions();
 }
 
-function showMacroSuggestions(target) {
+function showMacroSuggestions(target, query = '') {
     const box = getMacroSuggestionBox();
     box.innerHTML = '';
 
@@ -847,10 +1059,18 @@ function showMacroSuggestions(target) {
         return;
     }
 
-    box.innerHTML = state.macros.map((macro, index) => `
+    const trimmed = query.trim();
+    const items = trimmed ? getMatchingMacros(trimmed) : getRecentMacros();
+
+    if (!items.length) {
+        hideMacroSuggestions();
+        return;
+    }
+
+    macroSuggestionState.items = items;
+    box.innerHTML = items.map((macro, index) => `
         <button class="macro-suggestion-item ${index === 0 ? 'active' : ''}" data-macro-index="${index}" type="button">
-            <span>${escapeHtml(macro.key)}</span>
-            <small>${escapeHtml(macro.value)}</small>
+            <span>${highlightMatch(macro.value, trimmed)}</span>
         </button>
     `).join('');
 
@@ -867,19 +1087,6 @@ function showMacroSuggestions(target) {
     box.style.left = `${rect.left + window.scrollX}px`;
     box.style.top = `${rect.bottom + window.scrollY + 4}px`;
     box.classList.remove('hidden');
-}
-
-function handleMacroTrigger(target) {
-    const caret = target.selectionStart ?? target.value.length;
-    const before = target.value.slice(0, caret);
-    const slashMatch = before.match(/\/+$/);
-
-    if (!slashMatch || slashMatch[0].length % 2 === 0) {
-        hideMacroSuggestions();
-        return;
-    }
-
-    showMacroSuggestions(target);
 }
 
 function handleMacroKeydown(event) {
@@ -899,9 +1106,20 @@ function handleMacroKeydown(event) {
     }
 }
 
+function handleMacroInput(event) {
+    const target = event.target;
+    showMacroSuggestions(target, target.value);
+}
+
+function handleMacroFocus(event) {
+    const target = event.target;
+    showMacroSuggestions(target, target.value);
+}
+
 function attachMacroSuggestions(input) {
     if (!input) return;
-    input.addEventListener('input', () => handleMacroTrigger(input));
+    input.addEventListener('focus', handleMacroFocus);
+    input.addEventListener('input', handleMacroInput);
     input.addEventListener('keydown', handleMacroKeydown);
     input.addEventListener('blur', () => setTimeout(hideMacroSuggestions, 150));
 }
@@ -910,6 +1128,7 @@ function setupMacroSuggestions() {
     attachMacroSuggestions(document.getElementById('buffEffect'));
     attachMacroSuggestions(document.getElementById('judgeRoll'));
     attachMacroSuggestions(document.getElementById('attackRoll'));
+    attachMacroSuggestions(document.getElementById('macroValue'));
 
     document.addEventListener('click', (e) => {
         if (macroSuggestionBox && !macroSuggestionBox.contains(e.target)) {
@@ -1441,6 +1660,11 @@ function openBuffModal(editIndex = null) {
         document.getElementById('buffEffect').value = buff.effect || '';
         document.getElementById('buffTurn').value = buff.originalTurn || '';
         document.getElementById('buffColor').value = buff.color;
+        const colorSelect = document.getElementById('buffColorVariableSelect');
+        if (colorSelect) {
+            const matchedVariable = state.colorVariables.find(v => v.code === buff.color);
+            colorSelect.value = matchedVariable ? matchedVariable.name : '';
+        }
         document.getElementById('buffCategorySelect').value = buff.category || 'none';
         document.getElementById('buffMemo').value = getBuffMemoText(buff);
         document.getElementById('buffSimpleMemoToggle').checked = buff.showSimpleMemo ?? Boolean(buff.description);
@@ -1550,11 +1774,12 @@ function bulkAdd(type) {
             parser: (parts, index, category) => {
                 const name = parts[0];
                 const targetStr = parts[1] || '';
-                                const colorPattern = /^#[0-9A-Fa-f]{6}$/;
-                const colorIndex = parts.findIndex((part, idx) => idx >= 2 && colorPattern.test(part));
+                const colorPattern = /^#[0-9A-Fa-f]{6}$/;
+                const isColorToken = (token) => colorPattern.test(token) || state.colorVariables.some(v => v.name === token);
+                const colorIndex = parts.findIndex((part, idx) => idx >= 2 && isColorToken(part));
+                const colorToken = colorIndex >= 0 ? (parts[colorIndex] || '#0079FF') : (parts[4] || '#0079FF');
                 const memoAfterColor = (colorIndex >= 0 && colorIndex + 1 < parts.length) ? (parts[colorIndex + 1] || '') : '';
-                const colorSource = colorIndex >= 0 ? (parts[colorIndex] || '#0079FF') : (parts[4] || '#0079FF');
-                const color = validateColor(resolveColorValue(colorSource));
+                const color = validateColor(resolveColorValueOrThrow(colorToken, `行${index + 1}のカラーコード`));
 
                 const payloadEnd = colorIndex >= 0 ? colorIndex : parts.length;
                 const payload = parts.slice(2, payloadEnd);
@@ -2746,7 +2971,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('clearMacroInputs')?.addEventListener('click', resetMacroInputs);
     document.getElementById('addColorVariableBtn')?.addEventListener('click', addColorVariable);
     document.getElementById('clearColorVariableInputs')?.addEventListener('click', resetColorVariableInputs);
-    
+    document.getElementById('buffColorVariableSelect')?.addEventListener('change', applyColorVariableSelection);
+
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const targetId = this.getAttribute('data-target');
