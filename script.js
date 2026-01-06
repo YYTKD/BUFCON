@@ -140,6 +140,65 @@ function openCategoryContextMenu(event, type, categoryName) {
     showContextMenu(event.pageX, event.pageY, actions);
 }
 
+// ========================================
+// 設定メニュー
+// ========================================
+
+function openSettingsModal(targetId) {
+    const modal = document.getElementById(targetId);
+    if (modal?.showModal) {
+        modal.showModal();
+    }
+}
+
+function setupSettingsMenu() {
+    const toggle = document.getElementById('settingsToggle');
+    const dropdown = document.getElementById('settingsDropdown');
+    if (!toggle || !dropdown) return;
+
+    const hideDropdown = () => {
+        dropdown.classList.add('hidden');
+        toggle.setAttribute('aria-expanded', 'false');
+    };
+
+    const showDropdown = () => {
+        dropdown.classList.remove('hidden');
+        toggle.setAttribute('aria-expanded', 'true');
+    };
+
+    toggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+        if (isExpanded) {
+            hideDropdown();
+        } else {
+            showDropdown();
+        }
+    });
+
+    dropdown.addEventListener('click', (event) => {
+        const item = event.target.closest('.settings-dropdown-item');
+        if (!item) return;
+        const targetId = item.dataset.target;
+        hideDropdown();
+        if (targetId) {
+            openSettingsModal(targetId);
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!dropdown.contains(event.target) && !toggle.contains(event.target)) {
+            hideDropdown();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            hideDropdown();
+        }
+    });
+}
+
 function getCategories(type) {
     if (type === 'buff') return state.buffCategories;
     if (type === 'judge') return state.judgeCategories;
@@ -328,11 +387,9 @@ function loadData() {
     updateBuffCategorySelect();
     updateJudgeCategorySelect();
     updateAttackCategorySelect();
-    renderStats();
     renderBuffs();
     renderPackage('judge');
     renderPackage('attack');
-    updateStatSelects();
     updateBuffTargetDropdown();
 }
 
@@ -430,7 +487,7 @@ function importData() {
     
     try {
         const data = JSON.parse(text);
-        
+
         if (!data.buffs || !data.judges || !data.attacks) {
             throw new Error('無効なデータ形式です');
         }
@@ -534,6 +591,7 @@ function initFileDropZone() {
         reader.readAsText(file);
     });
 }
+
 
 // ========================================
 // カテゴリ管理
@@ -1727,7 +1785,6 @@ function openJudgeModal(editIndex = null) {
         document.getElementById('judgeName').value = judge.name;
         document.getElementById('judgeRoll').value = judge.roll;
 
-
         const categorySelect = document.getElementById('judgeCategorySelect');
         if (categorySelect) {
             categorySelect.value = judge.category || 'none';
@@ -1771,7 +1828,6 @@ function openAttackModal(editIndex = null) {
         const attack = state.attacks[editIndex];
         document.getElementById('attackName').value = attack.name;
         document.getElementById('attackRoll').value = attack.roll;
-        
 
         const categorySelect = document.getElementById('attackCategorySelect');
         if (categorySelect) {
@@ -2049,7 +2105,7 @@ function updatePackageOutput(type, selectedIndex = null) {
     }
     
     if (selectedIndex < 0 || selectedIndex >= array.length) return;
-    
+
     const item = array[selectedIndex];
     let command = item.roll;
 
@@ -2208,10 +2264,12 @@ function copyToClipboard(elementId, button) {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    setupSettingsMenu();
+
     document.querySelectorAll('.section-header').forEach(header => {
         header.addEventListener('click', () => toggleSection(header));
     });
-    
+
     document.getElementById('addBuffBtn')?.addEventListener('click', addBuff);
     document.getElementById('addBuffCategoryBtn')?.addEventListener('click', () => addCategory('buff', 'buffCategoryInput'));
     document.getElementById('turnProgressBtn')?.addEventListener('click', progressTurn);
@@ -2275,10 +2333,13 @@ document.addEventListener('DOMContentLoaded', () => {
         textId: 'bulkAddAttackText',
         type: 'attack'
     });
-    
+
     document.getElementById('exportToClipboard')?.addEventListener('click', exportData);
     document.getElementById('importConfirm')?.addEventListener('click', importData);
     document.getElementById('resetBtn')?.addEventListener('click', resetAll);
+    document.getElementById('userMacroClose')?.addEventListener('click', () => {
+        document.getElementById('userMacroModal')?.close();
+    });
     
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', function() {

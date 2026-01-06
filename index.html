@@ -336,6 +336,8 @@ header {
 .header-menu {
     display: flex;
     width: 50%;
+    gap: 16px;
+    margin-right: 16px;
     max-width: 300px;
     min-width: 120px;
     height: stretch;
@@ -372,9 +374,48 @@ header {
     display: none;
 }
 
-.header-menu-item span {
+.header-menu-item .material-symbols-rounded {
     font-size: 32px;
     font-variation-settings: 'FILL' 1;
+}
+
+.settings-menu {
+    position: relative;
+}
+
+.settings-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--primary-color-1);
+    border: 1px solid var(--primary-color-2);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    min-width: 180px;
+    padding: 6px 0;
+    z-index: 1100;
+}
+
+.settings-dropdown.hidden {
+    display: none;
+}
+
+.settings-dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    color: var(--secondary-color-1);
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.settings-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 
@@ -1122,10 +1163,22 @@ dialog .section-body {
             <div class="title">JET-PALET</div>
         </div>
         <div class="header-menu">
-            <button class="header-menu-item" style="anchor-name: --save" command="show-modal" commandfor="DataOption">
-                <div class="tooltip" style="--target: --save">セーブ・ロード</div>
-                <span class="material-symbols-rounded">save</span>
-            </button>
+            <div class="settings-menu header-menu-item">
+                <a type="button" id="settingsToggle" style="anchor-name: --settings"  target="_blank" rel="noopener noreferrer">
+                    <div class="tooltip" style="--target: --settings">設定</div>
+                    <span class="material-symbols-rounded">settings</span>
+                </a>
+                <div class="settings-dropdown hidden" id="settingsDropdown">
+                    <button class="settings-dropdown-item" data-target="DataOption">
+                        <span class="material-symbols-rounded">checkbook</span>
+                        <span>データ管理</span>
+                    </button>
+                    <button class="settings-dropdown-item" data-target="userMacroModal">
+                        <span class="material-symbols-rounded">bookmarks</span>
+                        <span>ユーザーマクロ</span>
+                    </button>
+                </div>
+            </div>
             <a class="header-menu-item" style="anchor-name: --help" href="https://unexpected-avatar-e3c.notion.site/BUFCON-2d1c2563a7d8804b97f9e64754356198" target="_blank" rel="noopener noreferrer">
                 <div class="tooltip" style="--target: --help">使い方</div>
                 <span class="material-symbols-rounded">help</span>
@@ -1166,6 +1219,19 @@ dialog .section-body {
                                 <span class="material-symbols-rounded">delete_forever</span>
                                 <span>すべて</span><span>初期化</span>
                             </button>
+                        </div>
+                    </div>
+            </dialog>
+<!--ユーザーマクロ　モーダル-->
+            <dialog class="section modal" id="userMacroModal" closedby="any">
+                    <div class="section section-header-m">
+                        <span class="material-symbols-rounded">bookmarks</span>
+                        <span class="section-header-title">ユーザーマクロ</span>
+                    </div>
+                    <div class="section-body" style="margin-top: 32px; display: flex; flex-direction: column; gap: 16px;">
+                        <p class="small-text">マクロの登録と管理は今後の機能追加で利用されます。</p>
+                        <div class="row-controls" style="justify-content: flex-end;">
+                            <button class="add-btn secondary-btn" id="userMacroClose">閉じる</button>
                         </div>
                     </div>
             </dialog>
@@ -1419,7 +1485,7 @@ dialog .section-body {
                                 <p class="small-text">形式：判定名|判定ロール</p>
                                 <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="add-area fd-cl m-8" id="bulkAddJudgeArea">
-                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1&#10;回避判定|1+//ダイスボーナス//d20" class="textarea-mono" style="height:80px;"></textarea>
+                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1&#10;回避判定|1d20" class="textarea-mono" style="height:80px;"></textarea>
                                 <div>
                                     <div class="row-controls">
                                         <span type="button" class="add-btn flex-1" id="bulkAddJudgeConfirm">追加を実行</span>
@@ -1520,7 +1586,7 @@ dialog .section-body {
                                 <p class="small-text">形式：攻撃名|攻撃ロール</p>
                                 <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="add-area fd-cl m-8" id="bulkAddAttackArea">
-                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10&#10;ファイアボール|1d6+(3+//肉体修正//)" class="textarea-mono" style="height:80px;"></textarea>
+                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10&#10;ファイアボール|1d6+3" class="textarea-mono" style="height:80px;"></textarea>
                                 <div>
                                     <div class="row-controls">
                                         <span type="button" class="add-btn flex-1" id="bulkAddAttackConfirm">追加を実行</span>
