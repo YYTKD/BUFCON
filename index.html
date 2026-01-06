@@ -1008,35 +1008,6 @@ dialog .section-body {
     font-weight: 800;
 }
 
-/* ステータスタグ */
-.stat-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 6px;
-}
-
-.stat-tag {
-    background: var(--primary-color-2);
-    color: var(--secondary-color-1);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.stat-tag .material-symbols-rounded {
-    border: none;
-    color: var(--secondary-color-1);
-    cursor: pointer;
-    font-size: 18px;
-    padding: 0;
-    line-height: 1;
-}
-
 /* ========================================
    情報表示・フィードバック
    ======================================== */
@@ -1198,28 +1169,6 @@ dialog .section-body {
                         </div>
                     </div>
             </dialog>
-<!--ステータス-->     
-            <div class="section">
-                <div class="section-header">
-                    <span class="material-symbols-rounded">analytics</span>
-                    <span class="section-header-title">ステータス</span>
-                    <span class="arrow">▼</span>
-                </div>
-                <div class="section-body">
-                    <div class="add-area">
-                                <div style="width: 100%;">
-                                    <label class="label-s">ステータス名 (,区切りで複数追加可)</label>
-                                    <input type="text" id="statName" placeholder="変数名（筋力、STR、冒険者レベルなど）">
-                                </div>
-                            <span type="button" class="add-btn harf-width" id="addStatBtn">
-                            <span>追加</span>
-                            </span>
-                    </div>
-                    <div class="stat-tags" id="statList">
-                        <div class="empty-message">ステータスを追加してください</div>
-                    </div>
-                </div>
-            </div>
 <!--バフ/デバフ-->
             <div class="section">
                 <div class="section-header">
@@ -1439,13 +1388,6 @@ dialog .section-body {
                                 <div class="note">判定の基本となるダイスロールを記入します。システムごとの独自のコマンドも入力できます。</div>
                                 <div class="note">代入記法：<br>//NAME//　*NAMEは任意の文字列<br>という記述で、//NAME//を指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。</div>
                                 <div>
-                                    <label for="judgeStat" class="label-s">補正ステータス</label>
-                                    <select id="judgeStat" multiple size="1">
-                                        <option>なし</option>
-                                    </select>
-                                </div>
-                                <div class="note">複数選択可</div>
-                                <div>
                                     <label for="judgeCategorySelect" class="label-s">カテゴリを選択</label>
                                     <select id="judgeCategorySelect" size="1">
                                         <option value="none">なし</option>
@@ -1474,10 +1416,10 @@ dialog .section-body {
                                 <span class="material-symbols-rounded">clear_all</span>
                                 <span>一括追加</span>
                             </div>
-                                <p class="small-text">形式：判定名|判定ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
+                                <p class="small-text">形式：判定名|判定ロール</p>
                                 <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="add-area fd-cl m-8" id="bulkAddJudgeArea">
-                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1|器用度&#10;回避判定|1d20|DEX" class="textarea-mono" style="height:80px;"></textarea>
+                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1&#10;回避判定|1+//ダイスボーナス//d20" class="textarea-mono" style="height:80px;"></textarea>
                                 <div>
                                     <div class="row-controls">
                                         <span type="button" class="add-btn flex-1" id="bulkAddJudgeConfirm">追加を実行</span>
@@ -1539,20 +1481,12 @@ dialog .section-body {
                                     <input type="text" id="attackName" placeholder="例：ソード(1H)">
                                 </div>
                                 <div>
-                                    <label for="judgeStat" class="label-s">攻撃ロール</label>
+                                    <label for="attackRoll" class="label-s">攻撃ロール</label>
                                     <input type="text" id="attackRoll" placeholder="例: 2d6,K20@10">
                                 </div>
                                 <div class="note">攻撃の基本となるダイスロールや固定値を記入できます。
                                 </div>
                                 <div class="note">代入記法：<br>//NAME　*NAMEは任意の文字列<br>という記述で、//NAMEを指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。
-                                </div>
-                                <div>
-                                    <label for="judgeStat" class="label-s">補正ステータス</label>
-                                    <select id="attackStat" multiple size="1">
-                                        <option value="none">なし</option>
-                                    </select>
-                                </div>
-                                <div class="note">複数選択可
                                 </div>
                                 <div>
                                     <label for="attackCategorySelect" class="label-s">カテゴリを選択</label>
@@ -1583,10 +1517,10 @@ dialog .section-body {
                                 <span class="material-symbols-rounded">clear_all</span>
                                 <span>一括追加</span>
                             </div>
-                                <p class="small-text">形式：攻撃名|攻撃ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
+                                <p class="small-text">形式：攻撃名|攻撃ロール</p>
                                 <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="add-area fd-cl m-8" id="bulkAddAttackArea">
-                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10|筋力B&#10;ファイアボール|1d6+3|INT" class="textarea-mono" style="height:80px;"></textarea>
+                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10&#10;ファイアボール|1d6+(3+//肉体修正//)" class="textarea-mono" style="height:80px;"></textarea>
                                 <div>
                                     <div class="row-controls">
                                         <span type="button" class="add-btn flex-1" id="bulkAddAttackConfirm">追加を実行</span>
