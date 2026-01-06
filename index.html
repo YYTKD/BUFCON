@@ -105,6 +105,50 @@ body {
     margin: 4px 0;
 }
 
+.macro-suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid var(--secondary-color-2);
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.16);
+    padding: 4px 0;
+    z-index: 1500;
+    min-width: 180px;
+    max-width: 320px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.macro-suggestions.hidden {
+    display: none;
+}
+
+.macro-suggestion-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.macro-suggestion-item span {
+    color: var(--primary-color-2);
+}
+
+.macro-suggestion-item small {
+    color: var(--primary-color-3);
+}
+
+.macro-suggestion-item.active,
+.macro-suggestion-item:hover {
+    background: rgba(0,0,0,0.06);
+}
+
 .material-symbols-rounded {
     font-size: 24px;
     font-weight: 400;
@@ -375,6 +419,45 @@ header {
 .header-menu-item span {
     font-size: 32px;
     font-variation-settings: 'FILL' 1;
+}
+
+.settings-menu {
+    position: relative;
+}
+
+.settings-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--primary-color-1);
+    border: 1px solid var(--primary-color-2);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    min-width: 180px;
+    padding: 6px 0;
+    z-index: 1100;
+}
+
+.settings-dropdown.hidden {
+    display: none;
+}
+
+.settings-dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    color: var(--secondary-color-1);
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.settings-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 
@@ -1008,35 +1091,6 @@ dialog .section-body {
     font-weight: 800;
 }
 
-/* ステータスタグ */
-.stat-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 6px;
-}
-
-.stat-tag {
-    background: var(--primary-color-2);
-    color: var(--secondary-color-1);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.stat-tag .material-symbols-rounded {
-    border: none;
-    color: var(--secondary-color-1);
-    cursor: pointer;
-    font-size: 18px;
-    padding: 0;
-    line-height: 1;
-}
-
 /* ========================================
    情報表示・フィードバック
    ======================================== */
@@ -1151,10 +1205,22 @@ dialog .section-body {
             <div class="title">JET-PALET</div>
         </div>
         <div class="header-menu">
-            <button class="header-menu-item" style="anchor-name: --save" command="show-modal" commandfor="DataOption">
-                <div class="tooltip" style="--target: --save">セーブ・ロード</div>
-                <span class="material-symbols-rounded">save</span>
-            </button>
+            <div class="settings-menu">
+                <button class="header-menu-item" id="settingsToggle" aria-haspopup="true" aria-expanded="false" style="anchor-name: --settings">
+                    <div class="tooltip" style="--target: --settings">設定</div>
+                    <span class="material-symbols-rounded">settings</span>
+                </button>
+                <div class="settings-dropdown hidden" id="settingsDropdown">
+                    <button class="settings-dropdown-item" data-target="DataOption">
+                        <span class="material-symbols-rounded">checkbook</span>
+                        <span>データ管理</span>
+                    </button>
+                    <button class="settings-dropdown-item" data-target="userMacroModal">
+                        <span class="material-symbols-rounded">bookmarks</span>
+                        <span>ユーザーマクロ</span>
+                    </button>
+                </div>
+            </div>
             <a class="header-menu-item" style="anchor-name: --help" href="https://unexpected-avatar-e3c.notion.site/BUFCON-2d1c2563a7d8804b97f9e64754356198" target="_blank" rel="noopener noreferrer">
                 <div class="tooltip" style="--target: --help">使い方</div>
                 <span class="material-symbols-rounded">help</span>
@@ -1198,28 +1264,42 @@ dialog .section-body {
                         </div>
                     </div>
             </dialog>
-<!--ステータス-->     
-            <div class="section">
-                <div class="section-header">
-                    <span class="material-symbols-rounded">analytics</span>
-                    <span class="section-header-title">ステータス</span>
-                    <span class="arrow">▼</span>
-                </div>
-                <div class="section-body">
-                    <div class="add-area">
-                                <div style="width: 100%;">
-                                    <label class="label-s">ステータス名 (,区切りで複数追加可)</label>
-                                    <input type="text" id="statName" placeholder="変数名（筋力、STR、冒険者レベルなど）">
-                                </div>
-                            <span type="button" class="add-btn harf-width" id="addStatBtn">
-                            <span>追加</span>
-                            </span>
+<!--ユーザーマクロ　モーダル-->
+            <dialog class="section modal" id="userMacroModal" closedby="any">
+                    <div class="section section-header-m">
+                        <span class="material-symbols-rounded">bookmarks</span>
+                        <span class="section-header-title">ユーザーマクロ</span>
                     </div>
-                    <div class="stat-tags" id="statList">
-                        <div class="empty-message">ステータスを追加してください</div>
+                    <div class="section-body" style="margin-top: 32px; display: flex; flex-direction: column; gap: 16px;">
+                        <div class="m-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label for="macroKey" class="label-s">マクロ名</label>
+                                <input type="text" id="macroKey" placeholder="例：//必殺技">
+                                <p class="small-text">/を入力すると候補が表示されます。//では反応せず、///で再度表示されます。</p>
+                            </div>
+                            <div>
+                                <label for="macroValue" class="label-s">展開文字列</label>
+                                <input type="text" id="macroValue" placeholder="例：2d6+5 または #FF0000">
+                                <p class="small-text">カラーコードを指定すると色入力欄でマクロ名を使って指定できます。</p>
+                            </div>
+                        </div>
+                        <div class="row-controls" style="justify-content: flex-end; gap: 8px;">
+                            <button class="add-btn secondary-btn" id="addMacroBtn">登録 / 更新</button>
+                            <button class="add-btn btn--muted" id="clearMacroInputs">リセット</button>
+                        </div>
+                        <div class="section-line"></div>
+                        <div class="m-8">
+                            <div class="label-L" style="margin-bottom: 8px;">
+                                <span class="material-symbols-rounded">list</span>
+                                <span>登録済みマクロ</span>
+                            </div>
+                            <div id="macroList" class="item-list" style="max-height: 200px; overflow-y: auto;"></div>
+                        </div>
+                        <div class="row-controls" style="justify-content: flex-end;">
+                            <button class="add-btn secondary-btn" id="userMacroClose">閉じる</button>
+                        </div>
                     </div>
-                </div>
-            </div>
+            </dialog>
 <!--バフ/デバフ-->
             <div class="section">
                 <div class="section-header">
@@ -1283,7 +1363,6 @@ dialog .section-body {
                                     <label for="buffEffect" class="label-s">コマンド</label>
                                     <div style="display: flex;">
                                         <input type="text" id="buffEffect" placeholder="例：+2,-1d6,//ダイスボーナス}=+1">
-                                        <button class="add-btn btn--muted" onclick="insertText('//NAME=')">//=</button>
                                     </div>
                                     </div>
                                 <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。
@@ -1301,7 +1380,7 @@ dialog .section-body {
                                     </div>
                                     <div style="width: 50%;">
                                         <label for="buffColor" class="label-s">ラベルの色を選択</label>
-                                        <input type="color" id="buffColor" value="#0079FF" list="buffColor-list">
+                                        <input type="text" id="buffColor" value="#0079FF" list="buffColor-list" placeholder="#RRGGBB またはマクロ名">
                                         <datalist id="buffColor-list">
                                             <option value="#0079FF"></option>
                                             <option value="#953D96"></option>
@@ -1439,13 +1518,6 @@ dialog .section-body {
                                 <div class="note">判定の基本となるダイスロールを記入します。システムごとの独自のコマンドも入力できます。</div>
                                 <div class="note">代入記法：<br>//NAME//　*NAMEは任意の文字列<br>という記述で、//NAME//を指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。</div>
                                 <div>
-                                    <label for="judgeStat" class="label-s">補正ステータス</label>
-                                    <select id="judgeStat" multiple size="1">
-                                        <option>なし</option>
-                                    </select>
-                                </div>
-                                <div class="note">複数選択可</div>
-                                <div>
                                     <label for="judgeCategorySelect" class="label-s">カテゴリを選択</label>
                                     <select id="judgeCategorySelect" size="1">
                                         <option value="none">なし</option>
@@ -1474,10 +1546,10 @@ dialog .section-body {
                                 <span class="material-symbols-rounded">clear_all</span>
                                 <span>一括追加</span>
                             </div>
-                                <p class="small-text">形式：判定名|判定ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
+                                <p class="small-text">形式：判定名|判定ロール</p>
                                 <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="add-area fd-cl m-8" id="bulkAddJudgeArea">
-                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1|器用度&#10;回避判定|1d20|DEX" class="textarea-mono" style="height:80px;"></textarea>
+                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1&#10;回避判定|1d20" class="textarea-mono" style="height:80px;"></textarea>
                                 <div>
                                     <div class="row-controls">
                                         <span type="button" class="add-btn flex-1" id="bulkAddJudgeConfirm">追加を実行</span>
@@ -1539,20 +1611,12 @@ dialog .section-body {
                                     <input type="text" id="attackName" placeholder="例：ソード(1H)">
                                 </div>
                                 <div>
-                                    <label for="judgeStat" class="label-s">攻撃ロール</label>
+                                    <label for="attackRoll" class="label-s">攻撃ロール</label>
                                     <input type="text" id="attackRoll" placeholder="例: 2d6,K20@10">
                                 </div>
                                 <div class="note">攻撃の基本となるダイスロールや固定値を記入できます。
                                 </div>
                                 <div class="note">代入記法：<br>//NAME　*NAMEは任意の文字列<br>という記述で、//NAMEを指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。
-                                </div>
-                                <div>
-                                    <label for="judgeStat" class="label-s">補正ステータス</label>
-                                    <select id="attackStat" multiple size="1">
-                                        <option value="none">なし</option>
-                                    </select>
-                                </div>
-                                <div class="note">複数選択可
                                 </div>
                                 <div>
                                     <label for="attackCategorySelect" class="label-s">カテゴリを選択</label>
@@ -1583,10 +1647,10 @@ dialog .section-body {
                                 <span class="material-symbols-rounded">clear_all</span>
                                 <span>一括追加</span>
                             </div>
-                                <p class="small-text">形式：攻撃名|攻撃ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
+                                <p class="small-text">形式：攻撃名|攻撃ロール</p>
                                 <p class="small-text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="add-area fd-cl m-8" id="bulkAddAttackArea">
-                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10|筋力B&#10;ファイアボール|1d6+3|INT" class="textarea-mono" style="height:80px;"></textarea>
+                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10&#10;ファイアボール|1d6+3" class="textarea-mono" style="height:80px;"></textarea>
                                 <div>
                                     <div class="row-controls">
                                         <span type="button" class="add-btn flex-1" id="bulkAddAttackConfirm">追加を実行</span>

@@ -1,7 +1,6 @@
 // ========================================
 // グローバル変数
 // ========================================
-let stats = [];
 let buffs = [];
 let judges = [];
 let attacks = [];
@@ -137,7 +136,6 @@ function loadData() {
         const saved = localStorage.getItem('trpgData');
         if (saved) {
             const data = JSON.parse(saved);
-            stats = Array.isArray(data.stats) ? data.stats : [];
             buffs = Array.isArray(data.buffs) ? data.buffs : [];
             judges = Array.isArray(data.judges) ? data.judges : getDefaultJudges();
             attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
@@ -151,31 +149,28 @@ function loadData() {
         judges = getDefaultJudges();
         attacks = getDefaultAttacks();
     }
-    
-    renderStats();
+
     renderBuffs();
     renderPackage('judge');
     renderPackage('attack');
-    updateStatSelects();
     updateBuffTargetDropdown();
 }
 
 function getDefaultJudges() {
     return [
-        { name: '命中(武器A)', roll: '1d20', stat: '' },
-        { name: '回避', roll: '1d20', stat: '' }
+        { name: '命中(武器A)', roll: '1d20' },
+        { name: '回避', roll: '1d20' }
     ];
 }
 
 function getDefaultAttacks() {
     return [
-        { name: '武器A', roll: '2d6', stat: '' }
+        { name: '武器A', roll: '2d6' }
     ];
 }
 
 function saveData() {
     const data = {
-        stats: stats,
         buffs: buffs,
         judges: judges,
         attacks: attacks
@@ -219,7 +214,6 @@ function resetAll() {
 
 function exportData() {
     const data = {
-        stats: stats,
         buffs: buffs,
         judges: judges,
         attacks: attacks
@@ -243,21 +237,18 @@ function importData() {
     try {
         const data = JSON.parse(text);
         
-        if (!data.stats || !data.buffs || !data.judges || !data.attacks) {
+        if (!data.buffs || !data.judges || !data.attacks) {
             throw new Error('無効なデータ形式です');
         }
-        
-        stats = data.stats || [];
+
         buffs = data.buffs || [];
         judges = data.judges || [];
         attacks = data.attacks || [];
         
-        renderStats();
-        renderBuffs();
-        renderPackage('judge');
-        renderPackage('attack');
-        updateStatSelects();
-        updateBuffTargetDropdown();
+    renderBuffs();
+    renderPackage('judge');
+    renderPackage('attack');
+    updateBuffTargetDropdown();
         saveData();
         
         document.getElementById('importText').value = '';
@@ -266,86 +257,6 @@ function importData() {
     } catch (e) {
         showToast('JSONの解析に失敗しました: ' + e.message, 'error');
     }
-}
-
-// ========================================
-// ステータス管理
-// ========================================
-
-function addStat() {
-    const input = document.getElementById('statName').value.trim();
-    
-    if (!input) {
-        showToast('ステータス名を入力してください', 'error');
-        return;
-    }
-    
-    // カンマ区切りで分割して複数追加
-    const names = input.split(',').map(n => n.trim()).filter(n => n);
-    
-    if (names.length === 0) {
-        showToast('ステータス名を入力してください', 'error');
-        return;
-    }
-    
-    // 重複チェック
-    const existingNames = stats.map(s => s.name);
-    const duplicates = names.filter(n => existingNames.includes(n));
-    
-    if (duplicates.length > 0) {
-        showToast(`既に存在するステータス: ${duplicates.join(', ')}`, 'error');
-        return;
-    }
-    
-    // 追加
-    names.forEach(name => {
-        stats.push({ name: name });
-    });
-    
-    document.getElementById('statName').value = '';
-    
-    renderStats();
-    updateStatSelects();
-    updateBuffTargetDropdown();
-    saveData();
-    
-    if (names.length > 1) {
-        showToast(`${names.length}個のステータスを追加しました`, 'success');
-    }
-}
-
-function removeStat(index) {
-    stats.splice(index, 1);
-    renderStats();
-    updateStatSelects();
-    saveData();
-}
-
-function renderStats() {
-    const list = document.getElementById('statList');
-    
-    if (stats.length === 0) {
-        list.innerHTML = '<div class="empty-message">ステータスを追加してください</div>';
-        return;
-    }
-    
-    list.innerHTML = stats.map((stat, i) => `
-        <div class="stat-tag">
-            ${escapeHtml(stat.name)}
-            <button onclick="removeStat(${i})">×</button>
-        </div>
-    `).join('');
-}
-
-function updateStatSelects() {
-    const judgeSelect = document.getElementById('judgeStat');
-    const attackSelect = document.getElementById('attackStat');
-    
-    const options = '<option value="">なし</option>' + 
-        stats.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('');
-    
-    judgeSelect.innerHTML = options;
-    attackSelect.innerHTML = options;
 }
 
 // ========================================
@@ -516,9 +427,8 @@ function bulkAdd(type) {
             parser: (parts, index) => {
                 const name = parts[0];
                 const roll = parts[1];
-                const stat = parts[2] || '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
-                return { name, roll, stat };
+                return { name, roll };
             },
             afterAdd: () => {
                 renderPackage('judge');
@@ -534,9 +444,8 @@ function bulkAdd(type) {
             parser: (parts, index) => {
                 const name = parts[0];
                 const roll = parts[1];
-                const stat = parts[2] || '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
-                return { name, roll, stat };
+                return { name, roll };
             },
             afterAdd: () => {
                 renderPackage('attack');
@@ -825,14 +734,13 @@ function handleDragEnd(e) {
 function addJudge() {
     const name = document.getElementById('judgeName').value.trim();
     const roll = document.getElementById('judgeRoll').value.trim();
-    const stat = document.getElementById('judgeStat').value;
-    
+
     if (!name || !roll) {
         showToast('判定名と判定ロールを入力してください', 'error');
         return;
     }
-    
-    judges.push({ name: name, roll: roll, stat: stat });
+
+    judges.push({ name: name, roll: roll });
     document.getElementById('judgeName').value = '';
     document.getElementById('judgeRoll').value = '';
     
@@ -854,14 +762,13 @@ function removeJudge(index) {
 function addAttack() {
     const name = document.getElementById('attackName').value.trim();
     const roll = document.getElementById('attackRoll').value.trim();
-    const stat = document.getElementById('attackStat').value;
-    
+
     if (!name || !roll) {
         showToast('攻撃名と攻撃ロールを入力してください', 'error');
         return;
     }
-    
-    attacks.push({ name: name, roll: roll, stat: stat });
+
+    attacks.push({ name: name, roll: roll });
     document.getElementById('attackName').value = '';
     document.getElementById('attackRoll').value = '';
     
@@ -928,7 +835,6 @@ function renderPackage(type) {
             <span class="material-symbols-rounded">drag_indicator</span>
             <span class="item-name">${escapeHtml(item.name)}</span>
             <span class="item-detail">${escapeHtml(item.roll)}</span>
-            <span class="item-detail">${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
             <button class="remove-btn" data-remove="${i}" data-remove-type="${type}">×</button>
         </div>
     `).join('');
@@ -998,13 +904,9 @@ function updatePackageOutput(type, selectedIndex = null) {
     }
     
     if (selectedIndex < 0 || selectedIndex >= array.length) return;
-    
+
     const item = array[selectedIndex];
     let command = item.roll;
-    
-    if (item.stat) {
-        command += '+{' + item.stat + '}';
-    }
     
     const filterKey = type === 'judge' ? 'judge:' : 'attack:';
     const activeBuffs = buffs.filter(b => 
@@ -1067,13 +969,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.section-header').forEach(header => {
         header.addEventListener('click', () => toggleSection(header));
     });
-    
-    // ステータス
-    document.getElementById('addStatBtn')?.addEventListener('click', addStat);
-    document.getElementById('statName')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addStat();
-    });
-    
+
     // バフ
     document.getElementById('addBuffBtn')?.addEventListener('click', addBuff);
     document.getElementById('turnProgressBtn')?.addEventListener('click', progressTurn);
@@ -1135,4 +1031,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // グローバルスコープに公開(HTMLから呼び出すため)
-window.removeStat = removeStat;
+

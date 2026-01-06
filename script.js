@@ -2,10 +2,10 @@
 // アプリケーション状態
 // ========================================
 const state = {
-    stats: [],
     buffs: [],
     judges: [],
     attacks: [],
+    macros: [],
     buffCategories: [],
     judgeCategories: [],
     attackCategories: [],
@@ -23,7 +23,6 @@ const state = {
 };
 
 function getCollection(type) {
-    if (type === 'stat') return state.stats;
     if (type === 'buff') return state.buffs;
     if (type === 'judge') return state.judges;
     if (type === 'attack') return state.attacks;
@@ -142,6 +141,65 @@ function openCategoryContextMenu(event, type, categoryName) {
     showContextMenu(event.pageX, event.pageY, actions);
 }
 
+// ========================================
+// 設定メニュー
+// ========================================
+
+function openSettingsModal(targetId) {
+    const modal = document.getElementById(targetId);
+    if (modal?.showModal) {
+        modal.showModal();
+    }
+}
+
+function setupSettingsMenu() {
+    const toggle = document.getElementById('settingsToggle');
+    const dropdown = document.getElementById('settingsDropdown');
+    if (!toggle || !dropdown) return;
+
+    const hideDropdown = () => {
+        dropdown.classList.add('hidden');
+        toggle.setAttribute('aria-expanded', 'false');
+    };
+
+    const showDropdown = () => {
+        dropdown.classList.remove('hidden');
+        toggle.setAttribute('aria-expanded', 'true');
+    };
+
+    toggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+        if (isExpanded) {
+            hideDropdown();
+        } else {
+            showDropdown();
+        }
+    });
+
+    dropdown.addEventListener('click', (event) => {
+        const item = event.target.closest('.settings-dropdown-item');
+        if (!item) return;
+        const targetId = item.dataset.target;
+        hideDropdown();
+        if (targetId) {
+            openSettingsModal(targetId);
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!dropdown.contains(event.target) && !toggle.contains(event.target)) {
+            hideDropdown();
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            hideDropdown();
+        }
+    });
+}
+
 function getCategories(type) {
     if (type === 'buff') return state.buffCategories;
     if (type === 'judge') return state.judgeCategories;
@@ -180,6 +238,25 @@ function escapeHtml(text) {
 function validateColor(color) {
     const hexPattern = /^#[0-9A-Fa-f]{6}$/;
     return hexPattern.test(color) ? color : '#ff6b6b';
+}
+
+function resolveMacroValue(value) {
+    if (typeof value !== 'string') return value;
+    const hit = state.macros.find(m => m.key === value.trim());
+    return hit ? hit.value : value;
+}
+
+function resolveColorValue(value) {
+    if (typeof value !== 'string') return '#ff6b6b';
+    const trimmed = value.trim();
+    const resolved = resolveMacroValue(trimmed);
+    if (/^#[0-9A-Fa-f]{6}$/.test(resolved)) {
+        return resolved;
+    }
+    if (trimmed) {
+        showToast('カラーコードが不正です。#RRGGBBまたはマクロ名を指定してください', 'error');
+    }
+    return '#ff6b6b';
 }
 
 /**
@@ -303,22 +380,30 @@ function normalizeBuffs(buffs = []) {
     return buffs.map(normalizeBuff);
 }
 
+function normalizeMacros(macros = []) {
+    if (!Array.isArray(macros)) return [];
+    return macros
+        .map(m => ({ key: typeof m.key === 'string' ? m.key : '', value: typeof m.value === 'string' ? m.value : '' }))
+        .filter(m => m.key && m.value);
+}
+
 function loadData() {
     try {
         const saved = localStorage.getItem('trpgData');
         if (saved) {
             const data = JSON.parse(saved);
-            state.stats = Array.isArray(data.stats) ? data.stats : [];
             state.buffs = normalizeBuffs(Array.isArray(data.buffs) ? data.buffs : getDefaultBuffs());
             state.buffCategories = Array.isArray(data.buffCategories) ? data.buffCategories : [];
             state.judges = Array.isArray(data.judges) ? data.judges : getDefaultJudges();
             state.judgeCategories = Array.isArray(data.judgeCategories) ? data.judgeCategories : [];
             state.attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
             state.attackCategories = Array.isArray(data.attackCategories) ? data.attackCategories : [];
+            state.macros = normalizeMacros(Array.isArray(data.macros) ? data.macros : []);
         } else {
             state.buffs = normalizeBuffs(getDefaultBuffs());
             state.judges = getDefaultJudges();
             state.attacks = getDefaultAttacks();
+            state.macros = getDefaultMacros();
         }
     } catch (e) {
         console.error('データの読み込みに失敗:', e);
@@ -326,17 +411,17 @@ function loadData() {
         state.buffs = normalizeBuffs(getDefaultBuffs());
         state.judges = getDefaultJudges();
         state.attacks = getDefaultAttacks();
+        state.macros = getDefaultMacros();
     }
 
     updateBuffCategorySelect();
     updateJudgeCategorySelect();
     updateAttackCategorySelect();
-    renderStats();
     renderBuffs();
     renderPackage('judge');
     renderPackage('attack');
-    updateStatSelects();
     updateBuffTargetDropdown();
+    renderMacroList();
 }
 
 function getDefaultBuffs() {
@@ -349,26 +434,30 @@ function getDefaultBuffs() {
 
 function getDefaultJudges() {
     return [
-        { name: '命中(武器A)　SAMPLE', roll: '1d20', stat: '' },
-        { name: '回避　SAMPLE', roll: '1d20', stat: '' }
+        { name: '命中(武器A)　SAMPLE', roll: '1d20' },
+        { name: '回避　SAMPLE', roll: '1d20' }
     ];
 }
 
 function getDefaultAttacks() {
     return [
-        { name: '武器A　SAMPLE', roll: '2d6', stat: '' }
+        { name: '武器A　SAMPLE', roll: '2d6' }
     ];
+}
+
+function getDefaultMacros() {
+    return [];
 }
 
 function saveData() {
     const data = {
-        stats: state.stats,
         buffs: state.buffs,
         buffCategories: state.buffCategories,
         judges: state.judges,
         judgeCategories: state.judgeCategories,
         attacks: state.attacks,
-        attackCategories: state.attackCategories
+        attackCategories: state.attackCategories,
+        macros: state.macros
     };
     
     try {
@@ -409,13 +498,13 @@ function resetAll() {
 
 function exportData() {
     const data = {
-        stats: state.stats,
         buffs: state.buffs,
         buffCategories: state.buffCategories,
         judges: state.judges,
         judgeCategories: state.judgeCategories,
         attacks: state.attacks,
-        attackCategories: state.attackCategories
+        attackCategories: state.attackCategories,
+        macros: state.macros
     };
     const json = JSON.stringify(data, null, 2);
     
@@ -435,28 +524,27 @@ function importData() {
     
     try {
         const data = JSON.parse(text);
-        
-        if (!data.stats || !data.buffs || !data.judges || !data.attacks) {
+
+        if (!data.buffs || !data.judges || !data.attacks) {
             throw new Error('無効なデータ形式です');
         }
 
-        state.stats = data.stats || [];
         state.buffs = normalizeBuffs(data.buffs || []);
         state.buffCategories = data.buffCategories || [];
         state.judges = data.judges || [];
         state.judgeCategories = data.judgeCategories || [];
         state.attacks = data.attacks || [];
         state.attackCategories = data.attackCategories || [];
+        state.macros = normalizeMacros(data.macros || []);
 
         updateBuffCategorySelect();
         updateJudgeCategorySelect();
         updateAttackCategorySelect();
-        renderStats();
         renderBuffs();
         renderPackage('judge');
         renderPackage('attack');
-        updateStatSelects();
         updateBuffTargetDropdown();
+        renderMacroList();
         saveData();
         
         document.getElementById('importText').value = '';
@@ -465,6 +553,223 @@ function importData() {
     } catch (e) {
         showToast('JSONの解析に失敗しました: ' + e.message, 'error');
     }
+}
+
+// ========================================
+// マクロ管理
+// ========================================
+
+function renderMacroList() {
+    const list = document.getElementById('macroList');
+    if (!list) return;
+
+    if (!state.macros.length) {
+        list.innerHTML = '<div class="empty-message">マクロが登録されていません</div>';
+        return;
+    }
+
+    list.innerHTML = state.macros.map((macro, index) => {
+        const isColor = /^#[0-9A-Fa-f]{6}$/.test(macro.value.trim());
+        const colorBadge = isColor ? `<span style="background:${escapeHtml(macro.value)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>` : '';
+        return `
+            <div class="item" data-macro-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
+                <div class="item-param" data-edit-macro="${index}" style="cursor: pointer;">
+                    <div class="item-name">${escapeHtml(macro.key)}</div>
+                    <div class="item-detail">${escapeHtml(macro.value)}</div>
+                </div>
+                <div class="row-controls" style="gap: 6px; align-items:center;">
+                    ${colorBadge}
+                    <button class="material-symbols-rounded add-btn btn--danger" data-remove-macro="${index}" title="削除">delete</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    list.querySelectorAll('[data-remove-macro]').forEach(btn => {
+        const idx = parseInt(btn.dataset.removeMacro);
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeMacro(idx);
+        });
+    });
+
+    list.querySelectorAll('[data-edit-macro]').forEach(area => {
+        const idx = parseInt(area.dataset.editMacro);
+        area.addEventListener('click', () => {
+            const macro = state.macros[idx];
+            if (!macro) return;
+            document.getElementById('macroKey').value = macro.key;
+            document.getElementById('macroValue').value = macro.value;
+        });
+    });
+}
+
+function addMacro() {
+    const keyInput = document.getElementById('macroKey');
+    const valueInput = document.getElementById('macroValue');
+    if (!keyInput || !valueInput) return;
+
+    const key = keyInput.value.trim();
+    const value = valueInput.value.trim();
+
+    if (!key || !value) {
+        showToast('マクロ名と展開文字列を入力してください', 'error');
+        return;
+    }
+
+    const existingIndex = state.macros.findIndex(m => m.key === key);
+    if (existingIndex >= 0) {
+        state.macros[existingIndex] = { key, value };
+        showToast('マクロを更新しました', 'success');
+    } else {
+        state.macros.push({ key, value });
+        showToast('マクロを追加しました', 'success');
+    }
+
+    renderMacroList();
+    saveData();
+}
+
+function removeMacro(index) {
+    if (index < 0 || index >= state.macros.length) return;
+    state.macros.splice(index, 1);
+    renderMacroList();
+    saveData();
+}
+
+function resetMacroInputs() {
+    document.getElementById('macroKey').value = '';
+    document.getElementById('macroValue').value = '';
+}
+
+// ========================================
+// マクロ補完UI
+// ========================================
+
+const macroSuggestionState = { target: null, activeIndex: 0 };
+let macroSuggestionBox = null;
+
+function getMacroSuggestionBox() {
+    if (macroSuggestionBox) return macroSuggestionBox;
+    macroSuggestionBox = document.createElement('div');
+    macroSuggestionBox.id = 'macroSuggestions';
+    macroSuggestionBox.className = 'macro-suggestions hidden';
+    document.body.appendChild(macroSuggestionBox);
+    return macroSuggestionBox;
+}
+
+function hideMacroSuggestions() {
+    if (!macroSuggestionBox) return;
+    macroSuggestionBox.classList.add('hidden');
+    macroSuggestionState.target = null;
+}
+
+function moveMacroSelection(delta) {
+    if (!macroSuggestionBox || macroSuggestionBox.classList.contains('hidden')) return;
+    const items = macroSuggestionBox.querySelectorAll('.macro-suggestion-item');
+    if (!items.length) return;
+
+    macroSuggestionState.activeIndex = (macroSuggestionState.activeIndex + delta + items.length) % items.length;
+    items.forEach((el, idx) => {
+        el.classList.toggle('active', idx === macroSuggestionState.activeIndex);
+    });
+}
+
+function applyMacroSuggestion(index) {
+    const target = macroSuggestionState.target;
+    if (!target) return;
+    const macro = state.macros[index];
+    if (!macro) return;
+
+    const caret = target.selectionStart ?? target.value.length;
+    const before = target.value.slice(0, caret);
+    const after = target.value.slice(caret);
+    const newBefore = before.slice(0, -1) + macro.value;
+    target.value = newBefore + after;
+
+    const pos = newBefore.length;
+    target.setSelectionRange(pos, pos);
+    hideMacroSuggestions();
+}
+
+function showMacroSuggestions(target) {
+    const box = getMacroSuggestionBox();
+    box.innerHTML = '';
+
+    if (!state.macros.length) {
+        hideMacroSuggestions();
+        return;
+    }
+
+    box.innerHTML = state.macros.map((macro, index) => `
+        <button class="macro-suggestion-item ${index === 0 ? 'active' : ''}" data-macro-index="${index}" type="button">
+            <span>${escapeHtml(macro.key)}</span>
+            <small>${escapeHtml(macro.value)}</small>
+        </button>
+    `).join('');
+
+    box.querySelectorAll('[data-macro-index]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            applyMacroSuggestion(parseInt(btn.dataset.macroIndex));
+        });
+    });
+
+    macroSuggestionState.target = target;
+    macroSuggestionState.activeIndex = 0;
+    const rect = target.getBoundingClientRect();
+    box.style.left = `${rect.left + window.scrollX}px`;
+    box.style.top = `${rect.bottom + window.scrollY + 4}px`;
+    box.classList.remove('hidden');
+}
+
+function handleMacroTrigger(target) {
+    const caret = target.selectionStart ?? target.value.length;
+    const before = target.value.slice(0, caret);
+    const slashMatch = before.match(/\/+$/);
+
+    if (!slashMatch || slashMatch[0].length % 2 === 0) {
+        hideMacroSuggestions();
+        return;
+    }
+
+    showMacroSuggestions(target);
+}
+
+function handleMacroKeydown(event) {
+    if (!macroSuggestionBox || macroSuggestionBox.classList.contains('hidden')) return;
+
+    if (['ArrowDown', 'Tab'].includes(event.key)) {
+        event.preventDefault();
+        moveMacroSelection(1);
+    } else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        moveMacroSelection(-1);
+    } else if (event.key === 'Enter') {
+        event.preventDefault();
+        applyMacroSuggestion(macroSuggestionState.activeIndex);
+    } else if (event.key === 'Escape') {
+        hideMacroSuggestions();
+    }
+}
+
+function attachMacroSuggestions(input) {
+    if (!input) return;
+    input.addEventListener('input', () => handleMacroTrigger(input));
+    input.addEventListener('keydown', handleMacroKeydown);
+    input.addEventListener('blur', () => setTimeout(hideMacroSuggestions, 150));
+}
+
+function setupMacroSuggestions() {
+    attachMacroSuggestions(document.getElementById('buffEffect'));
+    attachMacroSuggestions(document.getElementById('judgeRoll'));
+    attachMacroSuggestions(document.getElementById('attackRoll'));
+
+    document.addEventListener('click', (e) => {
+        if (macroSuggestionBox && !macroSuggestionBox.contains(e.target)) {
+            hideMacroSuggestions();
+        }
+    });
 }
 
 /**
@@ -543,86 +848,6 @@ function initFileDropZone() {
     });
 }
 
-
-// ========================================
-// ステータス管理
-// ========================================
-
-function addStat() {
-    const input = document.getElementById('statName').value.trim();
-    
-    if (!input) {
-        showToast('ステータス名を入力してください', 'error');
-        return;
-    }
-    
-    // カンマ区切りで分割して複数追加
-    const names = input.split(',').map(n => n.trim()).filter(n => n);
-    
-    if (names.length === 0) {
-        showToast('ステータス名を入力してください', 'error');
-        return;
-    }
-    
-    // 重複チェック
-    const existingNames = state.stats.map(s => s.name);
-    const duplicates = names.filter(n => existingNames.includes(n));
-    
-    if (duplicates.length > 0) {
-        showToast(`既に存在するステータス: ${duplicates.join(', ')}`, 'error');
-        return;
-    }
-    
-    // 追加
-    names.forEach(name => {
-        state.stats.push({ name: name });
-    });
-    
-    document.getElementById('statName').value = '';
-    
-    renderStats();
-    updateStatSelects();
-    updateBuffTargetDropdown();
-    saveData();
-    
-    if (names.length > 1) {
-        showToast(`${names.length}個のステータスを追加しました`, 'success');
-    }
-}
-
-function removeStat(index) {
-    state.stats.splice(index, 1);
-    renderStats();
-    updateStatSelects();
-    saveData();
-}
-
-function renderStats() {
-    const list = document.getElementById('statList');
-    
-    if (state.stats.length === 0) {
-        list.innerHTML = '<div class="empty-message">ステータスを追加してください</div>';
-        return;
-    }
-    
-    list.innerHTML = state.stats.map((stat, i) => `
-        <div class="stat-tag">
-            ${escapeHtml(stat.name)}
-            <button class="material-symbols-rounded" onclick="removeStat(${i})">disabled_by_default</button>
-        </div>
-    `).join('');
-}
-
-function updateStatSelects() {
-    const judgeSelect = document.getElementById('judgeStat');
-    const attackSelect = document.getElementById('attackStat');
-    
-    const options = '<option value="none">なし</option>' + 
-        state.stats.map(s => `<option value="${escapeHtml(s.name)}">${escapeHtml(s.name)}</option>`).join('');
-    
-    judgeSelect.innerHTML = options;
-    attackSelect.innerHTML = options;
-}
 
 // ========================================
 // カテゴリ管理
@@ -911,7 +1136,6 @@ function renderPackageItems(type, entries = []) {
             <span class="item-param">
                 <span class="item-name">${escapeHtml(item.name)}</span>
                 <span class="item-detail">${escapeHtml(item.roll)}</span>
-                <span class="item-detail">+${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
         </div>
     `).join('');
 }
@@ -1094,7 +1318,7 @@ function resetBuffForm() {
     document.getElementById('buffName').value = '';
     document.getElementById('buffEffect').value = '';
     document.getElementById('buffTurn').value = '';
-    document.getElementById('buffColor').value = '#F8F9FA';
+    document.getElementById('buffColor').value = '#0079FF';
     document.getElementById('buffCategorySelect').value = 'none';
     document.getElementById('buffMemo').value = '';
     document.getElementById('buffSimpleMemoToggle').checked = false;
@@ -1102,17 +1326,12 @@ function resetBuffForm() {
     updateBuffTargetDropdown();
 }
 
-function insertText(text) {
-    const textbox = document.getElementById('buffEffect');
-            textbox.value = textbox.value + text;
-}
-
 function addBuff() {
     const name = document.getElementById('buffName').value.trim();
     const effect = document.getElementById('buffEffect').value.trim();
     const targets = [...state.selectedBuffTargets];
     const turn = document.getElementById('buffTurn').value.trim();
-    const color = validateColor(document.getElementById('buffColor').value);
+    const color = validateColor(resolveColorValue(document.getElementById('buffColor').value));
     const categorySelect = document.getElementById('buffCategorySelect');
     const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
     const memo = document.getElementById('buffMemo').value;
@@ -1261,9 +1480,8 @@ function bulkAdd(type) {
             parser: (parts, index, category) => {
                 const name = parts[0];
                 const roll = parts[1];
-                const stat = parts[2] ? parts[2].split(',').map(s => s.trim()).join('+') : '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
-                return { name, roll, stat, category };
+                return { name, roll, category };
             },
             afterAdd: () => {
                 renderPackage('judge');
@@ -1279,9 +1497,8 @@ function bulkAdd(type) {
             parser: (parts, index, category) => {
                 const name = parts[0];
                 const roll = parts[1];
-                const stat = parts[2] ? parts[2].split(',').map(s => s.trim()).join('+') : '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
-                return { name, roll, stat, category };
+                return { name, roll, category };
             },
             afterAdd: () => {
                 renderPackage('attack');
@@ -1818,13 +2035,6 @@ function openJudgeModal(editIndex = null) {
         const judge = state.judges[editIndex];
         document.getElementById('judgeName').value = judge.name;
         document.getElementById('judgeRoll').value = judge.roll;
-        
-        // ステータスの選択状態を復元
-        const statSelect = document.getElementById('judgeStat');
-        const stats = judge.stat ? judge.stat.split('+') : [];
-        Array.from(statSelect.options).forEach(opt => {
-            opt.selected = stats.includes(opt.value);
-        });
 
         const categorySelect = document.getElementById('judgeCategorySelect');
         if (categorySelect) {
@@ -1845,7 +2055,6 @@ function openJudgeModal(editIndex = null) {
 function resetJudgeForm() {
     document.getElementById('judgeName').value = '';
     document.getElementById('judgeRoll').value = '';
-    document.getElementById('judgeStat').selectedIndex = -1;
     const categorySelect = document.getElementById('judgeCategorySelect');
     if (categorySelect) {
         categorySelect.value = 'none';
@@ -1870,13 +2079,6 @@ function openAttackModal(editIndex = null) {
         const attack = state.attacks[editIndex];
         document.getElementById('attackName').value = attack.name;
         document.getElementById('attackRoll').value = attack.roll;
-        
-        // ステータスの選択状態を復元
-        const statSelect = document.getElementById('attackStat');
-        const stats = attack.stat ? attack.stat.split('+') : [];
-        Array.from(statSelect.options).forEach(opt => {
-            opt.selected = stats.includes(opt.value);
-        });
 
         const categorySelect = document.getElementById('attackCategorySelect');
         if (categorySelect) {
@@ -1897,7 +2099,6 @@ function openAttackModal(editIndex = null) {
 function resetAttackForm() {
     document.getElementById('attackName').value = '';
     document.getElementById('attackRoll').value = '';
-    document.getElementById('attackStat').selectedIndex = -1;
     const categorySelect = document.getElementById('attackCategorySelect');
     if (categorySelect) {
         categorySelect.value = 'none';
@@ -1907,8 +2108,6 @@ function resetAttackForm() {
 function addJudge() {
     const name = document.getElementById('judgeName').value.trim();
     const roll = document.getElementById('judgeRoll').value.trim();
-    const selectedStats = Array.from(document.getElementById('judgeStat').selectedOptions).map(opt => opt.value).filter(v => v !== 'none');
-    const stat = selectedStats.length > 0 ? selectedStats.join('+') : '';
     const categorySelect = document.getElementById('judgeCategorySelect');
     const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
 
@@ -1920,11 +2119,11 @@ function addJudge() {
     if (state.editMode.active && state.editMode.type === 'judge') {
         // 編集モード
         const index = state.editMode.index;
-        state.judges[index] = { name: name, roll: roll, stat: stat, category };
+        state.judges[index] = { name: name, roll: roll, category };
         showToast('判定を更新しました', 'success');
     } else {
         // 追加モード
-        state.judges.push({ name: name, roll: roll, stat: stat, category });
+        state.judges.push({ name: name, roll: roll, category });
     }
     
     resetJudgeForm();
@@ -1948,8 +2147,6 @@ function removeJudge(index) {
 function addAttack() {
     const name = document.getElementById('attackName').value.trim();
     const roll = document.getElementById('attackRoll').value.trim();
-    const selectedStats = Array.from(document.getElementById('attackStat').selectedOptions).map(opt => opt.value).filter(v => v !== 'none');
-    const stat = selectedStats.length > 0 ? selectedStats.join('+') : '';
     const categorySelect = document.getElementById('attackCategorySelect');
     const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
 
@@ -1961,11 +2158,11 @@ function addAttack() {
     if (state.editMode.active && state.editMode.type === 'attack') {
         // 編集モード
         const index = state.editMode.index;
-        state.attacks[index] = { name: name, roll: roll, stat: stat, category };
+        state.attacks[index] = { name: name, roll: roll, category };
         showToast('攻撃を更新しました', 'success');
     } else {
         // 追加モード
-        state.attacks.push({ name: name, roll: roll, stat: stat, category });
+        state.attacks.push({ name: name, roll: roll, category });
     }
     
     resetAttackForm();
@@ -2159,14 +2356,9 @@ function updatePackageOutput(type, selectedIndex = null) {
     }
     
     if (selectedIndex < 0 || selectedIndex >= array.length) return;
-    
+
     const item = array[selectedIndex];
     let command = item.roll;
-
-    if (item.stat) {
-        const stats = item.stat.split('+');
-        command += '+{' + stats.join('}+{') + '}';
-    }
 
     const filterKey = type === 'judge' ? 'judge:' : 'attack:';
     const categoryKey = type === 'judge' ? 'judge-category:' : 'attack-category:';
@@ -2264,8 +2456,7 @@ function formatBuffForBulk(buff) {
 }
 
 function formatPackageForBulk(item) {
-    const statText = item.stat ? item.stat.split('+').join(',') : '';
-    return `${item.name}|${item.roll}|${statText}`;
+    return `${item.name}|${item.roll}`;
 }
 
 function copyItemData(type, index, button) {
@@ -2324,15 +2515,13 @@ function copyToClipboard(elementId, button) {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    setupSettingsMenu();
+    setupMacroSuggestions();
+
     document.querySelectorAll('.section-header').forEach(header => {
         header.addEventListener('click', () => toggleSection(header));
     });
-    
-    document.getElementById('addStatBtn')?.addEventListener('click', addStat);
-    document.getElementById('statName')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addStat();
-    });
-    
+
     document.getElementById('addBuffBtn')?.addEventListener('click', addBuff);
     document.getElementById('addBuffCategoryBtn')?.addEventListener('click', () => addCategory('buff', 'buffCategoryInput'));
     document.getElementById('turnProgressBtn')?.addEventListener('click', progressTurn);
@@ -2396,10 +2585,15 @@ document.addEventListener('DOMContentLoaded', () => {
         textId: 'bulkAddAttackText',
         type: 'attack'
     });
-    
+
     document.getElementById('exportToClipboard')?.addEventListener('click', exportData);
     document.getElementById('importConfirm')?.addEventListener('click', importData);
     document.getElementById('resetBtn')?.addEventListener('click', resetAll);
+    document.getElementById('userMacroClose')?.addEventListener('click', () => {
+        document.getElementById('userMacroModal')?.close();
+    });
+    document.getElementById('addMacroBtn')?.addEventListener('click', addMacro);
+    document.getElementById('clearMacroInputs')?.addEventListener('click', resetMacroInputs);
     
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -2409,13 +2603,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     initMultiSelect();
-    initFileDropZone(); 
+    initFileDropZone();
     loadUIState();
     loadData();
 });
 
 // グローバルスコープに公開
-window.removeStat = removeStat;
 window.openBuffModal = openBuffModal;
 window.openJudgeModal = openJudgeModal;
 window.openAttackModal = openAttackModal;
