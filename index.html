@@ -105,6 +105,50 @@ body {
     margin: 4px 0;
 }
 
+.macro-suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid var(--secondary-color-2);
+    border-radius: 6px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.16);
+    padding: 4px 0;
+    z-index: 1500;
+    min-width: 180px;
+    max-width: 320px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.macro-suggestions.hidden {
+    display: none;
+}
+
+.macro-suggestion-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 8px 12px;
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.macro-suggestion-item span {
+    color: var(--primary-color-2);
+}
+
+.macro-suggestion-item small {
+    color: var(--primary-color-3);
+}
+
+.macro-suggestion-item.active,
+.macro-suggestion-item:hover {
+    background: rgba(0,0,0,0.06);
+}
+
 .material-symbols-rounded {
     font-size: 24px;
     font-weight: 400;
@@ -336,8 +380,6 @@ header {
 .header-menu {
     display: flex;
     width: 50%;
-    gap: 16px;
-    margin-right: 16px;
     max-width: 300px;
     min-width: 120px;
     height: stretch;
@@ -374,7 +416,7 @@ header {
     display: none;
 }
 
-.header-menu-item .material-symbols-rounded {
+.header-menu-item span {
     font-size: 32px;
     font-variation-settings: 'FILL' 1;
 }
@@ -1163,11 +1205,11 @@ dialog .section-body {
             <div class="title">JET-PALET</div>
         </div>
         <div class="header-menu">
-            <div class="settings-menu header-menu-item">
-                <a type="button" id="settingsToggle" style="anchor-name: --settings"  target="_blank" rel="noopener noreferrer">
+            <div class="settings-menu">
+                <button class="header-menu-item" id="settingsToggle" aria-haspopup="true" aria-expanded="false" style="anchor-name: --settings">
                     <div class="tooltip" style="--target: --settings">設定</div>
                     <span class="material-symbols-rounded">settings</span>
-                </a>
+                </button>
                 <div class="settings-dropdown hidden" id="settingsDropdown">
                     <button class="settings-dropdown-item" data-target="DataOption">
                         <span class="material-symbols-rounded">checkbook</span>
@@ -1229,7 +1271,30 @@ dialog .section-body {
                         <span class="section-header-title">ユーザーマクロ</span>
                     </div>
                     <div class="section-body" style="margin-top: 32px; display: flex; flex-direction: column; gap: 16px;">
-                        <p class="small-text">マクロの登録と管理は今後の機能追加で利用されます。</p>
+                        <div class="m-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label for="macroKey" class="label-s">マクロ名</label>
+                                <input type="text" id="macroKey" placeholder="例：//必殺技">
+                                <p class="small-text">/を入力すると候補が表示されます。//では反応せず、///で再度表示されます。</p>
+                            </div>
+                            <div>
+                                <label for="macroValue" class="label-s">展開文字列</label>
+                                <input type="text" id="macroValue" placeholder="例：2d6+5 または #FF0000">
+                                <p class="small-text">カラーコードを指定すると色入力欄でマクロ名を使って指定できます。</p>
+                            </div>
+                        </div>
+                        <div class="row-controls" style="justify-content: flex-end; gap: 8px;">
+                            <button class="add-btn secondary-btn" id="addMacroBtn">登録 / 更新</button>
+                            <button class="add-btn btn--muted" id="clearMacroInputs">リセット</button>
+                        </div>
+                        <div class="section-line"></div>
+                        <div class="m-8">
+                            <div class="label-L" style="margin-bottom: 8px;">
+                                <span class="material-symbols-rounded">list</span>
+                                <span>登録済みマクロ</span>
+                            </div>
+                            <div id="macroList" class="item-list" style="max-height: 200px; overflow-y: auto;"></div>
+                        </div>
                         <div class="row-controls" style="justify-content: flex-end;">
                             <button class="add-btn secondary-btn" id="userMacroClose">閉じる</button>
                         </div>
@@ -1298,7 +1363,6 @@ dialog .section-body {
                                     <label for="buffEffect" class="label-s">コマンド</label>
                                     <div style="display: flex;">
                                         <input type="text" id="buffEffect" placeholder="例：+2,-1d6,//ダイスボーナス}=+1">
-                                        <button class="add-btn btn--muted" onclick="insertText('//NAME=')">//=</button>
                                     </div>
                                     </div>
                                 <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。
@@ -1316,7 +1380,7 @@ dialog .section-body {
                                     </div>
                                     <div style="width: 50%;">
                                         <label for="buffColor" class="label-s">ラベルの色を選択</label>
-                                        <input type="color" id="buffColor" value="#0079FF" list="buffColor-list">
+                                        <input type="text" id="buffColor" value="#0079FF" list="buffColor-list" placeholder="#RRGGBB またはマクロ名">
                                         <datalist id="buffColor-list">
                                             <option value="#0079FF"></option>
                                             <option value="#953D96"></option>
