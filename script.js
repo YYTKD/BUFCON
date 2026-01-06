@@ -425,6 +425,16 @@ function normalizeColorVariables(vars = []) {
         .filter(v => v.name && v.code);
 }
 
+function normalizeColorVariables(variables = []) {
+    if (!Array.isArray(variables)) return [];
+    return variables
+        .map(v => ({
+            name: typeof v.name === 'string' ? v.name : '',
+            code: typeof v.code === 'string' && /^#[0-9A-Fa-f]{6}$/.test(v.code) ? v.code.toUpperCase() : ''
+        }))
+        .filter(v => v.name && v.code);
+}
+
 function loadData() {
     try {
         const saved = localStorage.getItem('trpgData');
@@ -595,6 +605,8 @@ function importData() {
         renderPackage('attack');
         updateBuffTargetDropdown();
         renderMacroList();
+        renderColorVariableList();
+        updateColorVariableSelectors();
         saveData();
         
         document.getElementById('importText').value = '';
@@ -831,6 +843,124 @@ function applyColorVariableSelection(event) {
     if (colorInput) {
         colorInput.value = variable.code;
     }
+}
+
+// ========================================
+// カラー変数管理
+// ========================================
+
+function renderColorVariableList() {
+    const list = document.getElementById('colorVariableList');
+    if (!list) return;
+
+    if (!state.colorVariables.length) {
+        list.innerHTML = '<div class="empty-message">カラー変数が登録されていません</div>';
+        return;
+    }
+
+    list.innerHTML = state.colorVariables.map((variable, index) => `
+        <div class="item" data-color-variable-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
+            <div class="item-param" data-edit-color-variable="${index}" style="cursor: pointer;">
+                <div class="item-name">${escapeHtml(variable.name)}</div>
+                <div class="item-detail" style="display:flex; align-items:center; gap:8px;">
+                    <span style="background:${escapeHtml(variable.code)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>
+                    <span>${escapeHtml(variable.code)}</span>
+                </div>
+            </div>
+            <div class="item-controls">
+                <button class="material-symbols-rounded add-btn btn--danger" data-remove-color-variable="${index}" title="削除">delete</button>
+            </div>
+        </div>
+    `).join('');
+
+    list.querySelectorAll('[data-remove-color-variable]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(btn.dataset.removeColorVariable);
+            removeColorVariable(idx);
+        });
+    });
+
+    list.querySelectorAll('[data-edit-color-variable]').forEach(area => {
+        area.addEventListener('click', () => {
+            const idx = parseInt(area.dataset.editColorVariable);
+            const variable = state.colorVariables[idx];
+            if (!variable) return;
+            document.getElementById('colorVariableName').value = variable.name;
+            document.getElementById('colorVariableCode').value = variable.code;
+        });
+    });
+}
+
+function addColorVariable() {
+    const name = document.getElementById('colorVariableName').value.trim();
+    const codeInput = document.getElementById('colorVariableCode').value.trim();
+
+    if (!name || !codeInput) {
+        showToast('カラー変数名とカラーコードを入力してください', 'error');
+        return;
+    }
+
+    if (!/^#[0-9A-Fa-f]{6}$/.test(codeInput)) {
+        showToast('カラーコードは#RRGGBB形式で入力してください', 'error');
+        return;
+    }
+
+    const existingIndex = state.colorVariables.findIndex(v => v.name === name);
+    const variable = { name, code: codeInput.toUpperCase() };
+
+    if (existingIndex >= 0) {
+        state.colorVariables[existingIndex] = variable;
+        showToast('カラー変数を更新しました', 'success');
+    } else {
+        state.colorVariables.push(variable);
+        showToast('カラー変数を追加しました', 'success');
+    }
+
+    resetColorVariableInputs();
+    renderColorVariableList();
+    updateColorVariableSelectors();
+    saveData();
+}
+
+function removeColorVariable(index) {
+    if (index < 0 || index >= state.colorVariables.length) return;
+    state.colorVariables.splice(index, 1);
+    renderColorVariableList();
+    updateColorVariableSelectors();
+    saveData();
+}
+
+function resetColorVariableInputs() {
+    document.getElementById('colorVariableName').value = '';
+    document.getElementById('colorVariableCode').value = '';
+}
+
+function updateColorVariableSelectors() {
+    const options = ['<option value="">カラー変数を選択</option>', ...state.colorVariables.map(v => `<option value="${escapeHtml(v.name)}">${escapeHtml(v.name)} (${escapeHtml(v.code)})</option>`)];
+    document.querySelectorAll('[data-color-variable-select]').forEach(select => {
+        const current = select.value;
+        select.innerHTML = options.join('');
+        if (state.colorVariables.some(v => v.name === current)) {
+            select.value = current;
+        } else {
+            select.value = '';
+        }
+    });
+}
+
+function attachColorVariableSelector(selectId, inputId) {
+    const select = document.getElementById(selectId);
+    const input = document.getElementById(inputId);
+    if (!select || !input) return;
+    select.dataset.colorVariableSelect = 'true';
+    select.addEventListener('change', () => {
+        const selectedName = select.value;
+        const variable = state.colorVariables.find(v => v.name === selectedName);
+        if (variable) {
+            input.value = variable.code;
+        }
+    });
 }
 
 // ========================================
@@ -2761,6 +2891,7 @@ function copyToClipboard(elementId, button) {
 document.addEventListener('DOMContentLoaded', () => {
     setupSettingsMenu();
     setupMacroSuggestions();
+    attachColorVariableSelector('buffColorVariableSelect', 'buffColor');
 
     document.querySelectorAll('.section-header').forEach(header => {
         header.addEventListener('click', () => toggleSection(header));
