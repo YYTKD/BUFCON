@@ -381,10 +381,20 @@ function normalizeBuffs(buffs = []) {
 }
 
 function normalizeMacros(macros = []) {
-    if (!Array.isArray(macros)) return [];
-    return macros
+    if (!Array.isArray(macros)) return getDefaultMacros();
+
+    const sanitized = macros
         .map(m => ({ key: typeof m.key === 'string' ? m.key : '', value: typeof m.value === 'string' ? m.value : '' }))
         .filter(m => m.key && m.value);
+
+    const defaults = getDefaultMacros();
+    defaults.forEach((macro) => {
+        if (!sanitized.some((m) => m.key === macro.key)) {
+            sanitized.push({ ...macro });
+        }
+    });
+
+    return sanitized;
 }
 
 function loadData() {
@@ -446,7 +456,9 @@ function getDefaultAttacks() {
 }
 
 function getDefaultMacros() {
-    return [];
+    return [
+        { key: '//=', value: '//=' }
+    ];
 }
 
 function saveData() {
