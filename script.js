@@ -6,6 +6,7 @@ const state = {
     judges: [],
     attacks: [],
     macros: [],
+    macroHistory: [],
     buffCategories: [],
     judgeCategories: [],
     attackCategories: [],
@@ -387,6 +388,13 @@ function normalizeMacros(macros = []) {
         .filter(m => m.key && m.value);
 }
 
+function normalizeMacroHistory(history = []) {
+    if (!Array.isArray(history)) return [];
+    return history
+        .map(item => typeof item === 'string' ? item.trim() : '')
+        .filter(Boolean);
+}
+
 function loadData() {
     try {
         const saved = localStorage.getItem('trpgData');
@@ -399,11 +407,13 @@ function loadData() {
             state.attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
             state.attackCategories = Array.isArray(data.attackCategories) ? data.attackCategories : [];
             state.macros = normalizeMacros(Array.isArray(data.macros) ? data.macros : []);
+            state.macroHistory = normalizeMacroHistory(data.macroHistory || []);
         } else {
             state.buffs = normalizeBuffs(getDefaultBuffs());
             state.judges = getDefaultJudges();
             state.attacks = getDefaultAttacks();
             state.macros = getDefaultMacros();
+            state.macroHistory = [];
         }
     } catch (e) {
         console.error('データの読み込みに失敗:', e);
@@ -412,6 +422,7 @@ function loadData() {
         state.judges = getDefaultJudges();
         state.attacks = getDefaultAttacks();
         state.macros = getDefaultMacros();
+        state.macroHistory = [];
     }
 
     updateBuffCategorySelect();
@@ -457,7 +468,8 @@ function saveData() {
         judgeCategories: state.judgeCategories,
         attacks: state.attacks,
         attackCategories: state.attackCategories,
-        macros: state.macros
+        macros: state.macros,
+        macroHistory: state.macroHistory
     };
     
     try {
@@ -504,7 +516,8 @@ function exportData() {
         judgeCategories: state.judgeCategories,
         attacks: state.attacks,
         attackCategories: state.attackCategories,
-        macros: state.macros
+        macros: state.macros,
+        macroHistory: state.macroHistory
     };
     const json = JSON.stringify(data, null, 2);
     
@@ -536,6 +549,7 @@ function importData() {
         state.attacks = data.attacks || [];
         state.attackCategories = data.attackCategories || [];
         state.macros = normalizeMacros(data.macros || []);
+        state.macroHistory = normalizeMacroHistory(data.macroHistory || []);
 
         updateBuffCategorySelect();
         updateJudgeCategorySelect();
@@ -646,7 +660,7 @@ function resetMacroInputs() {
 // マクロ補完UI
 // ========================================
 
-const macroSuggestionState = { target: null, activeIndex: 0 };
+const macroSuggestionState = { target: null, activeIndex: 0, items: [] };
 let macroSuggestionBox = null;
 
 function getMacroSuggestionBox() {
@@ -662,6 +676,7 @@ function hideMacroSuggestions() {
     if (!macroSuggestionBox) return;
     macroSuggestionBox.classList.add('hidden');
     macroSuggestionState.target = null;
+    macroSuggestionState.items = [];
 }
 
 function moveMacroSelection(delta) {
@@ -675,21 +690,70 @@ function moveMacroSelection(delta) {
     });
 }
 
+function updateMacroHistory(key) {
+    if (typeof key !== 'string') return;
+    const trimmed = key.trim();
+    if (!trimmed) return;
+    const filtered = state.macroHistory.filter(item => item !== trimmed);
+    state.macroHistory = [trimmed, ...filtered].slice(0, 10);
+    saveData();
+}
+
 function applyMacroSuggestion(index) {
     const target = macroSuggestionState.target;
     if (!target) return;
-    const macro = state.macros[index];
+    const macro = macroSuggestionState.items[index];
     if (!macro) return;
 
-    const caret = target.selectionStart ?? target.value.length;
-    const before = target.value.slice(0, caret);
-    const after = target.value.slice(caret);
-    const newBefore = before.slice(0, -1) + macro.value;
-    target.value = newBefore + after;
-
-    const pos = newBefore.length;
+    target.value = macro.value;
+    const pos = target.value.length;
     target.setSelectionRange(pos, pos);
+    updateMacroHistory(macro.key);
     hideMacroSuggestions();
+}
+
+function highlightMatch(text, query) {
+    if (!query) return escapeHtml(text);
+    const lowerText = text.toLowerCase();
+    const lowerQuery = query.toLowerCase();
+    const index = lowerText.indexOf(lowerQuery);
+    if (index === -1) return escapeHtml(text);
+
+    const before = escapeHtml(text.slice(0, index));
+    const match = escapeHtml(text.slice(index, index + query.length));
+    const after = escapeHtml(text.slice(index + query.length));
+    return `${before}<strong>${match}</strong>${after}`;
+}
+
+function getRecentMacros() {
+    const recent = [];
+    state.macroHistory.forEach(key => {
+        const hit = state.macros.find(m => m.key === key);
+        if (hit && !recent.includes(hit)) {
+            recent.push(hit);
+        }
+    });
+
+    if (!recent.length) {
+        return state.macros.slice(0, 3);
+    }
+
+    const filled = [...recent];
+    state.macros.forEach(macro => {
+        if (filled.length >= 3) return;
+        if (!filled.includes(macro)) {
+            filled.push(macro);
+        }
+    });
+    return filled.slice(0, 3);
+}
+
+function getFilteredMacros(query) {
+    const trimmed = query.trim();
+    if (!trimmed) return getRecentMacros();
+
+    const lower = trimmed.toLowerCase();
+    return state.macros.filter(macro => macro.key.toLowerCase().includes(lower));
 }
 
 function showMacroSuggestions(target) {
@@ -701,9 +765,17 @@ function showMacroSuggestions(target) {
         return;
     }
 
-    box.innerHTML = state.macros.map((macro, index) => `
+    const query = target.value;
+    const macros = getFilteredMacros(query);
+
+    if (!macros.length) {
+        hideMacroSuggestions();
+        return;
+    }
+
+    box.innerHTML = macros.map((macro, index) => `
         <button class="macro-suggestion-item ${index === 0 ? 'active' : ''}" data-macro-index="${index}" type="button">
-            <span>${escapeHtml(macro.key)}</span>
+            <span>${highlightMatch(macro.key, query)}</span>
             <small>${escapeHtml(macro.value)}</small>
         </button>
     `).join('');
@@ -711,28 +783,20 @@ function showMacroSuggestions(target) {
     box.querySelectorAll('[data-macro-index]').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            applyMacroSuggestion(parseInt(btn.dataset.macroIndex));
+            applyMacroSuggestion(parseInt(btn.dataset.macroIndex, 10));
         });
     });
 
     macroSuggestionState.target = target;
     macroSuggestionState.activeIndex = 0;
+    macroSuggestionState.items = macros;
     const rect = target.getBoundingClientRect();
     box.style.left = `${rect.left + window.scrollX}px`;
     box.style.top = `${rect.bottom + window.scrollY + 4}px`;
     box.classList.remove('hidden');
 }
 
-function handleMacroTrigger(target) {
-    const caret = target.selectionStart ?? target.value.length;
-    const before = target.value.slice(0, caret);
-    const slashMatch = before.match(/\/+$/);
-
-    if (!slashMatch || slashMatch[0].length % 2 === 0) {
-        hideMacroSuggestions();
-        return;
-    }
-
+function handleMacroInput(target) {
     showMacroSuggestions(target);
 }
 
@@ -755,7 +819,8 @@ function handleMacroKeydown(event) {
 
 function attachMacroSuggestions(input) {
     if (!input) return;
-    input.addEventListener('input', () => handleMacroTrigger(input));
+    input.addEventListener('input', () => handleMacroInput(input));
+    input.addEventListener('focus', () => handleMacroInput(input));
     input.addEventListener('keydown', handleMacroKeydown);
     input.addEventListener('blur', () => setTimeout(hideMacroSuggestions, 150));
 }
