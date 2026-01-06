@@ -6,9 +6,20 @@ const state = {
     buffs: [],
     judges: [],
     attacks: [],
+    buffCategories: [],
+    judgeCategories: [],
+    attackCategories: [],
     draggedIndex: null,
     draggedType: null,
-    selectedBuffTargets: []
+    draggedCategory: null,
+    draggedCategoryType: null,
+    draggedCategoryName: null,
+    selectedBuffTargets: [],
+    editMode: {
+        active: false,
+        type: null,
+        index: null
+    }
 };
 
 function getCollection(type) {
@@ -16,6 +27,125 @@ function getCollection(type) {
     if (type === 'buff') return state.buffs;
     if (type === 'judge') return state.judges;
     if (type === 'attack') return state.attacks;
+    return null;
+}
+
+// ========================================
+// コンテキストメニュー
+// ========================================
+let contextMenuElement = null;
+
+function getContextMenu() {
+    if (contextMenuElement) return contextMenuElement;
+
+    contextMenuElement = document.createElement('div');
+    contextMenuElement.id = 'item-context-menu';
+    contextMenuElement.className = 'context-menu hidden';
+    document.body.appendChild(contextMenuElement);
+
+    document.addEventListener('click', hideContextMenu);
+    window.addEventListener('resize', hideContextMenu);
+    window.addEventListener('scroll', hideContextMenu, true);
+
+    return contextMenuElement;
+}
+
+function hideContextMenu() {
+    if (contextMenuElement) {
+        contextMenuElement.classList.add('hidden');
+    }
+}
+
+function showContextMenu(x, y, actions = []) {
+    if (!actions.length) return;
+
+    const menu = getContextMenu();
+    menu.innerHTML = '';
+
+    actions.forEach((action, index) => {
+        if (index > 0) {
+            const separator = document.createElement('div');
+            separator.className = 'context-menu-separator';
+            menu.appendChild(separator);
+        }
+
+        const button = document.createElement('button');
+        button.className = 'context-menu-item';
+        button.textContent = action.label;
+        button.addEventListener('click', () => {
+            action.onClick();
+            hideContextMenu();
+        });
+        menu.appendChild(button);
+    });
+
+    menu.classList.remove('hidden');
+    menu.style.visibility = 'hidden';
+    menu.style.left = '0px';
+    menu.style.top = '0px';
+
+    const menuWidth = menu.offsetWidth;
+    const menuHeight = menu.offsetHeight;
+    const viewportRight = window.scrollX + window.innerWidth;
+    const viewportBottom = window.scrollY + window.innerHeight;
+
+    let left = x;
+    let top = y;
+
+    if (left + menuWidth > viewportRight) {
+        left = viewportRight - menuWidth - 8;
+    }
+    if (top + menuHeight > viewportBottom) {
+        top = viewportBottom - menuHeight - 8;
+    }
+
+    left = Math.max(window.scrollX + 8, left);
+    top = Math.max(window.scrollY + 8, top);
+
+    menu.style.left = `${left}px`;
+    menu.style.top = `${top}px`;
+    menu.style.visibility = 'visible';
+}
+
+function openItemContextMenu(event, type, index) {
+    event.preventDefault();
+    const actions = [];
+
+    if (type === 'buff') {
+        actions.push({ label: '編集', onClick: () => openBuffModal(index) });
+        actions.push({ label: 'テキストをコピー', onClick: () => copyItemData('buff', index) });
+        actions.push({ label: '削除', onClick: () => removeBuff(index) });
+    } else if (type === 'judge') {
+        actions.push({ label: '編集', onClick: () => openJudgeModal(index) });
+        actions.push({ label: 'テキストをコピー', onClick: () => copyItemData('judge', index) });
+        actions.push({ label: '削除', onClick: () => removeJudge(index) });
+    } else if (type === 'attack') {
+        actions.push({ label: '編集', onClick: () => openAttackModal(index) });
+        actions.push({ label: 'テキストをコピー', onClick: () => copyItemData('attack', index) });
+        actions.push({ label: '削除', onClick: () => removeAttack(index) });
+    }
+
+    hideContextMenu();
+    showContextMenu(event.pageX, event.pageY, actions);
+}
+
+function openCategoryContextMenu(event, type, categoryName) {
+    event.preventDefault();
+
+    const actions = [
+        { label: '編集', onClick: () => editCategory(type, categoryName) },
+        { label: 'カテゴリ名をコピー', onClick: () => copyCategoryName(categoryName) },
+        { label: '削除', onClick: () => removeCategory(type, categoryName) }
+    ];
+
+    hideContextMenu();
+    showContextMenu(event.pageX, event.pageY, actions);
+}
+
+function getCategories(type) {
+    if (type === 'buff') return state.buffCategories;
+    if (type === 'judge') return state.judgeCategories;
+    if (type === 'attack') return state.attackCategories;
     return null;
 }
 
@@ -55,16 +185,26 @@ function validateColor(color) {
 /**
  * トースト通知を表示(alert代替)
  */
+function getActiveModal() {
+    const openDialogs = Array.from(document.querySelectorAll('dialog[open]'));
+    return openDialogs[openDialogs.length - 1] || null;
+}
+
 function showToast(message, type = 'info') {
+    const activeModal = getActiveModal();
+    const parent = activeModal || document.body;
+    const top = activeModal ? '60px' : '80px';
+
     const toast = document.createElement('div');
     toast.style.cssText = `
         position: fixed;
-        top: 80px;
+        top: ${top};
         right: 20px;
         padding: 12px 20px;
-        background: ${type === 'error' ? '#ff6b6b' : type === 'success' ? '#51cf66' : '#4dabf7'};
+        background: ${type === 'error' ? '#d9376e' : type === 'success' ? '#48c229' : '#5c59ff'};
         color: white;
         border-radius: 6px;
+        border: 2px solid var(--primary-color-1);
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         z-index: 10000;
         animation: slideIn 0.3s ease-out;
@@ -72,9 +212,9 @@ function showToast(message, type = 'info') {
         max-width: 300px;
     `;
     toast.textContent = message;
-    
-    document.body.appendChild(toast);
-    
+
+    parent.appendChild(toast);
+
     setTimeout(() => {
         toast.style.animation = 'slideOut 0.3s ease-in';
         setTimeout(() => toast.remove(), 300);
@@ -142,26 +282,55 @@ function loadUIState() {
 // データ管理
 // ========================================
 
+function normalizeBuff(buff) {
+    const memoText = typeof buff.memo === 'string'
+        ? buff.memo
+        : (typeof buff.description === 'string' ? buff.description : '');
+    const showSimpleMemo = typeof buff.showSimpleMemo === 'boolean'
+        ? buff.showSimpleMemo
+        : Boolean(buff.description);
+
+    const { description, ...rest } = buff;
+    return {
+        ...rest,
+        memo: memoText,
+        showSimpleMemo
+    };
+}
+
+function normalizeBuffs(buffs = []) {
+    if (!Array.isArray(buffs)) return [];
+    return buffs.map(normalizeBuff);
+}
+
 function loadData() {
     try {
         const saved = localStorage.getItem('trpgData');
         if (saved) {
             const data = JSON.parse(saved);
             state.stats = Array.isArray(data.stats) ? data.stats : [];
-            state.buffs = Array.isArray(data.buffs) ? data.buffs : [];
+            state.buffs = normalizeBuffs(Array.isArray(data.buffs) ? data.buffs : getDefaultBuffs());
+            state.buffCategories = Array.isArray(data.buffCategories) ? data.buffCategories : [];
             state.judges = Array.isArray(data.judges) ? data.judges : getDefaultJudges();
+            state.judgeCategories = Array.isArray(data.judgeCategories) ? data.judgeCategories : [];
             state.attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
+            state.attackCategories = Array.isArray(data.attackCategories) ? data.attackCategories : [];
         } else {
+            state.buffs = normalizeBuffs(getDefaultBuffs());
             state.judges = getDefaultJudges();
             state.attacks = getDefaultAttacks();
         }
     } catch (e) {
         console.error('データの読み込みに失敗:', e);
         showToast('データの読み込みに失敗しました', 'error');
+        state.buffs = normalizeBuffs(getDefaultBuffs());
         state.judges = getDefaultJudges();
         state.attacks = getDefaultAttacks();
     }
-    
+
+    updateBuffCategorySelect();
+    updateJudgeCategorySelect();
+    updateAttackCategorySelect();
     renderStats();
     renderBuffs();
     renderPackage('judge');
@@ -169,6 +338,14 @@ function loadData() {
     updateStatSelects();
     updateBuffTargetDropdown();
 }
+
+function getDefaultBuffs() {
+    return [
+        { name: 'キャッツアイ', memo: '命中UP', showSimpleMemo: true, effect: '+1', targets: ['judge:命中(武器A)　SAMPLE'], turn: '3', originalTurn: 3, color: '#F8F9FA', category: null, active: true },
+        { name: 'オーバーパワー', memo: 'ダメージUP', showSimpleMemo: true, effect: '+3', targets: ['attack:all-attack'], color: '#F7821B', category: null, active: true }
+    ];
+}
+
 
 function getDefaultJudges() {
     return [
@@ -187,8 +364,11 @@ function saveData() {
     const data = {
         stats: state.stats,
         buffs: state.buffs,
+        buffCategories: state.buffCategories,
         judges: state.judges,
-        attacks: state.attacks
+        judgeCategories: state.judgeCategories,
+        attacks: state.attacks,
+        attackCategories: state.attackCategories
     };
     
     try {
@@ -231,8 +411,11 @@ function exportData() {
     const data = {
         stats: state.stats,
         buffs: state.buffs,
+        buffCategories: state.buffCategories,
         judges: state.judges,
-        attacks: state.attacks
+        judgeCategories: state.judgeCategories,
+        attacks: state.attacks,
+        attackCategories: state.attackCategories
     };
     const json = JSON.stringify(data, null, 2);
     
@@ -256,12 +439,18 @@ function importData() {
         if (!data.stats || !data.buffs || !data.judges || !data.attacks) {
             throw new Error('無効なデータ形式です');
         }
-        
+
         state.stats = data.stats || [];
-        state.buffs = data.buffs || [];
+        state.buffs = normalizeBuffs(data.buffs || []);
+        state.buffCategories = data.buffCategories || [];
         state.judges = data.judges || [];
+        state.judgeCategories = data.judgeCategories || [];
         state.attacks = data.attacks || [];
-        
+        state.attackCategories = data.attackCategories || [];
+
+        updateBuffCategorySelect();
+        updateJudgeCategorySelect();
+        updateAttackCategorySelect();
         renderStats();
         renderBuffs();
         renderPackage('judge');
@@ -419,7 +608,7 @@ function renderStats() {
     list.innerHTML = state.stats.map((stat, i) => `
         <div class="stat-tag">
             ${escapeHtml(stat.name)}
-            <button onclick="removeStat(${i})">×</button>
+            <button class="material-symbols-rounded" onclick="removeStat(${i})">disabled_by_default</button>
         </div>
     `).join('');
 }
@@ -433,6 +622,334 @@ function updateStatSelects() {
     
     judgeSelect.innerHTML = options;
     attackSelect.innerHTML = options;
+}
+
+// ========================================
+// カテゴリ管理
+// ========================================
+
+function addCategory(type, inputId) {
+    const categories = getCategories(type);
+    if (!categories) return;
+
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const name = input.value.trim();
+    if (!name) {
+        showToast('カテゴリ名を入力してください', 'error');
+        return;
+    }
+
+    if (categories.includes(name)) {
+        showToast('同名のカテゴリが既に存在します', 'error');
+        return;
+    }
+
+    categories.push(name);
+    input.value = '';
+
+    if (type === 'buff') {
+        updateBuffCategorySelect();
+        renderBuffs();
+    } else if (type === 'judge') {
+        updateJudgeCategorySelect();
+        renderPackage('judge');
+    } else if (type === 'attack') {
+        updateAttackCategorySelect();
+        renderPackage('attack');
+    }
+
+    updateBuffTargetDropdown();
+    saveData();
+}
+
+function replaceCategoryOnItems(type, from, to) {
+    const items = getCollection(type) || [];
+    items.forEach(item => {
+        if (item.category === from) {
+            item.category = to;
+        }
+    });
+}
+
+function replaceBuffTargetsForCategory(type, from, to) {
+    if (type !== 'judge' && type !== 'attack') return;
+
+    const prefix = type === 'judge' ? 'judge-category:' : 'attack-category:';
+    const fromKey = prefix + from;
+    const toKey = to ? prefix + to : null;
+
+    state.buffs.forEach(buff => {
+        buff.targets = buff.targets
+            .map(target => target === fromKey ? toKey : target)
+            .filter(Boolean);
+    });
+
+    if (Array.isArray(state.selectedBuffTargets)) {
+        state.selectedBuffTargets = state.selectedBuffTargets
+            .map(target => target === fromKey ? toKey : target)
+            .filter(Boolean);
+    }
+}
+
+function refreshCategoryViews(type) {
+    if (type === 'buff') {
+        renderBuffs();
+        updateBuffCategorySelect();
+    } else if (type === 'judge') {
+        renderPackage('judge');
+        updateJudgeCategorySelect();
+    } else if (type === 'attack') {
+        renderPackage('attack');
+        updateAttackCategorySelect();
+    }
+
+    updateBuffTargetDropdown();
+    updatePackageOutput('judge');
+    updatePackageOutput('attack');
+    saveData();
+}
+
+function editCategory(type, oldName) {
+    const categories = getCategories(type);
+    if (!categories || !categories.includes(oldName)) return;
+
+    const newName = prompt('カテゴリ名を編集', oldName);
+    if (newName === null) return;
+
+    const trimmed = newName.trim();
+    if (!trimmed) {
+        showToast('カテゴリ名を入力してください', 'error');
+        return;
+    }
+
+    if (categories.includes(trimmed)) {
+        showToast('同名のカテゴリが既に存在します', 'error');
+        return;
+    }
+
+    const idx = categories.indexOf(oldName);
+    categories[idx] = trimmed;
+
+    replaceCategoryOnItems(type, oldName, trimmed);
+    replaceBuffTargetsForCategory(type, oldName, trimmed);
+    refreshCategoryViews(type);
+    showToast('カテゴリ名を変更しました', 'success');
+}
+
+function removeCategory(type, name) {
+    const categories = getCategories(type);
+    if (!categories || !categories.includes(name)) return;
+
+    const confirmed = confirm(`カテゴリ「${name}」を削除しますか？`);
+    if (!confirmed) return;
+
+    categories.splice(categories.indexOf(name), 1);
+    replaceCategoryOnItems(type, name, null);
+    replaceBuffTargetsForCategory(type, name, null);
+    refreshCategoryViews(type);
+    showToast('カテゴリを削除しました', 'success');
+}
+
+function copyCategoryName(name) {
+    if (!name) return;
+
+    navigator.clipboard.writeText(name)
+        .then(() => showToast('カテゴリ名をコピーしました', 'success'))
+        .catch(() => showToast('コピーに失敗しました', 'error'));
+}
+
+
+function buildCategoryMap(type) {
+    const map = { 'none': [] };
+    const categories = getCategories(type) || [];
+    categories.forEach(name => map[name] = []);
+
+    const items = getCollection(type) || [];
+    items.forEach((item, index) => {
+        const key = item.category || 'none';
+        if (!map[key]) {
+            map[key] = [];
+            categories.push(key);
+        }
+        map[key].push({ item, index });
+    });
+
+    return map;
+}
+
+const categoryIndexConfig = {
+    buff: { selectId: 'buffItemIndex', listId: 'buffList' },
+    judge: { selectId: 'judgeItemIndex', listId: 'judgeList' },
+    attack: { selectId: 'attackItemIndex', listId: 'attackList' }
+};
+
+function updateCategoryIndexDropdown(type) {
+    const config = categoryIndexConfig[type];
+    if (!config) return;
+
+    const select = document.getElementById(config.selectId);
+    if (!select) return;
+
+    const categories = ['none', ...(getCategories(type) || [])];
+    const uniqueCategories = [];
+    categories.forEach(category => {
+        const key = category || 'none';
+        if (!uniqueCategories.includes(key)) {
+            uniqueCategories.push(key);
+        }
+    });
+
+    const options = ['<option disabled></option>'];
+    uniqueCategories.forEach(category => {
+        const label = category === 'none' ? '未分類' : category;
+        options.push(`<option value="${escapeHtml(category)}">${escapeHtml(label)}</option>`);
+    });
+
+    select.innerHTML = options.join('');
+    select.value = '';
+}
+
+function scrollToCategory(type, category) {
+    const config = categoryIndexConfig[type];
+    if (!config || !category) return;
+
+    const list = document.getElementById(config.listId);
+    if (!list) return;
+
+    const blocks = Array.from(list.querySelectorAll('.category-block'));
+    const targetBlock = blocks.find(block => (block.getAttribute('data-category') || 'none') === category);
+
+    if (!targetBlock) return;
+
+    if (targetBlock.tagName === 'DETAILS') {
+        targetBlock.open = true;
+    }
+
+    const listRectTop = list.getBoundingClientRect().top;
+    const blockRectTop = targetBlock.getBoundingClientRect().top;
+    const offset = blockRectTop - listRectTop + list.scrollTop;
+
+    list.scrollTo({ top: offset, behavior: 'smooth' });
+}
+
+function handleCategoryIndexChange(type, event) {
+    const category = event.target.value;
+    if (!category) return;
+
+    scrollToCategory(type, category);
+    event.target.value = '';
+}
+
+function getCategoryInsertIndex(type, categoryKey) {
+    const arr = getCollection(type) || [];
+    const normalizedKey = categoryKey || 'none';
+    const indices = arr
+        .map((item, idx) => ({ item, idx }))
+        .filter(({ item }) => (item.category || 'none') === normalizedKey)
+        .map(({ idx }) => idx);
+
+    if (indices.length === 0) return arr.length;
+    return Math.max(...indices) + 1;
+}
+
+function renderBuffItems(entries = []) {
+    if (!Array.isArray(entries) || entries.length === 0) return '';
+
+    return entries.map(({ item, index }) => {
+        const bgColor = validateColor(item.color);
+        const textColor = getContrastColor(bgColor);
+        const targetTexts = item.targets.map(t => {
+            const text = getTargetText(t);
+            return text === "none" ? "なし" : text;
+        });
+        const turnDisplay = item.turn ? `<span class="turn-badge" style="outline:2px solid ${item.color};"><span>${item.turn}</span></span>` : '';
+        const simpleMemo = getBuffSimpleMemo(item);
+        const memoText = getBuffMemoText(item);
+        const memoHtml = memoText ? escapeHtml(memoText).replace(/\n/g, '<br>') : '<span class="memo-empty">メモはありません</span>';
+        const maxTurnText = item.originalTurn ?? item.turn;
+        const maxTurnDisplay = (maxTurnText === undefined || maxTurnText === null || maxTurnText === '') ? 'なし' : maxTurnText;
+        const targetsText = targetTexts.length ? targetTexts.join(', ') : 'なし';
+        const effectText = item.effect ? item.effect : 'なし';
+
+        return `
+            <details class="item buff-item draggable ${item.active ? 'active' : ''}"
+                     style="background-color: ${bgColor}; color: ${textColor};"
+                     data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}">
+                <summary class="buff-summary" draggable="true">
+                    <span class="item-param">
+                        <span class="item-name">${escapeHtml(item.name)}</span>
+                        ${simpleMemo ? `<span class="item-description">${escapeHtml(simpleMemo)}</span>` : ''}
+                    </span>
+                    ${turnDisplay}
+                    <span class="buff-btn">
+                        <button class="toggle-btn ${item.active ? 'active' : ''}" data-toggle="${index}" data-toggle-type="buff"></button>
+                    </span>
+                </summary>
+                <div class="buff-detail-body">
+                    <div>
+                        <p><strong>最大ターン：</strong>${escapeHtml(String(maxTurnDisplay))}</p>
+                        <p><strong>効果先：</strong>${escapeHtml(targetsText)}</p>
+                        <p><strong>コマンド：</strong>${escapeHtml(effectText)}</p>
+                    </div>
+                    <div class="item-detail buff-memo">
+                        <p class="item-detail-label"><strong>メモ：</strong></p>
+                        <p class="item-memo-text">${memoHtml}</p>
+                    </div>
+                </div>
+            </details>
+        `;
+    }).join('');
+}
+
+function renderPackageItems(type, entries = []) {
+    if (!Array.isArray(entries) || entries.length === 0) return '';
+
+    return entries.map(({ item, index }) => `
+        <div class="item clickable draggable" data-index="${index}" data-type="${type}" data-category="${escapeHtml(item.category || 'none')}" draggable="true">
+            <span class="item-param">
+                <span class="item-name">${escapeHtml(item.name)}</span>
+                <span class="item-detail">${escapeHtml(item.roll)}</span>
+                <span class="item-detail">+${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
+        </div>
+    `).join('');
+}
+
+function updateBuffCategorySelect() {
+    const select = document.getElementById('buffCategorySelect');
+    if (!select) return;
+
+    const options = ['<option value="none">なし</option>'];
+    state.buffCategories.forEach(name => {
+        options.push(`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`);
+    });
+
+    select.innerHTML = options.join('');
+}
+
+function updateJudgeCategorySelect() {
+    const select = document.getElementById('judgeCategorySelect');
+    if (!select) return;
+
+    const options = ['<option value="none">なし</option>'];
+    state.judgeCategories.forEach(name => {
+        options.push(`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`);
+    });
+
+    select.innerHTML = options.join('');
+}
+
+function updateAttackCategorySelect() {
+    const select = document.getElementById('attackCategorySelect');
+    if (!select) return;
+
+    const options = ['<option value="none">なし</option>'];
+    state.attackCategories.forEach(name => {
+        options.push(`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`);
+    });
+
+    select.innerHTML = options.join('');
 }
 
 // ========================================
@@ -451,15 +968,17 @@ function initMultiSelect() {
 function updateBuffTargetDropdown() {
     const select = document.getElementById('buffTargetSelect');
     if (!select) return;
-    
-    // 現在の選択値を保持
-    const currentValues = Array.from(select.selectedOptions).map(opt => opt.value);
-    
+
     // プレースホルダー
     let html = '<option disabled>複数選択可</option>';
     
+    // 状態に保持している選択値を使用
+    const currentValues = Array.isArray(state.selectedBuffTargets)
+        ? [...state.selectedBuffTargets]
+        : [];
+
     // その他カテゴリ
-    html += `<option value="none">なし</option>`;
+    html += `<option value="none" ${currentValues.includes('none') ? 'selected' : ''}>なし</option>`;
     html += `<option value="all-judge" ${currentValues.includes('all-judge') ? 'selected' : ''}>すべての判定</option>`;
     html += `<option value="all-attack" ${currentValues.includes('all-attack') ? 'selected' : ''}>すべての攻撃</option>`;
     html += `</optgroup>`;
@@ -467,20 +986,35 @@ function updateBuffTargetDropdown() {
     // 判定カテゴリ
     if (state.judges.length > 0) {
         html += `<optgroup label="---判定---">`;
+                if (state.judgeCategories.length > 0) {
+            state.judgeCategories.forEach(name => {
+                const value = `judge-category:${name}`;
+                html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>&gt;&gt;${escapeHtml(name)}</option>`;
+            });
+        }
+        
         state.judges.forEach(j => {
             const value = 'judge:' + j.name;
             html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(j.name)}</option>`;
         });
+
         html += `</optgroup>`;
     }
-    
+
     // 攻撃カテゴリ
     if (state.attacks.length > 0) {
         html += `<optgroup label="---攻撃---">`;
+                if (state.attackCategories.length > 0) {
+            state.attackCategories.forEach(name => {
+                const value = `attack-category:${name}`;
+                html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>&gt;&gt;${escapeHtml(name)}</option>`;
+            });
+        }
         state.attacks.forEach(a => {
             const value = 'attack:' + a.name;
             html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(a.name)}</option>`;
         });
+
         html += `</optgroup>`;
     }
     
@@ -495,6 +1029,8 @@ function getTargetText(target) {
     if (target === 'all-attack') return 'すべての攻撃';
     if (target.startsWith('judge:')) return target.substring(6);
     if (target.startsWith('attack:')) return target.substring(7);
+    if (target.startsWith('judge-category:')) return '>>' + target.substring(16);
+    if (target.startsWith('attack-category:')) return '>>' + target.substring(17);
     return target;
 }
 
@@ -502,43 +1038,133 @@ function getTargetText(target) {
 // バフ管理
 // ========================================
 
+function getBuffMemoText(buff) {
+    if (!buff) return '';
+    if (typeof buff.memo === 'string') return buff.memo;
+    if (typeof buff.description === 'string') return buff.description;
+    return '';
+}
+
+function getBuffSimpleMemo(buff) {
+    if (!buff || buff.showSimpleMemo === false) return '';
+    const memoText = getBuffMemoText(buff);
+    const firstLine = memoText.split(/\r?\n/)[0]?.trim() || '';
+    return firstLine;
+}
+
+function openBuffModal(editIndex = null) {
+    const modal = document.getElementById('buffaddmodal');
+    const modalTitle = modal.querySelector('.section-header-title');
+    const addBtn = document.getElementById('addBuffBtn');
+    const bulkAddSection = document.getElementById('bulkAddArea').parentElement;
+    
+    if (editIndex !== null) {
+        // 編集モード
+        state.editMode = { active: true, type: 'buff', index: editIndex };
+        modalTitle.textContent = 'バフ編集';
+        addBtn.textContent = '更新';
+        bulkAddSection.style.display = 'none';
+
+        const buff = state.buffs[editIndex];
+        updateBuffCategorySelect();
+        document.getElementById('buffName').value = buff.name;
+        document.getElementById('buffEffect').value = buff.effect || '';
+        document.getElementById('buffTurn').value = buff.originalTurn || '';
+        document.getElementById('buffColor').value = buff.color;
+        document.getElementById('buffCategorySelect').value = buff.category || 'none';
+        document.getElementById('buffMemo').value = getBuffMemoText(buff);
+        document.getElementById('buffSimpleMemoToggle').checked = buff.showSimpleMemo ?? Boolean(buff.description);
+
+        // 効果先の選択状態を復元
+        state.selectedBuffTargets = [...buff.targets];
+        updateBuffTargetDropdown();
+    } else {
+        // 追加モード
+        state.editMode = { active: false, type: null, index: null };
+        modalTitle.textContent = 'バフ追加';
+        addBtn.textContent = '追加';
+        bulkAddSection.style.display = 'block';
+        resetBuffForm();
+    }
+    
+    modal.showModal();
+}
+
+function resetBuffForm() {
+    document.getElementById('buffName').value = '';
+    document.getElementById('buffEffect').value = '';
+    document.getElementById('buffTurn').value = '';
+    document.getElementById('buffColor').value = '#F8F9FA';
+    document.getElementById('buffCategorySelect').value = 'none';
+    document.getElementById('buffMemo').value = '';
+    document.getElementById('buffSimpleMemoToggle').checked = false;
+    state.selectedBuffTargets = [];
+    updateBuffTargetDropdown();
+}
+
+function insertText(text) {
+    const textbox = document.getElementById('buffEffect');
+            textbox.value = textbox.value + text;
+}
+
 function addBuff() {
     const name = document.getElementById('buffName').value.trim();
-    const description = document.getElementById('buffDescription').value.trim();
     const effect = document.getElementById('buffEffect').value.trim();
     const targets = [...state.selectedBuffTargets];
     const turn = document.getElementById('buffTurn').value.trim();
     const color = validateColor(document.getElementById('buffColor').value);
-    
+    const categorySelect = document.getElementById('buffCategorySelect');
+    const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
+    const memo = document.getElementById('buffMemo').value;
+    const showSimpleMemo = document.getElementById('buffSimpleMemoToggle').checked;
+
     if (!name) {
         showToast('バフ名を入力してください', 'error');
         return;
     }
     
     if (targets.length === 0) {
-        showToast('効果先を選択してください', 'error');
-        return;
+        targets.push('none');
     }
     
-    state.buffs.push({
-        name: name,
-        description: description,
-        effect: effect,
-        targets: targets,
-        turn: turn ? parseInt(turn) : null,
-        originalTurn: turn ? parseInt(turn) : null,
-        color: color,
-        active: true
-    });
+    if (state.editMode.active && state.editMode.type === 'buff') {
+        // 編集モード
+        const index = state.editMode.index;
+        const oldTurn = state.buffs[index].turn;
+        const oldOriginalTurn = state.buffs[index].originalTurn;
+
+        state.buffs[index] = {
+            name: name,
+            effect: effect,
+            targets: targets,
+            turn: turn ? parseInt(turn) : oldTurn,
+            originalTurn: turn ? parseInt(turn) : oldOriginalTurn,
+            color: color,
+            category: category,
+            memo: memo,
+            showSimpleMemo,
+            active: state.buffs[index].active
+        };
+
+        showToast('バフを更新しました', 'success');
+    } else {
+        // 追加モード:
+        state.buffs.push({
+            name: name,
+            effect: effect,
+            targets: targets,
+            turn: turn ? parseInt(turn) : null,
+            originalTurn: turn ? parseInt(turn) : null,
+            color: color,
+            category: category,
+            memo: memo,
+            showSimpleMemo,
+            active: true
+        });
+    }
     
-    document.getElementById('buffName').value = '';
-    document.getElementById('buffTargetSelect').selectedIndex = -1;
-    document.getElementById('buffDescription').value = '';
-    document.getElementById('buffEffect').value = '';
-    document.getElementById('buffTurn').value = '';
-    
-    state.selectedBuffTargets = [];
-    updateBuffTargetDropdown();
+    resetBuffForm();
+    document.getElementById('buffaddmodal').close();
     
     renderBuffs();
     updatePackageOutput('judge');
@@ -552,44 +1178,76 @@ function bulkAdd(type) {
         'buff': {
             textId: 'bulkAddText',
             areaId: 'bulkAddArea',
-            minParts: 4,
+            minParts: 1,
             messageKey: 'バフ',
-            parser: (parts, index) => {
+            parser: (parts, index, category) => {
                 const name = parts[0];
-                const targetStr = parts[1];
-                const description = parts[2];
-                const effect = parts[3];
-                const turn = parts[4] ? parseInt(parts[4]) : null;
-                const color = validateColor(parts[5] || '#0079FF');
-                
+                const targetStr = parts[1] || '';
+                                const colorPattern = /^#[0-9A-Fa-f]{6}$/;
+                const colorIndex = parts.findIndex((part, idx) => idx >= 2 && colorPattern.test(part));
+                const memoAfterColor = (colorIndex >= 0 && colorIndex + 1 < parts.length) ? (parts[colorIndex + 1] || '') : '';
+                const color = validateColor(colorIndex >= 0 ? (parts[colorIndex] || '#0079FF') : (parts[4] || '#0079FF'));
+
+                const payloadEnd = colorIndex >= 0 ? colorIndex : parts.length;
+                const payload = parts.slice(2, payloadEnd);
+                const hasSimpleMemoField = payload.length >= 3;
+
+                const simpleMemo = hasSimpleMemoField ? (payload[0] || '') : '';
+                const effect = hasSimpleMemoField ? (payload[1] || '') : (payload[0] || '');
+                const turn = hasSimpleMemoField ? (payload[2] ? parseInt(payload[2]) : null) : (payload[1] ? parseInt(payload[1]) : null);
+                const memo = simpleMemo ? `${simpleMemo}${memoAfterColor ? `\n${memoAfterColor}` : ''}` : memoAfterColor;
                 if (!name) throw `行${index + 1}: バフ名が空です`;
-                
+
                 const targetNames = targetStr.split(',').map(t => t.trim());
                 const targets = [];
-                
+
                 targetNames.forEach(tName => {
+                    if (tName.startsWith('>>')) {
+                        const catName = tName.replace(/^>>\s*/, '');
+                        let matched = false;
+                        if (state.judgeCategories.includes(catName)) {
+                            targets.push('judge-category:' + catName);
+                            matched = true;
+                        }
+                        if (state.attackCategories.includes(catName)) {
+                            targets.push('attack-category:' + catName);
+                            matched = true;
+                        }
+                        if (!matched) throw `行${index + 1}: カテゴリ「${catName}」が見つかりません`;
+                        return;
+                    }
                     if (tName === 'なし') targets.push('none');
-                       else if (tName === 'すべての判定') targets.push('all-judge');
-                            else if (tName === 'すべての攻撃') targets.push('all-attack');
-                            else {
-                                const judge = state.judges.find(j => j.name === tName);
-                                if (judge) targets.push('judge:' + tName);
-                                else {
-                                    const attack = state.attacks.find(a => a.name === tName);
-                                    if (attack) targets.push('attack:' + tName);
-                                    else throw `行${index + 1}: 効果先「${tName}」が見つかりません`;
+                    else if (tName === '') targets.push('none');
+                    else if (tName === 'すべての判定') targets.push('all-judge');
+                    else if (tName === 'すべての攻撃') targets.push('all-attack');
+                    else {
+                        const judge = state.judges.find(j => j.name === tName);
+                        if (judge) targets.push('judge:' + tName);
+                        else {
+                            const attack = state.attacks.find(a => a.name === tName);
+                            if (attack) targets.push('attack:' + tName);
+                            else throw `行${index + 1}: 効果先「${tName}」が見つかりません`;
                         }
                     }
                 });
                 
                 if (targets.length === 0) throw `行${index + 1}: 有効な効果先がありません`;
-                
+
                 return {
-                    name, description, effect, targets, turn, originalTurn: turn,
-                    color, active: true
+                    name,
+                    memo,
+                    showSimpleMemo: Boolean(memo),
+                    effect,
+                    targets,
+                    turn,
+                    originalTurn: turn,
+                    color,
+                    active: true,
+                    category
                 };
             },
             afterAdd: () => {
+                updateBuffCategorySelect();
                 renderBuffs();
                 updatePackageOutput('judge');
                 updatePackageOutput('attack');
@@ -600,15 +1258,16 @@ function bulkAdd(type) {
             areaId: 'bulkAddJudgeArea',
             minParts: 2,
             messageKey: '判定パッケージ',
-            parser: (parts, index) => {
+            parser: (parts, index, category) => {
                 const name = parts[0];
                 const roll = parts[1];
                 const stat = parts[2] ? parts[2].split(',').map(s => s.trim()).join('+') : '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
-                return { name, roll, stat };
+                return { name, roll, stat, category };
             },
             afterAdd: () => {
                 renderPackage('judge');
+                updateJudgeCategorySelect();
                 updateBuffTargetDropdown();
             }
         },
@@ -617,15 +1276,16 @@ function bulkAdd(type) {
             areaId: 'bulkAddAttackArea',
             minParts: 2,
             messageKey: '攻撃パッケージ',
-            parser: (parts, index) => {
+            parser: (parts, index, category) => {
                 const name = parts[0];
                 const roll = parts[1];
                 const stat = parts[2] ? parts[2].split(',').map(s => s.trim()).join('+') : '';
                 if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
-                return { name, roll, stat };
+                return { name, roll, stat, category };
             },
             afterAdd: () => {
                 renderPackage('attack');
+                updateAttackCategorySelect();
                 updateBuffTargetDropdown();
             }
         }
@@ -643,13 +1303,31 @@ function bulkAdd(type) {
     
     const lines = text.split('\n').filter(line => line.trim());
     let added = 0;
-    
+    let currentCategory = null;
+
     lines.forEach((line, index) => {
+        const openMatch = line.match(/^<([^\/][^>]*)>$/);
+        const closeMatch = line.match(/^<\/([^>]+)>$/);
+
+        if (openMatch) {
+            currentCategory = openMatch[1].trim();
+            const cats = getCategories(type);
+            if (cats && currentCategory && !cats.includes(currentCategory)) {
+                cats.push(currentCategory);
+            }
+            return;
+        }
+
+        if (closeMatch) {
+            currentCategory = null;
+            return;
+        }
+
         try {
             const parts = line.split('|').map(p => p.trim());
             if (parts.length < config.minParts) return;
-            
-            const item = config.parser(parts, index);
+
+            const item = config.parser(parts, index, currentCategory);
             targetArray.push(item);
             added++;
         } catch (error) {
@@ -658,9 +1336,7 @@ function bulkAdd(type) {
     });
     
     if (added > 0) {
-        const area = document.getElementById(config.areaId);
         const textArea = document.getElementById(config.textId);
-
         if (textArea) textArea.value = '';
 
         config.afterAdd();
@@ -731,10 +1407,32 @@ function removeBuff(index) {
     saveData();
 }
 
+function resetBuffsToMaxTurns() {
+    let changed = false;
+
+    state.buffs.forEach(buff => {
+        if (typeof buff.originalTurn === 'number') {
+            buff.turn = buff.originalTurn;
+            buff.active = true;
+            changed = true;
+        }
+    });
+
+    if (changed) {
+        renderBuffs();
+        updatePackageOutput('judge');
+        updatePackageOutput('attack');
+        saveData();
+        showToast('すべてのバフを最大ターンにリセットしました', 'success');
+    } else {
+        showToast('ターンが設定されたバフがありません', 'error');
+    }
+}
+
 function progressTurn() {
     let changed = false;
     state.buffs.forEach(buff => {
-        if (buff.turn && buff.turn > 0) {
+        if (buff.active && buff.turn && buff.turn > 0) {
             buff.turn--;
             changed = true;
             if (buff.turn === 0) {
@@ -750,47 +1448,52 @@ function progressTurn() {
         saveData();
         showToast('ターンを経過させました', 'success');
     } else {
-        showToast('ターンが設定されたバフがありません', 'error');
+        showToast('アクティブなバフにターンが設定されていません', 'error');
     }
 }
+
 
 function renderBuffs() {
     const list = document.getElementById('buffList');
     if (!list) return;
-    
-    if (state.buffs.length === 0) {
+
+    const categoryMap = buildCategoryMap('buff');
+    const hasContent = (state.buffs.length + state.buffCategories.length) > 0;
+
+    if (!hasContent) {
         list.innerHTML = '<div class="empty-message">バフを追加してください</div>';
+        updateCategoryIndexDropdown('buff');
         return;
     }
-    
-    list.innerHTML = state.buffs.map((buff, i) => {
-        const bgColor = validateColor(buff.color);
-        const textColor = getContrastColor(bgColor);
-        const targetTexts = buff.targets.map(t => getTargetText(t));
-        const tooltipText = '効果先: ' + targetTexts.join(', ');
-        const turnDisplay = buff.turn ? `<span class="turn-badge" style="outline:2px solid ${buff.color};"><span>${buff.turn}</span></span>` : '';
-        
-        return `
-            <div class="item buff-item draggable ${buff.active ? 'active' : ''}" 
-                 style="background-color: ${bgColor}; color: ${textColor}; anchor-name: --no${i};"
-                 draggable="true"
-                 data-index="${i}" data-type="buff">
-                <div class="tooltip" style="--target: --no${i};">${escapeHtml(tooltipText)}</div>
-                <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity: 0.6;">drag_indicator</span>
-                <span class="item-param">
-                    <span class="item-name">${escapeHtml(buff.name)}</span>
-                    ${buff.description ? `<span class="item-description">${escapeHtml(buff.description)}</span>` : ''}
-                    ${buff.effect ? `<span class="item-effect">${escapeHtml(buff.effect)}</span>` : ''}
-                    ${turnDisplay}
-                </span>
-                <span class="buff-btn">
-                    <button class="toggle-btn ${buff.active ? 'active' : ''}" data-toggle="${i}" data-toggle-type="buff"></button>
-                    <button class="remove-btn" data-remove="${i}" data-remove-type="buff">×</button>
-                </span>
+
+    const sections = [];
+
+    sections.push(`
+        <details class="category-block uncategorized" data-category="none" open>
+            <summary class="category-header" data-category="none">
+                <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
+            </summary>
+            <div class="category-body" data-category="none">
+                ${renderBuffItems(categoryMap['none'])}
             </div>
-        `;
-    }).join('');
-    
+        </details>
+    `);
+
+    state.buffCategories.forEach(name => {
+        sections.push(`
+            <details class="category-block" open data-category="${escapeHtml(name)}">
+                <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span><span style="word-break: break-all;">${escapeHtml(name)}</span>
+                </summary>
+                <div class="category-body" data-category="${escapeHtml(name)}">
+                    ${renderBuffItems(categoryMap[name])}
+                </div>
+            </details>
+        `);
+    });
+
+    list.innerHTML = sections.join('');
+    updateCategoryIndexDropdown('buff');
     attachBuffEvents();
 }
 
@@ -801,31 +1504,35 @@ function attachBuffEvents() {
     buffList.querySelectorAll('[data-type="buff"]').forEach(el => {
         const i = parseInt(el.getAttribute('data-index'));
         if (isNaN(i)) return;
-        
+
         el.addEventListener('dragstart', (e) => handleDragStart(e, i, 'buff'));
         el.addEventListener('dragover', handleDragOver);
         el.addEventListener('dragleave', handleDragLeave);
         el.addEventListener('drop', (e) => handleDrop(e, i, 'buff'));
         el.addEventListener('dragend', handleDragEnd);
+        el.addEventListener('contextmenu', (e) => openItemContextMenu(e, 'buff', i));
+    });
+
+    buffList.querySelectorAll('.category-header').forEach(header => {
+        header.addEventListener('dragstart', (e) => handleCategoryHeaderDragStart(e, 'buff'));
+        header.addEventListener('dragover', (e) => handleCategoryDragOver(e, 'buff'));
+        header.addEventListener('dragleave', handleCategoryDragLeave);
+        header.addEventListener('drop', (e) => handleCategoryDrop(e, 'buff'));
+        header.addEventListener('dragend', handleCategoryHeaderDragEnd);
+        const categoryName = header.getAttribute('data-category');
+        if (categoryName && categoryName !== 'none') {
+            header.addEventListener('contextmenu', (e) => openCategoryContextMenu(e, 'buff', categoryName));
+        }
     });
     
     buffList.querySelectorAll('[data-toggle-type="buff"]').forEach(btn => {
         const i = parseInt(btn.getAttribute('data-toggle'));
         if (isNaN(i)) return;
-        
+
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
+            e.preventDefault();
             toggleBuff(i);
-        });
-    });
-    
-    buffList.querySelectorAll('[data-remove-type="buff"]').forEach(btn => {
-        const i = parseInt(btn.getAttribute('data-remove'));
-        if (isNaN(i)) return;
-        
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            removeBuff(i);
         });
     });
 }
@@ -837,6 +1544,13 @@ function attachBuffEvents() {
 function handleDragStart(e, index, type) {
     state.draggedIndex = index;
     state.draggedType = type;
+    state.draggedCategory = null;
+
+    if (type === 'buff') {
+        const buff = state.buffs[index];
+        state.draggedCategory = buff ? (buff.category || 'none') : null;
+    }
+
     e.target.classList.add('dragging');
     e.dataTransfer.effectAllowed = 'move';
 }
@@ -864,29 +1578,47 @@ function handleDragLeave(e) {
 function handleDrop(e, targetIndex, type) {
     e.preventDefault();
     e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom');
-    
+
     if (state.draggedIndex === null || state.draggedType !== type || state.draggedIndex === targetIndex) {
         return;
     }
-    
+
     const arr = getCollection(type);
     if (!arr) return;
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const midY = rect.top + rect.height / 2;
+
+    const draggedItem = arr[state.draggedIndex];
+    if (!draggedItem) return;
+
+    let targetCategory = null;
+    if (['buff', 'judge', 'attack'].includes(type)) {
+        const categoryAttr = e.currentTarget.getAttribute('data-category');
+        if (categoryAttr !== null) {
+            targetCategory = categoryAttr === 'none' ? null : categoryAttr;
+        }
+    }
+
     let insertIndex = targetIndex;
-    
-    if (e.clientY >= midY) {
-        insertIndex = targetIndex + 1;
+    if (targetIndex === null || targetIndex === undefined) {
+        insertIndex = getCategoryInsertIndex(type, targetCategory);
+    } else {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+
+        if (e.clientY >= midY) {
+            insertIndex = targetIndex + 1;
+        }
+
+        if (state.draggedIndex < insertIndex) {
+            insertIndex--;
+        }
     }
-    
-    if (state.draggedIndex < insertIndex) {
-        insertIndex--;
-    }
-    
+
     const item = arr.splice(state.draggedIndex, 1)[0];
+    if (targetCategory !== null || type === 'buff') {
+        item.category = targetCategory;
+    }
     arr.splice(insertIndex, 0, item);
-    
+
     if (type === 'buff') renderBuffs();
     else if (type === 'judge') renderPackage('judge');
     else if (type === 'attack') renderPackage('attack');
@@ -896,31 +1628,307 @@ function handleDrop(e, targetIndex, type) {
     saveData();
 }
 
-function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
+function handleCategoryHeaderDragStart(e, type) {
+    const categoryName = e.currentTarget.getAttribute('data-category');
+    if (!categoryName || categoryName === 'none') return;
+
+    state.draggedCategoryType = type;
+    state.draggedCategoryName = categoryName;
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.classList.add('dragging');
+}
+
+function handleCategoryHeaderDragEnd(e) {
+    document.querySelectorAll('.category-header.dragging')
+        .forEach(header => header.classList.remove('dragging'));
+    document.querySelectorAll('.category-header.category-drag-over')
+        .forEach(header => header.classList.remove('category-drag-over'));
+    state.draggedCategoryType = null;
+    state.draggedCategoryName = null;
+}
+
+function handleCategoryDragOver(e, type) {
+    const isItemDrag = state.draggedType === type;
+    const isCategoryDrag = state.draggedCategoryType === type;
+    if (!isItemDrag && !isCategoryDrag) return;
+
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('category-drag-over');
+}
+
+function handleCategoryDragLeave(e) {
+    e.currentTarget.classList.remove('category-drag-over');
+}
+
+function reorderCategory(type, targetCategory, dropAfter) {
+    const categories = getCategories(type);
+    if (!categories) return false;
+
+    const from = categories.indexOf(state.draggedCategoryName);
+    const to = categories.indexOf(targetCategory);
+
+    if (from === -1 || to === -1 || from === to) return false;
+
+    const name = categories.splice(from, 1)[0];
+    let insertIndex = to;
+
+    if (dropAfter) insertIndex += 1;
+    if (from < insertIndex) insertIndex -= 1;
+
+    categories.splice(insertIndex, 0, name);
+    return true;
+}
+
+function handleCategoryDrop(e, type) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const categoryKey = e.currentTarget.getAttribute('data-category') || 'none';
+
+    const isCategoryDrag = state.draggedCategoryType === type && state.draggedCategoryName;
+    if (isCategoryDrag) {
+        if (categoryKey !== 'none') {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const dropAfter = (e.clientY - rect.top) > rect.height / 2;
+            const changed = reorderCategory(type, categoryKey, dropAfter);
+
+            if (changed) {
+                if (type === 'buff') renderBuffs();
+                else renderPackage(type);
+                saveData();
+            }
+        }
+
+        handleCategoryHeaderDragEnd(e);
+        return;
+    }
+
+    if (state.draggedType !== type || state.draggedIndex === null) {
+        e.currentTarget.classList.remove('category-drag-over');
+        return;
+    }
+
+    const targetCategory = categoryKey === 'none' ? null : categoryKey;
+
+    const collection = getCollection(type);
+    const item = collection ? collection[state.draggedIndex] : null;
+
+    if (!collection || !item) {
+        e.currentTarget.classList.remove('category-drag-over');
+        return;
+    }
+
+    if ((item.category || null) !== targetCategory) {
+        item.category = targetCategory;
+
+        if (type === 'buff') renderBuffs();
+        else renderPackage(type);
+
+        updatePackageOutput('judge');
+        updatePackageOutput('attack');
+        saveData();
+    }
+
     state.draggedIndex = null;
     state.draggedType = null;
+    state.draggedCategory = null;
+    state.draggedCategoryType = null;
+    state.draggedCategoryName = null;
+    e.currentTarget.classList.remove('category-drag-over');
+}
+
+function handleCategoryBodyDragOver(e, type) {
+    if (state.draggedType !== type) return;
+
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('category-drag-over');
+}
+
+function handleCategoryBodyDragLeave(e) {
+    e.currentTarget.classList.remove('category-drag-over');
+}
+
+function handleCategoryBodyDrop(e, type) {
+    if (state.draggedType !== type || state.draggedIndex === null) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const categoryKey = e.currentTarget.getAttribute('data-category') || 'none';
+    const targetCategory = categoryKey === 'none' ? null : categoryKey;
+    const collection = getCollection(type);
+
+    if (!collection || state.draggedIndex < 0 || state.draggedIndex >= collection.length) {
+        e.currentTarget.classList.remove('category-drag-over');
+        return;
+    }
+
+    const item = collection.splice(state.draggedIndex, 1)[0];
+    item.category = targetCategory;
+
+    const insertIndex = getCategoryInsertIndex(type, targetCategory);
+    collection.splice(insertIndex, 0, item);
+
+    renderPackage(type);
+    updatePackageOutput('judge');
+    updatePackageOutput('attack');
+    saveData();
+
+    state.draggedIndex = null;
+    state.draggedType = null;
+    state.draggedCategory = null;
+    e.currentTarget.classList.remove('category-drag-over');
+}
+
+function handleDragEnd(e) {
+    e.target.classList.remove('dragging');
+    document.querySelectorAll('.category-header.category-drag-over')
+        .forEach(header => header.classList.remove('category-drag-over'));
+    document.querySelectorAll('.category-header.dragging')
+        .forEach(header => header.classList.remove('dragging'));
+    state.draggedIndex = null;
+    state.draggedType = null;
+    state.draggedCategory = null;
+    state.draggedCategoryType = null;
+    state.draggedCategoryName = null;
 }
 
 // ========================================
 // 判定・攻撃パッケージ管理
 // ========================================
 
+function openJudgeModal(editIndex = null) {
+    const modal = document.getElementById('judgeaddmodal');
+    const modalTitle = modal.querySelector('.section-header-title');
+    const addBtn = document.getElementById('addJudgeBtn');
+    const bulkAddSection = document.getElementById('bulkAddJudgeArea').parentElement;
+
+    updateJudgeCategorySelect();
+
+    if (editIndex !== null) {
+        // 編集モード
+        state.editMode = { active: true, type: 'judge', index: editIndex };
+        modalTitle.textContent = '判定パッケージ編集';
+        addBtn.textContent = '更新';
+        bulkAddSection.style.display = 'none';
+        
+        const judge = state.judges[editIndex];
+        document.getElementById('judgeName').value = judge.name;
+        document.getElementById('judgeRoll').value = judge.roll;
+        
+        // ステータスの選択状態を復元
+        const statSelect = document.getElementById('judgeStat');
+        const stats = judge.stat ? judge.stat.split('+') : [];
+        Array.from(statSelect.options).forEach(opt => {
+            opt.selected = stats.includes(opt.value);
+        });
+
+        const categorySelect = document.getElementById('judgeCategorySelect');
+        if (categorySelect) {
+            categorySelect.value = judge.category || 'none';
+        }
+    } else {
+        // 追加モード
+        state.editMode = { active: false, type: null, index: null };
+        modalTitle.textContent = '判定パッケージ追加';
+        addBtn.textContent = '追加';
+        bulkAddSection.style.display = 'block';
+        resetJudgeForm();
+    }
+    
+    modal.showModal();
+}
+
+function resetJudgeForm() {
+    document.getElementById('judgeName').value = '';
+    document.getElementById('judgeRoll').value = '';
+    document.getElementById('judgeStat').selectedIndex = -1;
+    const categorySelect = document.getElementById('judgeCategorySelect');
+    if (categorySelect) {
+        categorySelect.value = 'none';
+    }
+}
+
+function openAttackModal(editIndex = null) {
+    const modal = document.getElementById('attackaddmodal');
+    const modalTitle = modal.querySelector('.section-header-title');
+    const addBtn = document.getElementById('addAttackBtn');
+    const bulkAddSection = document.getElementById('bulkAddAttackArea').parentElement;
+
+    updateAttackCategorySelect();
+
+    if (editIndex !== null) {
+        // 編集モード
+        state.editMode = { active: true, type: 'attack', index: editIndex };
+        modalTitle.textContent = '攻撃パッケージ編集';
+        addBtn.textContent = '更新';
+        bulkAddSection.style.display = 'none';
+        
+        const attack = state.attacks[editIndex];
+        document.getElementById('attackName').value = attack.name;
+        document.getElementById('attackRoll').value = attack.roll;
+        
+        // ステータスの選択状態を復元
+        const statSelect = document.getElementById('attackStat');
+        const stats = attack.stat ? attack.stat.split('+') : [];
+        Array.from(statSelect.options).forEach(opt => {
+            opt.selected = stats.includes(opt.value);
+        });
+
+        const categorySelect = document.getElementById('attackCategorySelect');
+        if (categorySelect) {
+            categorySelect.value = attack.category || 'none';
+        }
+    } else {
+        // 追加モード
+        state.editMode = { active: false, type: null, index: null };
+        modalTitle.textContent = '攻撃パッケージ追加';
+        addBtn.textContent = '追加';
+        bulkAddSection.style.display = 'block';
+        resetAttackForm();
+    }
+    
+    modal.showModal();
+}
+
+function resetAttackForm() {
+    document.getElementById('attackName').value = '';
+    document.getElementById('attackRoll').value = '';
+    document.getElementById('attackStat').selectedIndex = -1;
+    const categorySelect = document.getElementById('attackCategorySelect');
+    if (categorySelect) {
+        categorySelect.value = 'none';
+    }
+}
+
 function addJudge() {
     const name = document.getElementById('judgeName').value.trim();
     const roll = document.getElementById('judgeRoll').value.trim();
-    const selectedStats = Array.from(document.getElementById('judgeStat').selectedOptions).map(opt => opt.value).filter(v => v);
+    const selectedStats = Array.from(document.getElementById('judgeStat').selectedOptions).map(opt => opt.value).filter(v => v !== 'none');
     const stat = selectedStats.length > 0 ? selectedStats.join('+') : '';
-    
+    const categorySelect = document.getElementById('judgeCategorySelect');
+    const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
+
     if (!name || !roll) {
         showToast('判定名と判定ロールを入力してください', 'error');
         return;
     }
     
-    state.judges.push({ name: name, roll: roll, stat: stat });
-    document.getElementById('judgeName').value = '';
-    document.getElementById('judgeStat').value = '';
-    document.getElementById('judgeRoll').value = '';
+    if (state.editMode.active && state.editMode.type === 'judge') {
+        // 編集モード
+        const index = state.editMode.index;
+        state.judges[index] = { name: name, roll: roll, stat: stat, category };
+        showToast('判定を更新しました', 'success');
+    } else {
+        // 追加モード
+        state.judges.push({ name: name, roll: roll, stat: stat, category });
+    }
+    
+    resetJudgeForm();
+    document.getElementById('judgeaddmodal').close();
     
     renderPackage('judge');
     updateBuffTargetDropdown();
@@ -940,18 +1948,28 @@ function removeJudge(index) {
 function addAttack() {
     const name = document.getElementById('attackName').value.trim();
     const roll = document.getElementById('attackRoll').value.trim();
-    const selectedStats = Array.from(document.getElementById('attackStat').selectedOptions).map(opt => opt.value).filter(v => v);
+    const selectedStats = Array.from(document.getElementById('attackStat').selectedOptions).map(opt => opt.value).filter(v => v !== 'none');
     const stat = selectedStats.length > 0 ? selectedStats.join('+') : '';
-    
+    const categorySelect = document.getElementById('attackCategorySelect');
+    const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
+
     if (!name || !roll) {
         showToast('攻撃名と攻撃ロールを入力してください', 'error');
         return;
     }
     
-    state.attacks.push({ name: name, roll: roll, stat: stat });
-    document.getElementById('attackName').value = '';
-    document.getElementById('attackStat').value = '';
-    document.getElementById('attackRoll').value = '';
+    if (state.editMode.active && state.editMode.type === 'attack') {
+        // 編集モード
+        const index = state.editMode.index;
+        state.attacks[index] = { name: name, roll: roll, stat: stat, category };
+        showToast('攻撃を更新しました', 'success');
+    } else {
+        // 追加モード
+        state.attacks.push({ name: name, roll: roll, stat: stat, category });
+    }
+    
+    resetAttackForm();
+    document.getElementById('attackaddmodal').close();
     
     renderPackage('attack');
     updateBuffTargetDropdown();
@@ -968,15 +1986,9 @@ function removeAttack(index) {
     saveData();
 }
 
-
-/**
- * 選択関数（判定・攻撃パッケージ）
- */
 function selectPackage(index, type) {
     const array = getCollection(type);
-
     if (!array) return;
-    
     if (index < 0 || index >= array.length) return;
     
     document.querySelectorAll(`[data-type="${type}"]`).forEach(el => el.classList.remove('selected'));
@@ -985,9 +1997,6 @@ function selectPackage(index, type) {
     updatePackageOutput(type, index);
 }
 
-/**
- * レンダリング（判定・攻撃パッケージ）
- */
 function renderPackage(type) {
     const typeConfig = {
         'judge': {
@@ -1003,41 +2012,64 @@ function renderPackage(type) {
     const config = typeConfig[type];
     const array = getCollection(type);
     if (!config || !array) return;
-    
+
     const list = document.getElementById(config.listId);
     if (!list) return;
-    
-    if (array.length === 0) {
+
+    const categoryMap = buildCategoryMap(type);
+    const categories = getCategories(type) || [];
+    const hasContent = (array.length + categories.length) > 0;
+
+    if (!hasContent) {
         list.innerHTML = `<div class="empty-message">${config.emptyMsg}</div>`;
+        updateCategoryIndexDropdown(type);
         return;
     }
 
-    list.innerHTML = array.map((item, i) => `
-        <div class="item clickable draggable" data-index="${i}" data-type="${type}" draggable="true">
-            <span class="material-symbols-rounded" style="position: relative; left: -8px; width: var(--spacing-m); opacity: 0.6;">drag_indicator</span>
-            <span class="item-param">
-                <span class="item-name">${escapeHtml(item.name)}</span>
-                <span class="item-detail">${escapeHtml(item.roll)}</span>
-                <span class="item-detail">+${item.stat ? escapeHtml(item.stat) : 'なし'}</span>
-            </span>
-            <button class="remove-btn" data-remove="${i}" data-remove-type="${type}">×</button>
-        </div>
-    `).join('');
-    
+    const sections = [];
+
+    sections.push(`
+        <details class="category-block uncategorized" data-category="none" open>
+            <summary class="category-header" data-category="none">
+                <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
+            </summary>
+            <div class="category-body" data-category="none">
+                ${renderPackageItems(type, categoryMap['none'])}
+            </div>
+        </details>
+    `);
+
+    categories.forEach(name => {
+        sections.push(`
+            <details class="category-block" open data-category="${escapeHtml(name)}">
+                <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span><span style="word-break: break-all;">${escapeHtml(name)}</span>
+                </summary>
+                <div class="category-body" data-category="${escapeHtml(name)}">
+                    ${renderPackageItems(type, categoryMap[name])}
+                </div>
+            </details>
+        `);
+    });
+
+    list.innerHTML = sections.join('');
+
+    updateCategoryIndexDropdown(type);
     attachItemEvents(type);
 }
 
-/* 汎用アイテムイベントアタッチ関数　*/
 function attachItemEvents(type) {
     const typeConfig = {
         'judge': {
             listId: 'judgeList',
             onSelect: (i) => selectPackage(i, 'judge'),
+            onEdit: (i) => openJudgeModal(i),
             onRemove: removeJudge
         },
         'attack': {
             listId: 'attackList',
             onSelect: (i) => selectPackage(i, 'attack'),
+            onEdit: (i) => openAttackModal(i),
             onRemove: removeAttack
         }
     };
@@ -1047,17 +2079,50 @@ function attachItemEvents(type) {
     
     const listElement = document.getElementById(config.listId);
     if (!listElement) return;
-    
+
     listElement.querySelectorAll(`[data-type="${type}"]`).forEach(el => {
         const i = parseInt(el.getAttribute('data-index'));
         if (isNaN(i)) return;
-        
+
         el.addEventListener('click', () => config.onSelect(i));
         el.addEventListener('dragstart', (e) => handleDragStart(e, i, type));
         el.addEventListener('dragover', handleDragOver);
         el.addEventListener('dragleave', handleDragLeave);
         el.addEventListener('drop', (e) => handleDrop(e, i, type));
         el.addEventListener('dragend', handleDragEnd);
+        el.addEventListener('contextmenu', (e) => openItemContextMenu(e, type, i));
+    });
+
+    listElement.querySelectorAll('.category-header').forEach(header => {
+        header.addEventListener('dragstart', (e) => handleCategoryHeaderDragStart(e, type));
+        header.addEventListener('dragover', (e) => handleCategoryDragOver(e, type));
+        header.addEventListener('dragleave', handleCategoryDragLeave);
+        header.addEventListener('drop', (e) => handleCategoryDrop(e, type));
+        header.addEventListener('dragend', handleCategoryHeaderDragEnd);
+        const categoryName = header.getAttribute('data-category');
+        if (categoryName && categoryName !== 'none') {
+            header.addEventListener('contextmenu', (e) => openCategoryContextMenu(e, type, categoryName));
+        }
+    });
+    
+    listElement.querySelectorAll(`[data-edit-type="${type}"]`).forEach(btn => {
+        const i = parseInt(btn.getAttribute('data-edit'));
+        if (isNaN(i)) return;
+        
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            config.onEdit(i);
+        });
+    });
+    
+    listElement.querySelectorAll(`[data-copy-type="${type}"]`).forEach(btn => {
+        const i = parseInt(btn.getAttribute('data-copy'));
+        if (isNaN(i)) return;
+
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyItemData(type, i, btn);
+        });
     });
     
     listElement.querySelectorAll(`[data-remove-type="${type}"]`).forEach(btn => {
@@ -1069,10 +2134,14 @@ function attachItemEvents(type) {
             config.onRemove(i);
         });
     });
+
+    listElement.querySelectorAll('.category-body').forEach(body => {
+        body.addEventListener('dragover', (e) => handleCategoryBodyDragOver(e, type));
+        body.addEventListener('dragleave', handleCategoryBodyDragLeave);
+        body.addEventListener('drop', (e) => handleCategoryBodyDrop(e, type));
+    });
 }
 
-/* コマンド生成関数（判定・攻撃パッケージ）*/
-/* コマンド生成関数(判定・攻撃パッケージ)*/
 function updatePackageOutput(type, selectedIndex = null) {
     const array = getCollection(type);
     const outputId = type === 'judge' ? 'judgeOutput' : 'attackOutput';
@@ -1093,22 +2162,23 @@ function updatePackageOutput(type, selectedIndex = null) {
     
     const item = array[selectedIndex];
     let command = item.roll;
-    
+
     if (item.stat) {
-        // 複数ステータスの場合も対応(+ で区切られている)
         const stats = item.stat.split('+');
         command += '+{' + stats.join('}+{') + '}';
     }
-    
+
     const filterKey = type === 'judge' ? 'judge:' : 'attack:';
-    const activeBuffs = state.buffs.filter(b => 
-        b.active && 
+    const categoryKey = type === 'judge' ? 'judge-category:' : 'attack-category:';
+    const itemCategory = item.category || null;
+    const activeBuffs = state.buffs.filter(b =>
+        b.active &&
         b.effect &&
-        (b.targets.includes(type === 'judge' ? 'all-judge' : 'all-attack') || 
-         b.targets.includes(filterKey + item.name))
+        (b.targets.includes(type === 'judge' ? 'all-judge' : 'all-attack') ||
+         b.targets.includes(filterKey + item.name) ||
+         (itemCategory && b.targets.includes(categoryKey + itemCategory)))
     );
     
-    // スロット置換用のマップを構築
     const slotMap = {};
     const normalEffects = [];
     
@@ -1116,8 +2186,7 @@ function updatePackageOutput(type, selectedIndex = null) {
         const effects = buff.effect.split(',').map(e => e.trim());
         
         effects.forEach(effect => {
-            // スロット記法のパターン: {{NAME}}=値
-            const slotMatch = effect.match(/\{\{([^}]+)\}\}=(.+)/);
+            const slotMatch = effect.match(/\/\/([^/]+)=(.+)/);
             
             if (slotMatch) {
                 const slotName = slotMatch[1];
@@ -1128,21 +2197,18 @@ function updatePackageOutput(type, selectedIndex = null) {
                 }
                 slotMap[slotName].push(slotValue);
             } else if (effect) {
-                // 通常効果
                 normalEffects.push(effect);
             }
         });
     });
     
-    // スロットを置換
-    command = command.replace(/\{\{([^}]+)\}\}/g, (match, slotName) => {
+    command = command.replace(/\/\/([^/]+)\/\//g, (match, slotName) => {
         if (slotMap[slotName] && slotMap[slotName].length > 0) {
             return slotMap[slotName].join('');
         }
-        return ''; // 未定義スロットは空文字
+        return '';
     });
     
-    // 通常効果を追加
     normalEffects.forEach(effect => {
         command += effect;
     });
@@ -1165,6 +2231,73 @@ function updatePackageOutput(type, selectedIndex = null) {
 // ========================================
 // コピー機能
 // ========================================
+function formatTargetsForBulk(targets) {
+    if (!Array.isArray(targets) || targets.length === 0) return 'なし';
+
+    const labels = targets.map(target => {
+        if (target === 'none') return 'なし';
+        if (target === 'all-judge') return 'すべての判定';
+        if (target === 'all-attack') return 'すべての攻撃';
+        if (target.startsWith('judge:')) return target.slice(6);
+        if (target.startsWith('attack:')) return target.slice(7);
+        if (target.startsWith('judge-category:')) return '>>' + target.slice(16);
+        if (target.startsWith('attack-category:')) return '>>' + target.slice(17);
+        return target;
+    });
+
+    return labels.join(',');
+}
+
+function formatBuffForBulk(buff) {
+    const targetText = formatTargetsForBulk(buff.targets);
+    const turnText = buff.originalTurn ?? buff.turn ?? '';
+    const simpleMemo = getBuffSimpleMemo(buff);
+
+    return [
+        buff.name || '',
+        targetText,
+        simpleMemo,
+        buff.effect || '',
+        turnText,
+        buff.color || '#0079FF'
+    ].join('|');
+}
+
+function formatPackageForBulk(item) {
+    const statText = item.stat ? item.stat.split('+').join(',') : '';
+    return `${item.name}|${item.roll}|${statText}`;
+}
+
+function copyItemData(type, index, button) {
+    const array = getCollection(type);
+    if (!array || index < 0 || index >= array.length) return;
+
+    let text = '';
+    const item = array[index];
+
+    if (type === 'buff') {
+        text = formatBuffForBulk(item);
+    } else if (type === 'judge' || type === 'attack') {
+        text = formatPackageForBulk(item);
+    } else {
+        return;
+    }
+
+    navigator.clipboard.writeText(text).then(() => {
+        if (button) {
+            const original = button.textContent;
+            button.textContent = 'コピー済み!';
+            button.classList.add('copied');
+            setTimeout(() => {
+                button.textContent = original;
+                button.classList.remove('copied');
+            }, 2000);
+        }
+        showToast('クリップボードにコピーしました', 'success');
+    }).catch(() => {
+        showToast('コピーに失敗しました', 'error');
+    });
+}
 
 function copyToClipboard(elementId, button) {
     const text = document.getElementById(elementId)?.textContent;
@@ -1191,20 +2324,28 @@ function copyToClipboard(elementId, button) {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // セクションヘッダーのトグル
     document.querySelectorAll('.section-header').forEach(header => {
         header.addEventListener('click', () => toggleSection(header));
     });
     
-    // ステータス
     document.getElementById('addStatBtn')?.addEventListener('click', addStat);
     document.getElementById('statName')?.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') addStat();
     });
     
-    // バフ
     document.getElementById('addBuffBtn')?.addEventListener('click', addBuff);
+    document.getElementById('addBuffCategoryBtn')?.addEventListener('click', () => addCategory('buff', 'buffCategoryInput'));
     document.getElementById('turnProgressBtn')?.addEventListener('click', progressTurn);
+    document.getElementById('turnResetBtn')?.addEventListener('click', resetBuffsToMaxTurns);
+    document.getElementById('buffItemIndex')?.addEventListener('change', (e) => handleCategoryIndexChange('buff', e));
+
+    const buffModal = document.getElementById('buffaddmodal');
+    if (buffModal) {
+        buffModal.addEventListener('close', () => {
+            resetBuffForm();
+            state.editMode = { active: false, type: null, index: null };
+        });
+    }
 
     setupBulkAddControls({
         toggleId: 'bulkAddBtn',
@@ -1214,13 +2355,22 @@ document.addEventListener('DOMContentLoaded', () => {
         type: 'buff'
     });
     
-    // 判定パッケージ
     document.getElementById('addJudgeBtn')?.addEventListener('click', addJudge);
+    document.getElementById('addJudgeCategoryBtn')?.addEventListener('click', () => addCategory('judge', 'judgeCategoryInput'));
+    document.getElementById('judgeItemIndex')?.addEventListener('change', (e) => handleCategoryIndexChange('judge', e));
     document.querySelectorAll('input[name="targetType"]').forEach(radio => {
         radio.addEventListener('change', () => updatePackageOutput('judge'));
     });
     document.getElementById('targetValue')?.addEventListener('input', () => updatePackageOutput('judge'));
     
+    const judgeModal = document.getElementById('judgeaddmodal');
+    if (judgeModal) {
+        judgeModal.addEventListener('close', () => {
+            resetJudgeForm();
+            state.editMode = { active: false, type: null, index: null };
+        });
+    }
+
     setupBulkAddControls({
         confirmId: 'bulkAddJudgeConfirm',
         areaId: 'bulkAddJudgeArea',
@@ -1228,9 +2378,18 @@ document.addEventListener('DOMContentLoaded', () => {
         type: 'judge'
     });
     
-    // 攻撃パッケージ
     document.getElementById('addAttackBtn')?.addEventListener('click', addAttack);
+    document.getElementById('addAttackCategoryBtn')?.addEventListener('click', () => addCategory('attack', 'attackCategoryInput'));
+    document.getElementById('attackItemIndex')?.addEventListener('change', (e) => handleCategoryIndexChange('attack', e));
     
+    const attackModal = document.getElementById('attackaddmodal');
+    if (attackModal) {
+        attackModal.addEventListener('close', () => {
+            resetAttackForm();
+            state.editMode = { active: false, type: null, index: null };
+        });
+    }
+
     setupBulkAddControls({
         confirmId: 'bulkAddAttackConfirm',
         areaId: 'bulkAddAttackArea',
@@ -1238,12 +2397,10 @@ document.addEventListener('DOMContentLoaded', () => {
         type: 'attack'
     });
     
-    // データ管理
     document.getElementById('exportToClipboard')?.addEventListener('click', exportData);
     document.getElementById('importConfirm')?.addEventListener('click', importData);
     document.getElementById('resetBtn')?.addEventListener('click', resetAll);
     
-    // コピーボタン
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const targetId = this.getAttribute('data-target');
@@ -1251,12 +2408,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // 初期化
     initMultiSelect();
     initFileDropZone(); 
     loadUIState();
     loadData();
 });
 
-// グローバルスコープに公開(HTMLから呼び出すため)
+// グローバルスコープに公開
 window.removeStat = removeStat;
+window.openBuffModal = openBuffModal;
+window.openJudgeModal = openJudgeModal;
+window.openAttackModal = openAttackModal;
