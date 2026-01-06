@@ -1295,6 +1295,31 @@ dialog .section-body {
                             </div>
                             <div id="macroList" class="item-list" style="max-height: 200px; overflow-y: auto;"></div>
                         </div>
+                        <div class="section-line"></div>
+                        <div class="m-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label for="colorVariableName" class="label-s">カラー変数名</label>
+                                <input type="text" id="colorVariableName" placeholder="例：バフ色">
+                                <p class="small-text">バフなどのカラー入力欄でプルダウンから選択できます。</p>
+                            </div>
+                            <div>
+                                <label for="colorVariableCode" class="label-s">カラーコード</label>
+                                <input type="text" id="colorVariableCode" placeholder="#RRGGBB">
+                                <p class="small-text">#RRGGBB 形式で指定してください。</p>
+                            </div>
+                        </div>
+                        <div class="row-controls" style="justify-content: flex-end; gap: 8px;">
+                            <button class="add-btn secondary-btn" id="addColorVariableBtn">登録 / 更新</button>
+                            <button class="add-btn btn--muted" id="clearColorVariableInputs">リセット</button>
+                        </div>
+                        <div class="section-line"></div>
+                        <div class="m-8">
+                            <div class="label-L" style="margin-bottom: 8px;">
+                                <span class="material-symbols-rounded">palette</span>
+                                <span>登録済みカラー変数</span>
+                            </div>
+                            <div id="colorVariableList" class="item-list" style="max-height: 200px; overflow-y: auto;"></div>
+                        </div>
                         <div class="row-controls" style="justify-content: flex-end;">
                             <button class="add-btn secondary-btn" id="userMacroClose">閉じる</button>
                         </div>
@@ -1379,8 +1404,13 @@ dialog .section-body {
                                     <div class="note">効果時間がターンで決められている場合、効果の続くターン数を指定します。
                                     </div>
                                     <div style="width: 50%;">
-                                        <label for="buffColor" class="label-s">ラベルの色を選択</label>
-                                        <input type="text" id="buffColor" value="#0079FF" list="buffColor-list" placeholder="#RRGGBB またはマクロ名">
+                                    <label for="buffColor" class="label-s">ラベルの色を選択</label>
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                        <input type="text" id="buffColor" value="#0079FF" list="buffColor-list" placeholder="#RRGGBB またはカラー変数/マクロ名" style="flex: 1 1 220px;">
+                                        <select id="buffColorVariableSelect" data-color-variable-select style="flex: 1 1 160px; min-width: 180px;">
+                                            <option value="">カラー変数を選択</option>
+                                        </select>
+                                    </div>
                                         <datalist id="buffColor-list">
                                             <option value="#0079FF"></option>
                                             <option value="#953D96"></option>

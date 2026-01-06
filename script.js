@@ -6,6 +6,7 @@ const state = {
     judges: [],
     attacks: [],
     macros: [],
+    colorVariables: [],
     buffCategories: [],
     judgeCategories: [],
     attackCategories: [],
@@ -249,13 +250,20 @@ function resolveMacroValue(value) {
 function resolveColorValue(value) {
     if (typeof value !== 'string') return '#ff6b6b';
     const trimmed = value.trim();
+    if (!trimmed) return '#ff6b6b';
+
+    const variableHit = state.colorVariables.find(v => v.name === trimmed);
+    if (variableHit) return variableHit.code;
+
     const resolved = resolveMacroValue(trimmed);
     if (/^#[0-9A-Fa-f]{6}$/.test(resolved)) {
         return resolved;
     }
-    if (trimmed) {
-        showToast('カラーコードが不正です。#RRGGBBまたはマクロ名を指定してください', 'error');
-    }
+
+    const nestedVariable = state.colorVariables.find(v => v.name === resolved);
+    if (nestedVariable) return nestedVariable.code;
+
+    showToast('カラーコードが不正です。#RRGGBBまたは登録済みのカラー変数名/マクロ名を指定してください', 'error');
     return '#ff6b6b';
 }
 
@@ -387,6 +395,16 @@ function normalizeMacros(macros = []) {
         .filter(m => m.key && m.value);
 }
 
+function normalizeColorVariables(variables = []) {
+    if (!Array.isArray(variables)) return [];
+    return variables
+        .map(v => ({
+            name: typeof v.name === 'string' ? v.name : '',
+            code: typeof v.code === 'string' && /^#[0-9A-Fa-f]{6}$/.test(v.code) ? v.code.toUpperCase() : ''
+        }))
+        .filter(v => v.name && v.code);
+}
+
 function loadData() {
     try {
         const saved = localStorage.getItem('trpgData');
@@ -399,11 +417,13 @@ function loadData() {
             state.attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
             state.attackCategories = Array.isArray(data.attackCategories) ? data.attackCategories : [];
             state.macros = normalizeMacros(Array.isArray(data.macros) ? data.macros : []);
+            state.colorVariables = normalizeColorVariables(Array.isArray(data.colorVariables) ? data.colorVariables : []);
         } else {
             state.buffs = normalizeBuffs(getDefaultBuffs());
             state.judges = getDefaultJudges();
             state.attacks = getDefaultAttacks();
             state.macros = getDefaultMacros();
+            state.colorVariables = [];
         }
     } catch (e) {
         console.error('データの読み込みに失敗:', e);
@@ -412,6 +432,7 @@ function loadData() {
         state.judges = getDefaultJudges();
         state.attacks = getDefaultAttacks();
         state.macros = getDefaultMacros();
+        state.colorVariables = [];
     }
 
     updateBuffCategorySelect();
@@ -422,6 +443,8 @@ function loadData() {
     renderPackage('attack');
     updateBuffTargetDropdown();
     renderMacroList();
+    renderColorVariableList();
+    updateColorVariableSelectors();
 }
 
 function getDefaultBuffs() {
@@ -457,7 +480,8 @@ function saveData() {
         judgeCategories: state.judgeCategories,
         attacks: state.attacks,
         attackCategories: state.attackCategories,
-        macros: state.macros
+        macros: state.macros,
+        colorVariables: state.colorVariables
     };
     
     try {
@@ -504,7 +528,8 @@ function exportData() {
         judgeCategories: state.judgeCategories,
         attacks: state.attacks,
         attackCategories: state.attackCategories,
-        macros: state.macros
+        macros: state.macros,
+        colorVariables: state.colorVariables
     };
     const json = JSON.stringify(data, null, 2);
     
@@ -536,6 +561,7 @@ function importData() {
         state.attacks = data.attacks || [];
         state.attackCategories = data.attackCategories || [];
         state.macros = normalizeMacros(data.macros || []);
+        state.colorVariables = normalizeColorVariables(data.colorVariables || []);
 
         updateBuffCategorySelect();
         updateJudgeCategorySelect();
@@ -545,6 +571,8 @@ function importData() {
         renderPackage('attack');
         updateBuffTargetDropdown();
         renderMacroList();
+        renderColorVariableList();
+        updateColorVariableSelectors();
         saveData();
         
         document.getElementById('importText').value = '';
@@ -640,6 +668,124 @@ function removeMacro(index) {
 function resetMacroInputs() {
     document.getElementById('macroKey').value = '';
     document.getElementById('macroValue').value = '';
+}
+
+// ========================================
+// カラー変数管理
+// ========================================
+
+function renderColorVariableList() {
+    const list = document.getElementById('colorVariableList');
+    if (!list) return;
+
+    if (!state.colorVariables.length) {
+        list.innerHTML = '<div class="empty-message">カラー変数が登録されていません</div>';
+        return;
+    }
+
+    list.innerHTML = state.colorVariables.map((variable, index) => `
+        <div class="item" data-color-variable-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
+            <div class="item-param" data-edit-color-variable="${index}" style="cursor: pointer;">
+                <div class="item-name">${escapeHtml(variable.name)}</div>
+                <div class="item-detail" style="display:flex; align-items:center; gap:8px;">
+                    <span style="background:${escapeHtml(variable.code)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>
+                    <span>${escapeHtml(variable.code)}</span>
+                </div>
+            </div>
+            <div class="item-controls">
+                <button class="material-symbols-rounded add-btn btn--danger" data-remove-color-variable="${index}" title="削除">delete</button>
+            </div>
+        </div>
+    `).join('');
+
+    list.querySelectorAll('[data-remove-color-variable]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(btn.dataset.removeColorVariable);
+            removeColorVariable(idx);
+        });
+    });
+
+    list.querySelectorAll('[data-edit-color-variable]').forEach(area => {
+        area.addEventListener('click', () => {
+            const idx = parseInt(area.dataset.editColorVariable);
+            const variable = state.colorVariables[idx];
+            if (!variable) return;
+            document.getElementById('colorVariableName').value = variable.name;
+            document.getElementById('colorVariableCode').value = variable.code;
+        });
+    });
+}
+
+function addColorVariable() {
+    const name = document.getElementById('colorVariableName').value.trim();
+    const codeInput = document.getElementById('colorVariableCode').value.trim();
+
+    if (!name || !codeInput) {
+        showToast('カラー変数名とカラーコードを入力してください', 'error');
+        return;
+    }
+
+    if (!/^#[0-9A-Fa-f]{6}$/.test(codeInput)) {
+        showToast('カラーコードは#RRGGBB形式で入力してください', 'error');
+        return;
+    }
+
+    const existingIndex = state.colorVariables.findIndex(v => v.name === name);
+    const variable = { name, code: codeInput.toUpperCase() };
+
+    if (existingIndex >= 0) {
+        state.colorVariables[existingIndex] = variable;
+        showToast('カラー変数を更新しました', 'success');
+    } else {
+        state.colorVariables.push(variable);
+        showToast('カラー変数を追加しました', 'success');
+    }
+
+    resetColorVariableInputs();
+    renderColorVariableList();
+    updateColorVariableSelectors();
+    saveData();
+}
+
+function removeColorVariable(index) {
+    if (index < 0 || index >= state.colorVariables.length) return;
+    state.colorVariables.splice(index, 1);
+    renderColorVariableList();
+    updateColorVariableSelectors();
+    saveData();
+}
+
+function resetColorVariableInputs() {
+    document.getElementById('colorVariableName').value = '';
+    document.getElementById('colorVariableCode').value = '';
+}
+
+function updateColorVariableSelectors() {
+    const options = ['<option value="">カラー変数を選択</option>', ...state.colorVariables.map(v => `<option value="${escapeHtml(v.name)}">${escapeHtml(v.name)} (${escapeHtml(v.code)})</option>`)];
+    document.querySelectorAll('[data-color-variable-select]').forEach(select => {
+        const current = select.value;
+        select.innerHTML = options.join('');
+        if (state.colorVariables.some(v => v.name === current)) {
+            select.value = current;
+        } else {
+            select.value = '';
+        }
+    });
+}
+
+function attachColorVariableSelector(selectId, inputId) {
+    const select = document.getElementById(selectId);
+    const input = document.getElementById(inputId);
+    if (!select || !input) return;
+    select.dataset.colorVariableSelect = 'true';
+    select.addEventListener('change', () => {
+        const selectedName = select.value;
+        const variable = state.colorVariables.find(v => v.name === selectedName);
+        if (variable) {
+            input.value = variable.code;
+        }
+    });
 }
 
 // ========================================
@@ -1319,6 +1465,8 @@ function resetBuffForm() {
     document.getElementById('buffEffect').value = '';
     document.getElementById('buffTurn').value = '';
     document.getElementById('buffColor').value = '#0079FF';
+    const colorSelect = document.getElementById('buffColorVariableSelect');
+    if (colorSelect) colorSelect.value = '';
     document.getElementById('buffCategorySelect').value = 'none';
     document.getElementById('buffMemo').value = '';
     document.getElementById('buffSimpleMemoToggle').checked = false;
@@ -1405,7 +1553,8 @@ function bulkAdd(type) {
                                 const colorPattern = /^#[0-9A-Fa-f]{6}$/;
                 const colorIndex = parts.findIndex((part, idx) => idx >= 2 && colorPattern.test(part));
                 const memoAfterColor = (colorIndex >= 0 && colorIndex + 1 < parts.length) ? (parts[colorIndex + 1] || '') : '';
-                const color = validateColor(colorIndex >= 0 ? (parts[colorIndex] || '#0079FF') : (parts[4] || '#0079FF'));
+                const colorSource = colorIndex >= 0 ? (parts[colorIndex] || '#0079FF') : (parts[4] || '#0079FF');
+                const color = validateColor(resolveColorValue(colorSource));
 
                 const payloadEnd = colorIndex >= 0 ? colorIndex : parts.length;
                 const payload = parts.slice(2, payloadEnd);
@@ -2517,6 +2666,7 @@ function copyToClipboard(elementId, button) {
 document.addEventListener('DOMContentLoaded', () => {
     setupSettingsMenu();
     setupMacroSuggestions();
+    attachColorVariableSelector('buffColorVariableSelect', 'buffColor');
 
     document.querySelectorAll('.section-header').forEach(header => {
         header.addEventListener('click', () => toggleSection(header));
@@ -2594,6 +2744,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('addMacroBtn')?.addEventListener('click', addMacro);
     document.getElementById('clearMacroInputs')?.addEventListener('click', resetMacroInputs);
+    document.getElementById('addColorVariableBtn')?.addEventListener('click', addColorVariable);
+    document.getElementById('clearColorVariableInputs')?.addEventListener('click', resetColorVariableInputs);
     
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', function() {
