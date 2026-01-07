@@ -105,50 +105,6 @@ body {
     margin: 4px 0;
 }
 
-.macro-suggestions {
-    position: absolute;
-    background: white;
-    border: 1px solid var(--secondary-color-2);
-    border-radius: 6px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.16);
-    padding: 4px 0;
-    z-index: 1500;
-    min-width: 180px;
-    max-width: 320px;
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.macro-suggestions.hidden {
-    display: none;
-}
-
-.macro-suggestion-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 8px 12px;
-    background: transparent;
-    border: none;
-    text-align: left;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.macro-suggestion-item span {
-    color: var(--primary-color-2);
-}
-
-.macro-suggestion-item small {
-    color: var(--primary-color-3);
-}
-
-.macro-suggestion-item.active,
-.macro-suggestion-item:hover {
-    background: rgba(0,0,0,0.06);
-}
-
 .material-symbols-rounded {
     font-size: 24px;
     font-weight: 400;
@@ -385,7 +341,6 @@ header {
     height: stretch;
     justify-content: flex-end;
     color: var(--secondary-color-1);
-    position-anchor: ;
 }
 
 .header-menu-item {
@@ -502,6 +457,7 @@ header {
     position: fixed;
     width: calc(100% - 16px);
     outline: 2px solid var(--primary-color-2);
+    z-index: 2;
     anchor-name: --S-header;
 }
 input[type="radio"] {
@@ -510,6 +466,7 @@ input[type="radio"] {
 
 /* セクションボディ */
 .section-body {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -525,6 +482,7 @@ input[type="radio"] {
     overflow: visible;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    z-index: 1;
     box-shadow: 0 4px 8px 2px var(--primary-color-3);
 }
 
@@ -579,6 +537,7 @@ dialog .section-body {
 
 /* 入力フォーム */
 .add-area {
+    position: relative;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
@@ -834,6 +793,74 @@ dialog .section-body {
     transform: rotate(-180deg);
     transform-origin: bottom center;
 }
+
+/* オートコンプリート */
+#buffEffect, 
+#judgeRoll, 
+#attackRoll, 
+#bulkAddText, 
+#bulkAddJudgeText, 
+#bulkAddAttackText {
+    anchor-name: --input;
+}
+
+        .autocomplete-dropdown {
+            position: absolute;
+            background: var(--secondary-color-1);
+            border: 1px solid var(--primary-color-3);
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1150;
+            max-height: 200px;
+            overflow-y: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            top: anchor(bottom);
+            position-anchor: --input;
+        }
+
+        .autocomplete-dropdown::-webkit-scrollbar {
+            display: none;
+        }
+
+        .autocomplete-dropdown.hidden {
+            display: none;
+        }
+
+        .autocomplete-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.1s;
+            border-bottom: 1px solid var(--bg-color);
+            gap: 8px;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background-color: var(--bg-color);
+        }
+
+        .autocomplete-text {
+            flex: 1;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary-color-1);
+            word-break: break-all;
+        }
+
+        .autocomplete-category {
+            font-size: 11px;
+            color: var(--primary-color-3);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
 
 /* カテゴリ */
 .category-header {
@@ -1103,6 +1130,7 @@ dialog .section-body {
     background: var(--secondary-color-1);
     height: 40px;
     width: 40px;
+    z-index: 2;
     position-anchor: --S-header;
 }
 
@@ -1217,7 +1245,7 @@ dialog .section-body {
                     </button>
                     <button class="settings-dropdown-item" data-target="userMacroModal">
                         <span class="material-symbols-rounded">bookmarks</span>
-                        <span>ユーザーマクロ</span>
+                        <span>ユーザー辞書</span>
                     </button>
                 </div>
             </div>
@@ -1264,62 +1292,78 @@ dialog .section-body {
                         </div>
                     </div>
             </dialog>
-<!--ユーザーマクロ　モーダル-->
-            <dialog class="section modal" id="userMacroModal" closedby="any">
-                    <div class="section section-header-m">
-                        <span class="material-symbols-rounded">bookmarks</span>
-                        <span class="section-header-title">ユーザーマクロ</span>
-                    </div>
-                    <div class="section-body" style="margin-top: 32px; display: flex; flex-direction: column; gap: 16px;">
-                        <div class="m-8" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
-                            <div>
-                                <label for="macroValue" class="label-s">オートコンプリート用文字列</label>
-                                <input type="text" id="macroValue" placeholder="例：({筋力}+//筋力修正//)/6">
-                                <p class="small-text">フォーカス時に直近で使ったもの上位3件、入力中は部分一致の候補を表示します。</p>
-                            </div>
-                        </div>
-                        <div class="row-controls" style="justify-content: flex-end; gap: 8px;">
-                            <button class="add-btn secondary-btn" id="addMacroBtn">登録 / 更新</button>
-                            <button class="add-btn btn--muted" id="clearMacroInputs">リセット</button>
-                        </div>
-                        <div class="section-line"></div>
-                        <div class="m-8">
-                            <div class="label-L" style="margin-bottom: 8px;">
-                                <span class="material-symbols-rounded">list</span>
-                                <span>登録済みマクロ</span>
-                            </div>
-                            <div id="macroList" class="item-list" style="max-height: 200px; overflow-y: auto;"></div>
-                        </div>
-                        <div class="section-line"></div>
-                        <div class="m-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <div>
-                                <label for="colorVariableName" class="label-s">カラー変数名</label>
-                                <input type="text" id="colorVariableName" placeholder="例：バフ色">
-                                <p class="small-text">バフなどのカラー入力欄でプルダウンから選択できます。</p>
-                            </div>
-                            <div>
-                                <label for="colorVariableCode" class="label-s">カラーコード</label>
-                                <input type="text" id="colorVariableCode" placeholder="#RRGGBB">
-                                <p class="small-text">#RRGGBB 形式で指定してください。</p>
-                            </div>
-                        </div>
-                        <div class="row-controls" style="justify-content: flex-end; gap: 8px;">
-                            <button class="add-btn secondary-btn" id="addColorVariableBtn">登録 / 更新</button>
-                            <button class="add-btn btn--muted" id="clearColorVariableInputs">リセット</button>
-                        </div>
-                        <div class="section-line"></div>
-                        <div class="m-8">
-                            <div class="label-L" style="margin-bottom: 8px;">
-                                <span class="material-symbols-rounded">palette</span>
-                                <span>登録済みカラー変数</span>
-                            </div>
-                            <div id="colorVariableList" class="item-list" style="max-height: 200px; overflow-y: auto;"></div>
-                        </div>
-                        <div class="row-controls" style="justify-content: flex-end;">
-                            <button class="add-btn secondary-btn" id="userMacroClose">閉じる</button>
-                        </div>
-                    </div>
-            </dialog>
+<!-- ユーザー辞書 モーダル -->
+<dialog class="section modal" id="userMacroModal" closedby="any">
+    <div class="section section-header-m">
+        <span class="material-symbols-rounded">bookmarks</span>
+        <span class="section-header-title">ユーザー辞書</span>
+        <button class="material-symbols-rounded add-btn pt-R btn--danger" command="close" commandfor="userMacroModal">
+        close
+        </button>
+    </div>
+    <div class="section-body" style="margin-top: 32px; display: flex; flex-direction: column; gap: 16px;">
+        
+        <!-- 登録フォーム -->
+        <div class="m-8">
+            <div class="label-L">
+                <span class="material-symbols-rounded">add_box</span>
+                <span>新規登録・編集</span>
+            </div>
+            <div class="add-area">
+                <div>
+                    <label for="macroText" class="label-s">文字列</label>
+                    <input type="text" id="macroText" placeholder="例：//筋力修正//" autocomplete="off">
+                </div>
+                <div>
+                    <label for="macroCategory" class="label-s">カテゴリー</label>
+                    <input type="text" id="macroCategory" placeholder="例：代入記法" autocomplete="off">
+                </div>
+                <div class="row-controls" style="margin-top: 8px;">
+                    <button class="add-btn flex-1" id="macroAddBtn">登録</button>
+                    <button class="add-btn btn--muted flex-1" id="macroCancelBtn" style="display: none;">キャンセル</button>
+                </div>
+                <div id="macroDuplicateWarning" class="small-text" style="color: var(--danger-color); display: none;">
+                    この文字列は既に登録されています
+                </div>
+            </div>
+        </div>
+
+        <div class="section-line"></div>
+
+        <!-- 一覧表示 -->
+        <div class="m-8">
+            <div class="label-L">
+                <span class="material-symbols-rounded">list</span>
+                <span>登録済み辞書</span>
+            </div>
+            <div id="macroDictionaryList" class="item-list">
+                <div class="empty-message">辞書が登録されていません</div>
+            </div>
+        </div>
+
+        <div class="section-line"></div>
+
+        <!-- 出力・読込 -->
+        <div class="m-8">
+            <div class="label-L">
+                <span class="material-symbols-rounded">save_alt</span>
+                <span>データ管理</span>
+            </div>
+            <div style="display: flex; gap: 8px; flex-direction: column;">
+                <button class="add-btn secondary-btn" id="macroExportBtn">
+                    <span class="material-symbols-rounded">download</span>
+                    <span>ユーザー辞書をエクスポート</span>
+                </button>
+                <label class="label-s">ユーザー辞書をインポート</label>
+                <textarea id="macroImportText" placeholder="JSONを貼り付けてください" class="textarea-mono" style="height: 80px;"></textarea>
+                <button class="add-btn secondary-btn btn--info" id="macroImportBtn">
+                    <span class="material-symbols-rounded">upload</span>
+                    <span>読み込む</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</dialog>
 <!--バフ/デバフ-->
             <div class="section">
                 <div class="section-header">
@@ -1383,6 +1427,7 @@ dialog .section-body {
                                     <label for="buffEffect" class="label-s">コマンド</label>
                                     <div style="display: flex;">
                                         <input type="text" id="buffEffect" placeholder="例：+2,-1d6,//ダイスボーナス}=+1">
+                                        <button class="add-btn btn--muted" onclick="insertText('//NAME=')">//=</button>
                                     </div>
                                     </div>
                                 <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。
@@ -1391,47 +1436,16 @@ dialog .section-body {
                                 </div>
                                 <div class="note">代入記法は「,」で区切ることで、一つのバフから複数の場所へ代入を指示することができます。<br>通常の記法とも併用できます。<br>例：//ダイスボーナス=+1,//ダイスの種類=20,-2
                                 </div>
-                                    <div class="fd-rw">
-                                        <div style="width: 50%;">
-                                            <label for="buffTurn" class="label-s">ターン</label>
-                                            <input type="number" id="buffTurn" placeholder="数値">
-                                        </div>
-                                        <div class="note">効果時間がターンで決められている場合、効果の続くターン数を指定します。
-                                        </div>
-                                        <div style="width: 50%; display: flex; gap: 8px; align-items: center;">
-                                            <div style="flex: 1;">
-                                                <label for="buffColor" class="label-s">ラベルの色を選択</label>
-                                                <input type="text" id="buffColor" value="#0079FF" list="buffColor-list" placeholder="#RRGGBB">
-                                                <datalist id="buffColor-list">
-                                                    <option value="#0079FF"></option>
-                                                    <option value="#953D96"></option>
-                                                    <option value="#F64E9D"></option>
-                                                    <option value="#DF383E"></option>
-                                                    <option value="#F7821B"></option>
-                                                    <option value="#FEC626"></option>
-                                                    <option value="#62BA46"></option>
-                                                    <option value="#F8F9FA"></option>
-                                                <option value="#141414"></option>
-                                                <option value="#595959"></option>
-                                                </datalist>
-                                            </div>
-                                            <div style="width: 140px;">
-                                                <label for="buffColorVariableSelect" class="label-s">カラー変数</label>
-                                                <select id="buffColorVariableSelect">
-                                                    <option value="">未選択</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="note">カラー変数を選ぶとその色が適用されます。</div>
+                                <div class="fd-rw">
+                                    <div style="width: 50%;">
+                                        <label for="buffTurn" class="label-s">ターン</label>
+                                        <input type="number" id="buffTurn" placeholder="数値">
+                                    </div>
+                                    <div class="note">効果時間がターンで決められている場合、効果の続くターン数を指定します。
                                     </div>
                                     <div style="width: 50%;">
-                                    <label for="buffColor" class="label-s">ラベルの色を選択</label>
-                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                        <input type="text" id="buffColor" value="#0079FF" list="buffColor-list" placeholder="#RRGGBB またはカラー変数/マクロ名" style="flex: 1 1 220px;">
-                                        <select id="buffColorVariableSelect" data-color-variable-select style="flex: 1 1 160px; min-width: 180px;">
-                                            <option value="">カラー変数を選択</option>
-                                        </select>
-                                    </div>
+                                        <label for="buffColor" class="label-s">ラベルの色を選択</label>
+                                        <input type="color" id="buffColor" value="#0079FF" list="buffColor-list">
                                         <datalist id="buffColor-list">
                                             <option value="#0079FF"></option>
                                             <option value="#953D96"></option>

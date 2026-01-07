@@ -5,8 +5,6 @@ const state = {
     buffs: [],
     judges: [],
     attacks: [],
-    macros: [],
-    colorVariables: [],
     buffCategories: [],
     judgeCategories: [],
     attackCategories: [],
@@ -16,7 +14,6 @@ const state = {
     draggedCategoryType: null,
     draggedCategoryName: null,
     selectedBuffTargets: [],
-    macroEditIndex: null,
     editMode: {
         active: false,
         type: null,
@@ -242,44 +239,6 @@ function validateColor(color) {
     return hexPattern.test(color) ? color : '#ff6b6b';
 }
 
-function resolveColorValue(value) {
-    if (typeof value !== 'string') return '#ff6b6b';
-    const trimmed = value.trim();
-    const colorVariable = state.colorVariables.find(v => v.name === trimmed);
-
-    if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
-        return trimmed;
-    }
-
-    if (colorVariable) {
-        return colorVariable.code;
-    }
-
-    if (trimmed) {
-        showToast('カラーコードが不正です。#RRGGBBまたは登録済みカラー変数名を指定してください', 'error');
-    }
-    return '#ff6b6b';
-}
-
-function resolveColorValueOrThrow(value, contextLabel = 'カラーコード') {
-    if (typeof value !== 'string') {
-        throw `${contextLabel}が空です`;
-    }
-
-    const trimmed = value.trim();
-    const colorVariable = state.colorVariables.find(v => v.name === trimmed);
-
-    if (/^#[0-9A-Fa-f]{6}$/.test(trimmed)) {
-        return trimmed;
-    }
-
-    if (colorVariable) {
-        return colorVariable.code;
-    }
-
-    throw `${contextLabel}が不正です。#RRGGBB または登録済みのカラー変数名を指定してください`;
-}
-
 /**
  * トースト通知を表示(alert代替)
  */
@@ -401,41 +360,6 @@ function normalizeBuffs(buffs = []) {
     return buffs.map(normalizeBuff);
 }
 
-function normalizeMacros(macros = []) {
-    if (!Array.isArray(macros)) return [];
-    return macros
-        .map(m => {
-            if (typeof m === 'string') {
-                return { value: m, lastUsedAt: 0 };
-            }
-            const value = typeof m.value === 'string' ? m.value : (typeof m.key === 'string' ? m.key : '');
-            const lastUsedAt = typeof m.lastUsedAt === 'number' ? m.lastUsedAt : 0;
-            return { value, lastUsedAt };
-        })
-        .filter(m => m.value);
-}
-
-function normalizeColorVariables(vars = []) {
-    if (!Array.isArray(vars)) return [];
-    const hexPattern = /^#[0-9A-Fa-f]{6}$/;
-    return vars
-        .map(v => ({
-            name: typeof v.name === 'string' ? v.name.trim() : '',
-            code: typeof v.code === 'string' && hexPattern.test(v.code.trim()) ? v.code.trim() : ''
-        }))
-        .filter(v => v.name && v.code);
-}
-
-function normalizeColorVariables(variables = []) {
-    if (!Array.isArray(variables)) return [];
-    return variables
-        .map(v => ({
-            name: typeof v.name === 'string' ? v.name : '',
-            code: typeof v.code === 'string' && /^#[0-9A-Fa-f]{6}$/.test(v.code) ? v.code.toUpperCase() : ''
-        }))
-        .filter(v => v.name && v.code);
-}
-
 function loadData() {
     try {
         const saved = localStorage.getItem('trpgData');
@@ -447,14 +371,10 @@ function loadData() {
             state.judgeCategories = Array.isArray(data.judgeCategories) ? data.judgeCategories : [];
             state.attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
             state.attackCategories = Array.isArray(data.attackCategories) ? data.attackCategories : [];
-            state.macros = normalizeMacros(Array.isArray(data.macros) ? data.macros : []);
-            state.colorVariables = normalizeColorVariables(Array.isArray(data.colorVariables) ? data.colorVariables : []);
         } else {
             state.buffs = normalizeBuffs(getDefaultBuffs());
             state.judges = getDefaultJudges();
             state.attacks = getDefaultAttacks();
-            state.macros = getDefaultMacros();
-            state.colorVariables = getDefaultColorVariables();
         }
     } catch (e) {
         console.error('データの読み込みに失敗:', e);
@@ -462,11 +382,7 @@ function loadData() {
         state.buffs = normalizeBuffs(getDefaultBuffs());
         state.judges = getDefaultJudges();
         state.attacks = getDefaultAttacks();
-        state.macros = getDefaultMacros();
-        state.colorVariables = getDefaultColorVariables();
     }
-
-    migrateLegacyMacroReferences();
 
     updateBuffCategorySelect();
     updateJudgeCategorySelect();
@@ -475,9 +391,6 @@ function loadData() {
     renderPackage('judge');
     renderPackage('attack');
     updateBuffTargetDropdown();
-    renderMacroList();
-    renderColorVariableList();
-    updateColorVariableSelect();
 }
 
 function getDefaultBuffs() {
@@ -501,14 +414,6 @@ function getDefaultAttacks() {
     ];
 }
 
-function getDefaultMacros() {
-    return normalizeMacros(['//=']);
-}
-
-function getDefaultColorVariables() {
-    return [];
-}
-
 function saveData() {
     const data = {
         buffs: state.buffs,
@@ -516,9 +421,7 @@ function saveData() {
         judges: state.judges,
         judgeCategories: state.judgeCategories,
         attacks: state.attacks,
-        attackCategories: state.attackCategories,
-        macros: state.macros,
-        colorVariables: state.colorVariables
+        attackCategories: state.attackCategories
     };
     
     try {
@@ -564,9 +467,7 @@ function exportData() {
         judges: state.judges,
         judgeCategories: state.judgeCategories,
         attacks: state.attacks,
-        attackCategories: state.attackCategories,
-        macros: state.macros,
-        colorVariables: state.colorVariables
+        attackCategories: state.attackCategories
     };
     const json = JSON.stringify(data, null, 2);
     
@@ -597,8 +498,6 @@ function importData() {
         state.judgeCategories = data.judgeCategories || [];
         state.attacks = data.attacks || [];
         state.attackCategories = data.attackCategories || [];
-        state.macros = normalizeMacros(data.macros || []);
-        state.colorVariables = normalizeColorVariables(data.colorVariables || []);
 
         updateBuffCategorySelect();
         updateJudgeCategorySelect();
@@ -607,9 +506,6 @@ function importData() {
         renderPackage('judge');
         renderPackage('attack');
         updateBuffTargetDropdown();
-        renderMacroList();
-        renderColorVariableList();
-        updateColorVariableSelectors();
         saveData();
         
         document.getElementById('importText').value = '';
@@ -618,527 +514,6 @@ function importData() {
     } catch (e) {
         showToast('JSONの解析に失敗しました: ' + e.message, 'error');
     }
-}
-
-// ========================================
-// マクロ管理
-// ========================================
-
-function renderMacroList() {
-    const list = document.getElementById('macroList');
-    if (!list) return;
-
-    if (!state.macros.length) {
-        list.innerHTML = '<div class="empty-message">マクロが登録されていません</div>';
-        return;
-    }
-
-    list.innerHTML = state.macros.map((macroValue, index) => {
-        const isColor = /^#[0-9A-Fa-f]{6}$/.test(macroValue.trim());
-        const colorBadge = isColor ? `<span style="background:${escapeHtml(macroValue)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>` : '';
-        return `
-            <div class="item" data-macro-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
-                <div class="item-param" data-edit-macro="${index}" style="cursor: pointer;">
-                    <div class="item-name">${escapeHtml(macro.value)}</div>
-                </div>
-                <div class="row-controls" style="gap: 6px; align-items:center;">
-                    ${colorBadge}
-                    <button class="material-symbols-rounded add-btn btn--danger" data-remove-macro="${index}" title="削除">delete</button>
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    list.querySelectorAll('[data-remove-macro]').forEach(btn => {
-        const idx = parseInt(btn.dataset.removeMacro);
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            removeMacro(idx);
-        });
-    });
-
-    list.querySelectorAll('[data-edit-macro]').forEach(area => {
-        const idx = parseInt(area.dataset.editMacro);
-        area.addEventListener('click', () => {
-            const macro = state.macros[idx];
-            if (!macro) return;
-            const valueInput = document.getElementById('macroValue');
-            if (!valueInput) return;
-            valueInput.value = macro.value;
-            valueInput.dataset.editingIndex = idx;
-        });
-    });
-}
-
-function addMacro() {
-    const valueInput = document.getElementById('macroValue');
-    if (!valueInput) return;
-
-    const value = valueInput.value.trim();
-
-    if (!value) {
-        showToast('オートコンプリート用文字列を入力してください', 'error');
-        return;
-    }
-
-    const editingIndex = parseInt(valueInput.dataset.editingIndex ?? '-1');
-    if (!isNaN(editingIndex) && editingIndex >= 0 && state.macros[editingIndex]) {
-        state.macros[editingIndex] = { ...state.macros[editingIndex], value };
-        showToast('マクロを更新しました', 'success');
-    } else {
-        const duplicateIndex = state.macros.findIndex(m => m.value === value);
-        if (duplicateIndex >= 0) {
-            state.macros[duplicateIndex] = { ...state.macros[duplicateIndex], value };
-            showToast('既存のマクロを更新しました', 'success');
-        } else {
-            state.macros.push({ value, lastUsedAt: 0 });
-            showToast('マクロを追加しました', 'success');
-        }
-    }
-
-    resetMacroInputs();
-    renderMacroList();
-    saveData();
-}
-
-function removeMacro(index) {
-    if (index < 0 || index >= state.macros.length) return;
-    const removed = state.macros[index];
-    state.macros.splice(index, 1);
-    resetMacroInputs();
-    renderMacroList();
-    saveData();
-}
-
-function resetMacroInputs() {
-    const input = document.getElementById('macroValue');
-    if (!input) return;
-    input.value = '';
-    delete input.dataset.editingIndex;
-}
-
-// ========================================
-// カラー変数
-// ========================================
-
-function renderColorVariableList() {
-    const list = document.getElementById('colorVariableList');
-    if (!list) return;
-
-    if (!state.colorVariables.length) {
-        list.innerHTML = '<div class="empty-message">カラー変数が登録されていません</div>';
-        return;
-    }
-
-    list.innerHTML = state.colorVariables.map((variable, index) => `
-        <div class="item" data-color-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
-            <div class="item-param" data-edit-color="${index}" style="cursor:pointer; display:flex; gap:8px; align-items:center;">
-                <span style="background:${escapeHtml(variable.code)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>
-                <div>
-                    <div class="item-name">${escapeHtml(variable.name)}</div>
-                    <div class="item-detail">${escapeHtml(variable.code)}</div>
-                </div>
-            </div>
-            <button class="material-symbols-rounded add-btn btn--danger" data-remove-color="${index}" title="削除">delete</button>
-        </div>
-    `).join('');
-
-    list.querySelectorAll('[data-edit-color]').forEach(area => {
-        const idx = parseInt(area.dataset.editColor);
-        area.addEventListener('click', () => {
-            const variable = state.colorVariables[idx];
-            if (!variable) return;
-            const nameInput = document.getElementById('colorVariableName');
-            const codeInput = document.getElementById('colorVariableCode');
-            if (!nameInput || !codeInput) return;
-            nameInput.value = variable.name;
-            nameInput.dataset.editingIndex = idx;
-            codeInput.value = variable.code;
-        });
-    });
-
-    list.querySelectorAll('[data-remove-color]').forEach(btn => {
-        const idx = parseInt(btn.dataset.removeColor);
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            removeColorVariable(idx);
-        });
-    });
-}
-
-function addColorVariable() {
-    const nameInput = document.getElementById('colorVariableName');
-    const codeInput = document.getElementById('colorVariableCode');
-    if (!nameInput || !codeInput) return;
-
-    const name = nameInput.value.trim();
-    const code = codeInput.value.trim();
-    const hexPattern = /^#[0-9A-Fa-f]{6}$/;
-
-    if (!name || !code) {
-        showToast('カラー変数名とカラーコードを入力してください', 'error');
-        return;
-    }
-
-    if (!hexPattern.test(code)) {
-        showToast('#RRGGBB形式でカラーコードを入力してください', 'error');
-        return;
-    }
-
-    const editingIndex = parseInt(nameInput.dataset.editingIndex ?? '-1');
-    if (!isNaN(editingIndex) && editingIndex >= 0 && state.colorVariables[editingIndex]) {
-        state.colorVariables[editingIndex] = { name, code };
-        showToast('カラー変数を更新しました', 'success');
-    } else {
-        const duplicateIndex = state.colorVariables.findIndex(v => v.name === name);
-        if (duplicateIndex >= 0) {
-            state.colorVariables[duplicateIndex] = { name, code };
-            showToast('同名のカラー変数を更新しました', 'success');
-        } else {
-            state.colorVariables.push({ name, code });
-            showToast('カラー変数を追加しました', 'success');
-        }
-    }
-
-    updateColorVariableSelect();
-    renderColorVariableList();
-    resetColorVariableInputs();
-    saveData();
-}
-
-function removeColorVariable(index) {
-    if (index < 0 || index >= state.colorVariables.length) return;
-    state.colorVariables.splice(index, 1);
-    resetColorVariableInputs();
-    updateColorVariableSelect();
-    renderColorVariableList();
-    saveData();
-}
-
-function resetColorVariableInputs() {
-    const nameInput = document.getElementById('colorVariableName');
-    const codeInput = document.getElementById('colorVariableCode');
-    if (nameInput) {
-        nameInput.value = '';
-        delete nameInput.dataset.editingIndex;
-    }
-    if (codeInput) {
-        codeInput.value = '';
-    }
-}
-
-function updateColorVariableSelect() {
-    const select = document.getElementById('buffColorVariableSelect');
-    if (!select) return;
-
-    const options = ['<option value="">未選択</option>'];
-    state.colorVariables.forEach(variable => {
-        options.push(`<option value="${escapeHtml(variable.name)}">${escapeHtml(variable.name)}</option>`);
-    });
-    select.innerHTML = options.join('');
-}
-
-function applyColorVariableSelection(event) {
-    const name = event.target.value;
-    if (!name) return;
-    const variable = state.colorVariables.find(v => v.name === name);
-    if (!variable) return;
-    const colorInput = document.getElementById('buffColor');
-    if (colorInput) {
-        colorInput.value = variable.code;
-    }
-}
-
-// ========================================
-// カラー変数管理
-// ========================================
-
-function renderColorVariableList() {
-    const list = document.getElementById('colorVariableList');
-    if (!list) return;
-
-    if (!state.colorVariables.length) {
-        list.innerHTML = '<div class="empty-message">カラー変数が登録されていません</div>';
-        return;
-    }
-
-    list.innerHTML = state.colorVariables.map((variable, index) => `
-        <div class="item" data-color-variable-index="${index}" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
-            <div class="item-param" data-edit-color-variable="${index}" style="cursor: pointer;">
-                <div class="item-name">${escapeHtml(variable.name)}</div>
-                <div class="item-detail" style="display:flex; align-items:center; gap:8px;">
-                    <span style="background:${escapeHtml(variable.code)}; border:1px solid var(--secondary-color-2); width:18px; height:18px; border-radius:4px; display:inline-block;"></span>
-                    <span>${escapeHtml(variable.code)}</span>
-                </div>
-            </div>
-            <div class="item-controls">
-                <button class="material-symbols-rounded add-btn btn--danger" data-remove-color-variable="${index}" title="削除">delete</button>
-            </div>
-        </div>
-    `).join('');
-
-    list.querySelectorAll('[data-remove-color-variable]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const idx = parseInt(btn.dataset.removeColorVariable);
-            removeColorVariable(idx);
-        });
-    });
-
-    list.querySelectorAll('[data-edit-color-variable]').forEach(area => {
-        area.addEventListener('click', () => {
-            const idx = parseInt(area.dataset.editColorVariable);
-            const variable = state.colorVariables[idx];
-            if (!variable) return;
-            document.getElementById('colorVariableName').value = variable.name;
-            document.getElementById('colorVariableCode').value = variable.code;
-        });
-    });
-}
-
-function addColorVariable() {
-    const name = document.getElementById('colorVariableName').value.trim();
-    const codeInput = document.getElementById('colorVariableCode').value.trim();
-
-    if (!name || !codeInput) {
-        showToast('カラー変数名とカラーコードを入力してください', 'error');
-        return;
-    }
-
-    if (!/^#[0-9A-Fa-f]{6}$/.test(codeInput)) {
-        showToast('カラーコードは#RRGGBB形式で入力してください', 'error');
-        return;
-    }
-
-    const existingIndex = state.colorVariables.findIndex(v => v.name === name);
-    const variable = { name, code: codeInput.toUpperCase() };
-
-    if (existingIndex >= 0) {
-        state.colorVariables[existingIndex] = variable;
-        showToast('カラー変数を更新しました', 'success');
-    } else {
-        state.colorVariables.push(variable);
-        showToast('カラー変数を追加しました', 'success');
-    }
-
-    resetColorVariableInputs();
-    renderColorVariableList();
-    updateColorVariableSelectors();
-    saveData();
-}
-
-function removeColorVariable(index) {
-    if (index < 0 || index >= state.colorVariables.length) return;
-    state.colorVariables.splice(index, 1);
-    renderColorVariableList();
-    updateColorVariableSelectors();
-    saveData();
-}
-
-function resetColorVariableInputs() {
-    document.getElementById('colorVariableName').value = '';
-    document.getElementById('colorVariableCode').value = '';
-}
-
-function updateColorVariableSelectors() {
-    const options = ['<option value="">カラー変数を選択</option>', ...state.colorVariables.map(v => `<option value="${escapeHtml(v.name)}">${escapeHtml(v.name)} (${escapeHtml(v.code)})</option>`)];
-    document.querySelectorAll('[data-color-variable-select]').forEach(select => {
-        const current = select.value;
-        select.innerHTML = options.join('');
-        if (state.colorVariables.some(v => v.name === current)) {
-            select.value = current;
-        } else {
-            select.value = '';
-        }
-    });
-}
-
-function attachColorVariableSelector(selectId, inputId) {
-    const select = document.getElementById(selectId);
-    const input = document.getElementById(inputId);
-    if (!select || !input) return;
-    select.dataset.colorVariableSelect = 'true';
-    select.addEventListener('change', () => {
-        const selectedName = select.value;
-        const variable = state.colorVariables.find(v => v.name === selectedName);
-        if (variable) {
-            input.value = variable.code;
-        }
-    });
-}
-
-// ========================================
-// マクロ補完UI
-// ========================================
-
-const macroSuggestionState = { target: null, activeIndex: 0, items: [] };
-let macroSuggestionBox = null;
-
-function getMacroSuggestionBox() {
-    if (macroSuggestionBox) return macroSuggestionBox;
-    macroSuggestionBox = document.createElement('div');
-    macroSuggestionBox.id = 'macroSuggestions';
-    macroSuggestionBox.className = 'macro-suggestions hidden';
-    document.body.appendChild(macroSuggestionBox);
-    return macroSuggestionBox;
-}
-
-function hideMacroSuggestions() {
-    if (!macroSuggestionBox) return;
-    macroSuggestionBox.classList.add('hidden');
-    macroSuggestionState.target = null;
-    macroSuggestionState.items = [];
-}
-
-function moveMacroSelection(delta) {
-    if (!macroSuggestionBox || macroSuggestionBox.classList.contains('hidden')) return;
-    const items = macroSuggestionBox.querySelectorAll('.macro-suggestion-item');
-    if (!items.length) return;
-
-    macroSuggestionState.activeIndex = (macroSuggestionState.activeIndex + delta + items.length) % items.length;
-    items.forEach((el, idx) => {
-        el.classList.toggle('active', idx === macroSuggestionState.activeIndex);
-    });
-}
-
-function highlightMatch(text, query) {
-    if (!query) return escapeHtml(text);
-    const lowerText = text.toLowerCase();
-    const lowerQuery = query.toLowerCase();
-    const index = lowerText.indexOf(lowerQuery);
-
-    if (index === -1) return escapeHtml(text);
-
-    const before = escapeHtml(text.slice(0, index));
-    const match = escapeHtml(text.slice(index, index + query.length));
-    const after = escapeHtml(text.slice(index + query.length));
-    return `${before}<strong>${match}</strong>${after}`;
-}
-
-function getRecentMacros(limit = 3) {
-    const sorted = [...state.macros]
-        .sort((a, b) => (b.lastUsedAt || 0) - (a.lastUsedAt || 0))
-        .filter(m => m.lastUsedAt);
-    if (sorted.length) return sorted.slice(0, limit);
-    return [...state.macros].slice(0, limit);
-}
-
-function getMatchingMacros(query) {
-    const lower = query.toLowerCase();
-    return state.macros
-        .filter(m => m.value.toLowerCase().includes(lower))
-        .sort((a, b) => {
-            const aIndex = a.value.toLowerCase().indexOf(lower);
-            const bIndex = b.value.toLowerCase().indexOf(lower);
-            if (aIndex !== bIndex) return aIndex - bIndex;
-            return (b.lastUsedAt || 0) - (a.lastUsedAt || 0);
-        });
-}
-
-function applyMacroSuggestion(index) {
-    const target = macroSuggestionState.target;
-    if (!target) return;
-    const macro = macroSuggestionState.items[index];
-    if (!macro) return;
-
-    target.value = macro.value;
-    const pos = macro.value.length;
-    target.setSelectionRange(pos, pos);
-
-    const stateMacro = state.macros.find(m => m.value === macro.value);
-    if (stateMacro) {
-        stateMacro.lastUsedAt = Date.now();
-        saveData();
-    }
-
-    hideMacroSuggestions();
-}
-
-function showMacroSuggestions(target, query = '') {
-    const box = getMacroSuggestionBox();
-    box.innerHTML = '';
-
-    if (!state.macros.length) {
-        hideMacroSuggestions();
-        return;
-    }
-
-    const trimmed = query.trim();
-    const items = trimmed ? getMatchingMacros(trimmed) : getRecentMacros();
-
-    if (!items.length) {
-        hideMacroSuggestions();
-        return;
-    }
-
-    macroSuggestionState.items = items;
-    box.innerHTML = items.map((macro, index) => `
-        <button class="macro-suggestion-item ${index === 0 ? 'active' : ''}" data-macro-index="${index}" type="button">
-            <span>${highlightMatch(macro.value, trimmed)}</span>
-        </button>
-    `).join('');
-
-    box.querySelectorAll('[data-macro-index]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            applyMacroSuggestion(parseInt(btn.dataset.macroIndex));
-        });
-    });
-
-    macroSuggestionState.target = target;
-    macroSuggestionState.activeIndex = 0;
-    const rect = target.getBoundingClientRect();
-    box.style.left = `${rect.left + window.scrollX}px`;
-    box.style.top = `${rect.bottom + window.scrollY + 4}px`;
-    box.classList.remove('hidden');
-}
-
-function handleMacroKeydown(event) {
-    if (!macroSuggestionBox || macroSuggestionBox.classList.contains('hidden')) return;
-
-    if (['ArrowDown', 'Tab'].includes(event.key)) {
-        event.preventDefault();
-        moveMacroSelection(1);
-    } else if (event.key === 'ArrowUp') {
-        event.preventDefault();
-        moveMacroSelection(-1);
-    } else if (event.key === 'Enter') {
-        event.preventDefault();
-        applyMacroSuggestion(macroSuggestionState.activeIndex);
-    } else if (event.key === 'Escape') {
-        hideMacroSuggestions();
-    }
-}
-
-function handleMacroInput(event) {
-    const target = event.target;
-    showMacroSuggestions(target, target.value);
-}
-
-function handleMacroFocus(event) {
-    const target = event.target;
-    showMacroSuggestions(target, target.value);
-}
-
-function attachMacroSuggestions(input) {
-    if (!input) return;
-    input.addEventListener('focus', handleMacroFocus);
-    input.addEventListener('input', handleMacroInput);
-    input.addEventListener('keydown', handleMacroKeydown);
-    input.addEventListener('blur', () => setTimeout(hideMacroSuggestions, 150));
-}
-
-function setupMacroSuggestions() {
-    attachMacroSuggestions(document.getElementById('buffEffect'));
-    attachMacroSuggestions(document.getElementById('judgeRoll'));
-    attachMacroSuggestions(document.getElementById('attackRoll'));
-    attachMacroSuggestions(document.getElementById('macroValue'));
-
-    document.addEventListener('click', (e) => {
-        if (macroSuggestionBox && !macroSuggestionBox.contains(e.target)) {
-            hideMacroSuggestions();
-        }
-    });
 }
 
 /**
@@ -1545,6 +920,293 @@ function updateAttackCategorySelect() {
     select.innerHTML = options.join('');
 }
 
+
+// ========================================
+// ユーザー辞書管理
+// ========================================
+
+const macroState = {
+    dictionary: [],
+    editingId: null
+};
+
+/**
+ * ユーザー辞書をロード
+ */
+function loadUserDictionary() {
+    try {
+        const saved = localStorage.getItem('userDictionary');
+        if (saved) {
+            macroState.dictionary = JSON.parse(saved);
+        } else {
+            macroState.dictionary = [];
+        }
+    } catch (e) {
+        console.error('ユーザー辞書の読み込みに失敗:', e);
+        macroState.dictionary = [];
+    }
+}
+
+/**
+ * ユーザー辞書をセーブ
+ */
+function saveUserDictionary() {
+    try {
+        const json = JSON.stringify(macroState.dictionary);
+        if (json.length > 5 * 1024 * 1024) {
+            showToast('辞書データが大きすぎて保存できません', 'error');
+            return false;
+        }
+        localStorage.setItem('userDictionary', json);
+        return true;
+    } catch (e) {
+        console.error('ユーザー辞書の保存に失敗:', e);
+        showToast('辞書データの保存に失敗しました', 'error');
+        return false;
+    }
+}
+
+/**
+ * ユーザー辞書に登録（追加または更新）
+ */
+function addOrUpdateMacro() {
+    const textInput = document.getElementById('macroText');
+    const categoryInput = document.getElementById('macroCategory');
+    const text = textInput.value.trim();
+    const category = categoryInput.value.trim();
+
+    if (!text) {
+        showToast('文字列を入力してください', 'error');
+        return;
+    }
+
+    if (!category) {
+        showToast('カテゴリーを入力してください', 'error');
+        return;
+    }
+
+    // 重複チェック（編集時以外）
+    const isDuplicate = macroState.dictionary.some(item => 
+        item.text === text && item.id !== macroState.editingId
+    );
+
+    if (isDuplicate) {
+        showToast('この文字列は既に登録されています', 'error');
+        return;
+    }
+
+    if (macroState.editingId) {
+        // 編集モード：既存アイテムを更新
+        const index = macroState.dictionary.findIndex(item => item.id === macroState.editingId);
+        if (index !== -1) {
+            macroState.dictionary[index].text = text;
+            macroState.dictionary[index].category = category;
+            showToast('辞書項目を更新しました', 'success');
+        }
+        cancelMacroEdit();
+    } else {
+        // 追加モード：新規アイテムを作成
+        const newItem = {
+            id: generateUUID(),
+            text: text,
+            category: category,
+            usage: 0
+        };
+        macroState.dictionary.push(newItem);
+        showToast('辞書に登録しました', 'success');
+    }
+
+    textInput.value = '';
+    categoryInput.value = '';
+    saveUserDictionary();
+    renderMacroDictionary();
+}
+
+/**
+ * ユーザー辞書の編集を開始
+ */
+function startMacroEdit(id) {
+    const item = macroState.dictionary.find(m => m.id === id);
+    if (!item) return;
+
+    macroState.editingId = id;
+    document.getElementById('macroText').value = item.text;
+    document.getElementById('macroCategory').value = item.category;
+
+    // UIの更新
+    const addBtn = document.getElementById('macroAddBtn');
+    const cancelBtn = document.getElementById('macroCancelBtn');
+    addBtn.textContent = '更新';
+    cancelBtn.style.display = 'flex';
+
+    // 一時削除
+    macroState.dictionary = macroState.dictionary.filter(m => m.id !== id);
+    renderMacroDictionary();
+
+    document.getElementById('macroText').focus();
+}
+
+/**
+ * ユーザー辞書の編集をキャンセル
+ */
+function cancelMacroEdit() {
+    if (!macroState.editingId) return;
+
+    // 削除されたアイテムを復帰させるため、localStorageから再ロード
+    const saved = localStorage.getItem('userDictionary');
+    if (saved) {
+        try {
+            macroState.dictionary = JSON.parse(saved);
+        } catch (e) {
+            console.error('辞書の復帰に失敗:', e);
+        }
+    }
+
+    macroState.editingId = null;
+    document.getElementById('macroText').value = '';
+    document.getElementById('macroCategory').value = '';
+
+    const addBtn = document.getElementById('macroAddBtn');
+    const cancelBtn = document.getElementById('macroCancelBtn');
+    addBtn.textContent = '登録';
+    cancelBtn.style.display = 'none';
+
+    renderMacroDictionary();
+}
+
+/**
+ * ユーザー辞書から削除
+ */
+function deleteMacro(id) {
+    const item = macroState.dictionary.find(m => m.id === id);
+    if (!item) return;
+
+    if (!confirm(`「${escapeHtml(item.text)}」を削除しますか？`)) {
+        return;
+    }
+
+    macroState.dictionary = macroState.dictionary.filter(m => m.id !== id);
+    saveUserDictionary();
+    renderMacroDictionary();
+    showToast('辞書項目を削除しました', 'success');
+}
+
+/**
+ * ユーザー辞書を一覧表示
+ */
+function renderMacroDictionary() {
+    const listContainer = document.getElementById('macroDictionaryList');
+
+    if (macroState.dictionary.length === 0) {
+        listContainer.innerHTML = '<div class="empty-message">辞書が登録されていません</div>';
+        return;
+    }
+
+    const items = macroState.dictionary.map(item => `
+        <div class="item">
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; word-break: break-all;">${escapeHtml(item.text)}</div>
+                    <div style="font-size: 11px; color: var(--primary-color-3);">カテゴリー: ${escapeHtml(item.category)}</div>
+                </div>
+                <div style="display: flex; gap: 4px; flex-shrink: 0;">
+                    <button class="add-btn material-symbols-rounded" onclick="startMacroEdit('${escapeHtml(item.id)}')">edit</button>
+                    <button class="add-btn btn--danger material-symbols-rounded" onclick="deleteMacro('${escapeHtml(item.id)}')">close</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    listContainer.innerHTML = items;
+}
+
+/**
+ * ユーザー辞書をエクスポート
+ */
+function exportUserDictionary() {
+    const json = JSON.stringify(macroState.dictionary, null, 2);
+    navigator.clipboard.writeText(json).then(() => {
+        showToast('ユーザー辞書をクリップボードにコピーしました', 'success');
+    }).catch(() => {
+        showToast('コピーに失敗しました', 'error');
+    });
+}
+
+/**
+ * ユーザー辞書をインポート
+ */
+function importUserDictionary() {
+    const text = document.getElementById('macroImportText').value.trim();
+    if (!text) {
+        showToast('JSONを貼り付けてください', 'error');
+        return;
+    }
+
+    try {
+        const data = JSON.parse(text);
+        if (!Array.isArray(data)) {
+            throw new Error('配列形式ではありません');
+        }
+
+        // バリデーション
+        data.forEach((item, index) => {
+            if (!item.text || !item.category) {
+                throw new Error(`行${index + 1}: textとcategoryは必須です`);
+            }
+            if (!item.id) {
+                item.id = generateUUID();
+            }
+            if (item.usage === undefined) {
+                item.usage = 0;
+            }
+        });
+
+        macroState.dictionary = data;
+        saveUserDictionary();
+        document.getElementById('macroImportText').value = '';
+        renderMacroDictionary();
+        showToast('ユーザー辞書をインポートしました', 'success');
+    } catch (e) {
+        showToast('JSONの解析に失敗しました: ' + e.message, 'error');
+    }
+}
+
+/**
+ * UUID生成（簡易版）
+ */
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
+/**
+ * ユーザー辞書モーダルのイベント初期化
+ */
+function setupUserDictionaryModal() {
+    document.getElementById('macroAddBtn')?.addEventListener('click', addOrUpdateMacro);
+    document.getElementById('macroCancelBtn')?.addEventListener('click', cancelMacroEdit);
+    document.getElementById('macroExportBtn')?.addEventListener('click', exportUserDictionary);
+    document.getElementById('macroImportBtn')?.addEventListener('click', importUserDictionary);
+
+    // エンターキーで登録
+    document.getElementById('macroText')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addOrUpdateMacro();
+        }
+    });
+
+    // キャンセルボタンのEscキー対応
+    document.getElementById('macroCategory')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && macroState.editingId) {
+            cancelMacroEdit();
+        }
+    });
+}
+
 // ========================================
 // マルチセレクト
 // ========================================
@@ -1664,11 +1326,6 @@ function openBuffModal(editIndex = null) {
         document.getElementById('buffEffect').value = buff.effect || '';
         document.getElementById('buffTurn').value = buff.originalTurn || '';
         document.getElementById('buffColor').value = buff.color;
-        const colorSelect = document.getElementById('buffColorVariableSelect');
-        if (colorSelect) {
-            const matchedVariable = state.colorVariables.find(v => v.code === buff.color);
-            colorSelect.value = matchedVariable ? matchedVariable.name : '';
-        }
         document.getElementById('buffCategorySelect').value = buff.category || 'none';
         document.getElementById('buffMemo').value = getBuffMemoText(buff);
         document.getElementById('buffSimpleMemoToggle').checked = buff.showSimpleMemo ?? Boolean(buff.description);
@@ -1692,9 +1349,7 @@ function resetBuffForm() {
     document.getElementById('buffName').value = '';
     document.getElementById('buffEffect').value = '';
     document.getElementById('buffTurn').value = '';
-    document.getElementById('buffColor').value = '#0079FF';
-    const colorSelect = document.getElementById('buffColorVariableSelect');
-    if (colorSelect) colorSelect.value = '';
+    document.getElementById('buffColor').value = '#F8F9FA';
     document.getElementById('buffCategorySelect').value = 'none';
     document.getElementById('buffMemo').value = '';
     document.getElementById('buffSimpleMemoToggle').checked = false;
@@ -1702,12 +1357,17 @@ function resetBuffForm() {
     updateBuffTargetDropdown();
 }
 
+function insertText(text) {
+    const textbox = document.getElementById('buffEffect');
+            textbox.value = textbox.value + text;
+}
+
 function addBuff() {
     const name = document.getElementById('buffName').value.trim();
     const effect = document.getElementById('buffEffect').value.trim();
     const targets = [...state.selectedBuffTargets];
     const turn = document.getElementById('buffTurn').value.trim();
-    const color = validateColor(resolveColorValue(document.getElementById('buffColor').value));
+    const color = validateColor(document.getElementById('buffColor').value);
     const categorySelect = document.getElementById('buffCategorySelect');
     const category = categorySelect ? (categorySelect.value === 'none' ? null : categorySelect.value) : null;
     const memo = document.getElementById('buffMemo').value;
@@ -1778,12 +1438,10 @@ function bulkAdd(type) {
             parser: (parts, index, category) => {
                 const name = parts[0];
                 const targetStr = parts[1] || '';
-                const colorPattern = /^#[0-9A-Fa-f]{6}$/;
-                const isColorToken = (token) => colorPattern.test(token) || state.colorVariables.some(v => v.name === token);
-                const colorIndex = parts.findIndex((part, idx) => idx >= 2 && isColorToken(part));
-                const colorToken = colorIndex >= 0 ? (parts[colorIndex] || '#0079FF') : (parts[4] || '#0079FF');
+                                const colorPattern = /^#[0-9A-Fa-f]{6}$/;
+                const colorIndex = parts.findIndex((part, idx) => idx >= 2 && colorPattern.test(part));
                 const memoAfterColor = (colorIndex >= 0 && colorIndex + 1 < parts.length) ? (parts[colorIndex + 1] || '') : '';
-                const color = validateColor(resolveColorValueOrThrow(colorToken, `行${index + 1}のカラーコード`));
+                const color = validateColor(colorIndex >= 0 ? (parts[colorIndex] || '#0079FF') : (parts[4] || '#0079FF'));
 
                 const payloadEnd = colorIndex >= 0 ? colorIndex : parts.length;
                 const payload = parts.slice(2, payloadEnd);
@@ -2799,6 +2457,276 @@ function updatePackageOutput(type, selectedIndex = null) {
 }
 
 // ========================================
+// オートコンプリート機能
+// ========================================
+
+const autocompleteState = {
+    currentInput: null,
+    suggestions: [],
+    selectedIndex: -1,
+    dropdownElement: null,
+    isOpen: false
+};
+
+/**
+ * オートコンプリート対象フィールドの定義
+ */
+const autocompleteTargets = [
+    'buffEffect',
+    'judgeRoll',
+    'attackRoll',
+    'bulkAddText',
+    'bulkAddJudgeText',
+    'bulkAddAttackText'
+];
+
+/**
+ * 辞書から検索候補を取得
+ */
+function getAutocompleteSuggestions(input) {
+    if (!input || input.length === 0) return [];
+
+    const lowerInput = input.toLowerCase();
+    
+    // 先頭一致と中間一致で分ける
+    const exact = [];
+    const partial = [];
+
+    macroState.dictionary.forEach(item => {
+        const lowerText = item.text.toLowerCase();
+        if (lowerText.startsWith(lowerInput)) {
+            exact.push(item);
+        } else if (lowerText.includes(lowerInput)) {
+            partial.push(item);
+        }
+    });
+
+    // 先頭一致を優先し、最大5件まで
+    return [...exact, ...partial].slice(0, 5);
+}
+
+/**
+ * オートコンプリートドロップダウンを作成・取得
+ */
+function getAutocompleteDropdown() {
+    if (autocompleteState.dropdownElement) {
+        return autocompleteState.dropdownElement;
+    }
+
+    const dropdown = document.createElement('div');
+    dropdown.id = 'autocomplete-dropdown';
+    dropdown.className = 'autocomplete-dropdown hidden';
+    document.body.appendChild(dropdown);
+    autocompleteState.dropdownElement = dropdown;
+
+    return dropdown;
+}
+
+/**
+ * オートコンプリートドロップダウンを表示
+ */
+function showAutocompleteDropdown(inputElement, suggestions) {
+    if (suggestions.length === 0) {
+        hideAutocompleteDropdown();
+        return;
+    }
+
+    // ドロップダウン要素を強制作成（入力欄の直後に追加）
+    let dropdown = document.getElementById('autocomplete-dropdown');
+    if (!dropdown) {
+        console.log('Creating dropdown element');
+        dropdown = document.createElement('div');
+        dropdown.id = 'autocomplete-dropdown';
+        dropdown.className = 'autocomplete-dropdown';
+        // 入力欄の親要素に追加
+        inputElement.parentElement.appendChild(dropdown);
+        autocompleteState.dropdownElement = dropdown;
+    }
+
+    const rect = inputElement.getBoundingClientRect();
+
+    // ドロップダウンのHTMLを生成
+    const itemsHtml = suggestions.map((item, index) => `
+        <div class="autocomplete-item" data-index="${index}" data-text="${escapeHtml(item.text)}">
+            <span class="autocomplete-text">${escapeHtml(item.text)}</span>
+            <span class="autocomplete-category">${escapeHtml(item.category)}</span>
+        </div>
+    `).join('');
+
+    dropdown.innerHTML = itemsHtml;
+    dropdown.classList.remove('hidden');
+    autocompleteState.isOpen = true;
+
+    // アイテムのクリックイベントを設定
+    dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+        item.addEventListener('click', () => {
+            selectAutocompleteItem(inputElement, item.getAttribute('data-text'));
+        });
+
+        item.addEventListener('mouseenter', () => {
+            const index = parseInt(item.getAttribute('data-index'));
+            setSelectedAutocompleteIndex(index);
+        });
+    });
+
+    console.log('Dropdown shown, isOpen:', autocompleteState.isOpen, 'element:', dropdown);
+}
+
+/**
+ * オートコンプリートドロップダウンを非表示
+ */
+function hideAutocompleteDropdown() {
+    const dropdown = autocompleteState.dropdownElement;
+    if (dropdown) {
+        dropdown.classList.add('hidden');
+    }
+    autocompleteState.isOpen = false;
+    autocompleteState.selectedIndex = -1;
+    console.log('Dropdown hidden, isOpen:', autocompleteState.isOpen);
+}
+
+/**
+ * オートコンプリート項目を選択
+ */
+function selectAutocompleteItem(inputElement, text) {
+    inputElement.value = text;
+    hideAutocompleteDropdown();
+    inputElement.focus();
+
+    // inputイベントを発火させて他の処理をトリガー
+    inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+/**
+ * オートコンプリート選択インデックスを設定
+ */
+function setSelectedAutocompleteIndex(index) {
+    const dropdown = autocompleteState.dropdownElement;
+    if (!dropdown) return;
+
+    // 前の選択項目のハイライトを削除
+    if (autocompleteState.selectedIndex >= 0) {
+        const prevItem = dropdown.querySelector(`[data-index="${autocompleteState.selectedIndex}"]`);
+        if (prevItem) prevItem.classList.remove('selected');
+    }
+
+    // 新しい選択項目にハイライトを追加
+    autocompleteState.selectedIndex = index;
+    const item = dropdown.querySelector(`[data-index="${index}"]`);
+    if (item) {
+        item.classList.add('selected');
+        item.scrollIntoView({ block: 'nearest' });
+    }
+}
+
+/**
+ * オートコンプリート対象フィールドを初期化
+ */
+function setupAutocompleteFields() {
+    autocompleteTargets.forEach(targetId => {
+        const element = document.getElementById(targetId);
+        if (!element) {
+            console.warn(`オートコンプリート対象が見つかりません: ${targetId}`);
+            return;
+        }
+
+        element.addEventListener('input', (e) => {
+            console.log(`Input event on ${targetId}, value: "${e.target.value}"`);
+            
+            if (macroState.dictionary.length === 0) {
+                console.log('Dictionary is empty');
+                hideAutocompleteDropdown();
+                return;
+            }
+
+            const input = e.target.value;
+            const suggestions = getAutocompleteSuggestions(input);
+            console.log(`Suggestions found: ${suggestions.length}`);
+
+            if (suggestions.length > 0) {
+                autocompleteState.currentInput = e.target;
+                autocompleteState.suggestions = suggestions;
+                showAutocompleteDropdown(e.target, suggestions);
+            } else {
+                hideAutocompleteDropdown();
+            }
+        });
+
+        // キーボード操作（IME対応）
+        element.addEventListener('keydown', (e) => {
+            console.log(`Keydown on ${targetId}, key: "${e.key}", isOpen: ${autocompleteState.isOpen}`);
+            
+            if (!autocompleteState.isOpen) return;
+
+            const dropdown = autocompleteState.dropdownElement;
+            const itemCount = dropdown.querySelectorAll('.autocomplete-item').length;
+
+            // Enterキーとエスケープはここで処理
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (autocompleteState.selectedIndex >= 0) {
+                    const item = dropdown.querySelector(`[data-index="${autocompleteState.selectedIndex}"]`);
+                    if (item) {
+                        selectAutocompleteItem(e.target, item.getAttribute('data-text'));
+                        console.log('Enter pressed, item selected');
+                    }
+                } else {
+                    hideAutocompleteDropdown();
+                    console.log('Enter pressed, no selection');
+                }
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                hideAutocompleteDropdown();
+                console.log('Escape pressed');
+            }
+        });
+
+        // 矢印キーはkeyupで処理（IME干渉を回避）
+        element.addEventListener('keyup', (e) => {
+            console.log(`Keyup on ${targetId}, key: "${e.key}", isOpen: ${autocompleteState.isOpen}`);
+            
+            if (!autocompleteState.isOpen) return;
+
+            const dropdown = autocompleteState.dropdownElement;
+            const itemCount = dropdown.querySelectorAll('.autocomplete-item').length;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextIndex = autocompleteState.selectedIndex + 1;
+                if (nextIndex < itemCount) {
+                    setSelectedAutocompleteIndex(nextIndex);
+                    console.log('Arrow down, selectedIndex:', autocompleteState.selectedIndex);
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevIndex = autocompleteState.selectedIndex - 1;
+                if (prevIndex >= 0) {
+                    setSelectedAutocompleteIndex(prevIndex);
+                    console.log('Arrow up, selectedIndex:', autocompleteState.selectedIndex);
+                }
+            }
+        });
+
+        // フォーカス喪失時には処理しない（clickOutsideで処理）
+        // element.addEventListener('blur', () => {
+        //     setTimeout(() => hideAutocompleteDropdown(), 150);
+        // });
+    });
+}
+
+/**
+ * ドキュメント全体のクリックでドロップダウンを閉じる
+ */
+function setupAutocompleteClickOutside() {
+    document.addEventListener('click', (e) => {
+        const dropdown = autocompleteState.dropdownElement;
+        if (dropdown && !dropdown.contains(e.target) && !autocompleteTargets.includes(e.target.id)) {
+            hideAutocompleteDropdown();
+        }
+    });
+}
+
+// ========================================
 // コピー機能
 // ========================================
 function formatTargetsForBulk(targets) {
@@ -2894,8 +2822,6 @@ function copyToClipboard(elementId, button) {
 
 document.addEventListener('DOMContentLoaded', () => {
     setupSettingsMenu();
-    setupMacroSuggestions();
-    attachColorVariableSelector('buffColorVariableSelect', 'buffColor');
 
     document.querySelectorAll('.section-header').forEach(header => {
         header.addEventListener('click', () => toggleSection(header));
@@ -2971,12 +2897,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userMacroClose')?.addEventListener('click', () => {
         document.getElementById('userMacroModal')?.close();
     });
-    document.getElementById('addMacroBtn')?.addEventListener('click', addMacro);
-    document.getElementById('clearMacroInputs')?.addEventListener('click', resetMacroInputs);
-    document.getElementById('addColorVariableBtn')?.addEventListener('click', addColorVariable);
-    document.getElementById('clearColorVariableInputs')?.addEventListener('click', resetColorVariableInputs);
-    document.getElementById('buffColorVariableSelect')?.addEventListener('change', applyColorVariableSelection);
-
+    
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const targetId = this.getAttribute('data-target');
@@ -2984,10 +2905,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
+    loadUserDictionary();           // 辞書を先にロード
+    setupUserDictionaryModal();     // UI初期化
+    renderMacroDictionary();        // 表示
+    setupAutocompleteFields();      // 辞書ロード後にオートコンプリート初期化
+    setupAutocompleteClickOutside();
+    
     initMultiSelect();
     initFileDropZone();
     loadUIState();
     loadData();
+
 });
 
 // グローバルスコープに公開
