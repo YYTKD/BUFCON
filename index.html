@@ -737,6 +737,21 @@ dialog .section-body {
     display: none;
 }
 
+.item-list.no-resize {
+    resize: none;
+}
+
+.list-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.list-header-row .label-L {
+    margin-bottom: 0;
+}
+
 
 
 .itemindex {
@@ -1332,11 +1347,18 @@ dialog .section-body {
 
         <!-- 一覧表示 -->
         <div class="m-8">
-            <div class="label-L">
-                <span class="material-symbols-rounded">list</span>
-                <span>登録済み辞書</span>
+            <div class="list-header-row">
+                <div class="label-L">
+                    <span class="material-symbols-rounded">list</span>
+                    <span>登録済み辞書</span>
+                </div>
+                <label class="itemindex" style="anchor-name: --macro-bookmark;">
+                    <div class="tooltip" style="--target: --macro-bookmark">カテゴリへ移動</div>
+                    <span class="material-symbols-rounded">bookmark</span>
+                    <select class="add-btn" id="macroItemIndex"></select>
+                </label>
             </div>
-            <div id="macroDictionaryList" class="item-list">
+            <div id="macroDictionaryList" class="item-list no-resize">
                 <div class="empty-message">辞書が登録されていません</div>
             </div>
         </div>

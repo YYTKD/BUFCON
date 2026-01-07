@@ -25,6 +25,7 @@ function getCollection(type) {
     if (type === 'buff') return state.buffs;
     if (type === 'judge') return state.judges;
     if (type === 'attack') return state.attacks;
+    if (type === 'macro') return macroState.dictionary;
     return null;
 }
 
@@ -121,6 +122,9 @@ function openItemContextMenu(event, type, index) {
         actions.push({ label: '編集', onClick: () => openAttackModal(index) });
         actions.push({ label: 'テキストをコピー', onClick: () => copyItemData('attack', index) });
         actions.push({ label: '削除', onClick: () => removeAttack(index) });
+    } else if (type === 'macro') {
+        actions.push({ label: '編集', onClick: () => startMacroEdit(index) });
+        actions.push({ label: '削除', onClick: () => deleteMacro(index) });
     }
 
     hideContextMenu();
@@ -203,6 +207,16 @@ function getCategories(type) {
     if (type === 'buff') return state.buffCategories;
     if (type === 'judge') return state.judgeCategories;
     if (type === 'attack') return state.attackCategories;
+    if (type === 'macro') {
+        const categories = [];
+        macroState.dictionary.forEach(item => {
+            const name = item.category ? item.category.trim() : '';
+            if (name && !categories.includes(name)) {
+                categories.push(name);
+            }
+        });
+        return categories;
+    }
     return null;
 }
 
@@ -751,7 +765,8 @@ function buildCategoryMap(type) {
 const categoryIndexConfig = {
     buff: { selectId: 'buffItemIndex', listId: 'buffList' },
     judge: { selectId: 'judgeItemIndex', listId: 'judgeList' },
-    attack: { selectId: 'attackItemIndex', listId: 'attackList' }
+    attack: { selectId: 'attackItemIndex', listId: 'attackList' },
+    macro: { selectId: 'macroItemIndex', listId: 'macroDictionaryList' }
 };
 
 function updateCategoryIndexDropdown(type) {
@@ -1094,30 +1109,73 @@ function deleteMacro(id) {
 /**
  * ユーザー辞書を一覧表示
  */
+function renderMacroItems(entries = []) {
+    if (!Array.isArray(entries) || entries.length === 0) return '';
+
+    return entries.map(({ item }) => `
+        <div class="item clickable" data-type="macro" data-id="${escapeHtml(item.id)}">
+            <span class="item-param">
+                <span class="item-name">${escapeHtml(item.text)}</span>
+            </span>
+        </div>
+    `).join('');
+}
+
+function attachMacroEvents() {
+    const listContainer = document.getElementById('macroDictionaryList');
+    if (!listContainer) return;
+
+    listContainer.querySelectorAll('[data-type="macro"]').forEach(el => {
+        const id = el.getAttribute('data-id');
+        if (!id) return;
+        el.addEventListener('contextmenu', (e) => openItemContextMenu(e, 'macro', id));
+    });
+}
+
 function renderMacroDictionary() {
     const listContainer = document.getElementById('macroDictionaryList');
 
     if (macroState.dictionary.length === 0) {
         listContainer.innerHTML = '<div class="empty-message">辞書が登録されていません</div>';
+        updateCategoryIndexDropdown('macro');
         return;
     }
 
-    const items = macroState.dictionary.map(item => `
-        <div class="item">
-            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; word-break: break-all;">${escapeHtml(item.text)}</div>
-                    <div style="font-size: 11px; color: var(--primary-color-3);">カテゴリー: ${escapeHtml(item.category)}</div>
-                </div>
-                <div style="display: flex; gap: 4px; flex-shrink: 0;">
-                    <button class="add-btn material-symbols-rounded" onclick="startMacroEdit('${escapeHtml(item.id)}')">edit</button>
-                    <button class="add-btn btn--danger material-symbols-rounded" onclick="deleteMacro('${escapeHtml(item.id)}')">close</button>
-                </div>
-            </div>
-        </div>
-    `).join('');
+    const categoryMap = buildCategoryMap('macro');
+    const categories = getCategories('macro') || [];
+    const sections = [];
 
-    listContainer.innerHTML = items;
+    if (categoryMap['none'] && categoryMap['none'].length > 0) {
+        sections.push(`
+            <details class="category-block uncategorized" data-category="none" open>
+                <summary class="category-header" data-category="none">
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
+                    <span style="word-break: break-all;">未分類</span>
+                </summary>
+                <div class="category-body" data-category="none">
+                    ${renderMacroItems(categoryMap['none'])}
+                </div>
+            </details>
+        `);
+    }
+
+    categories.forEach(name => {
+        sections.push(`
+            <details class="category-block" open data-category="${escapeHtml(name)}">
+                <summary class="category-header" data-category="${escapeHtml(name)}">
+                    <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
+                    <span style="word-break: break-all;">${escapeHtml(name)}</span>
+                </summary>
+                <div class="category-body" data-category="${escapeHtml(name)}">
+                    ${renderMacroItems(categoryMap[name])}
+                </div>
+            </details>
+        `);
+    });
+
+    listContainer.innerHTML = sections.join('');
+    updateCategoryIndexDropdown('macro');
+    attachMacroEvents();
 }
 
 /**
@@ -1190,6 +1248,7 @@ function setupUserDictionaryModal() {
     document.getElementById('macroCancelBtn')?.addEventListener('click', cancelMacroEdit);
     document.getElementById('macroExportBtn')?.addEventListener('click', exportUserDictionary);
     document.getElementById('macroImportBtn')?.addEventListener('click', importUserDictionary);
+    document.getElementById('macroItemIndex')?.addEventListener('change', (e) => handleCategoryIndexChange('macro', e));
 
     // エンターキーで登録
     document.getElementById('macroText')?.addEventListener('keydown', (e) => {
