@@ -39,7 +39,7 @@ function getContextMenu() {
 
     contextMenuElement = document.createElement('div');
     contextMenuElement.id = 'item-context-menu';
-    contextMenuElement.className = 'context-menu hidden';
+    contextMenuElement.className = 'context-menu u-hidden';
     document.body.appendChild(contextMenuElement);
 
     document.addEventListener('click', hideContextMenu);
@@ -51,7 +51,7 @@ function getContextMenu() {
 
 function hideContextMenu() {
     if (contextMenuElement) {
-        contextMenuElement.classList.add('hidden');
+        contextMenuElement.classList.add('u-hidden');
     }
 }
 
@@ -69,12 +69,12 @@ function showContextMenu(x, y, actions = []) {
     actions.forEach((action, index) => {
         if (index > 0) {
             const separator = document.createElement('div');
-            separator.className = 'context-menu-separator';
+            separator.className = 'context-menu__separator';
             menu.appendChild(separator);
         }
 
         const button = document.createElement('button');
-        button.className = 'context-menu-item';
+        button.className = 'context-menu__item';
         button.textContent = action.label;
         button.addEventListener('click', () => {
             action.onClick();
@@ -83,7 +83,7 @@ function showContextMenu(x, y, actions = []) {
         menu.appendChild(button);
     });
 
-    menu.classList.remove('hidden');
+    menu.classList.remove('u-hidden');
     menu.style.visibility = 'hidden';
     menu.style.left = '0px';
     menu.style.top = '0px';
@@ -166,12 +166,12 @@ function setupSettingsMenu() {
     if (!toggle || !dropdown) return;
 
     const hideDropdown = () => {
-        dropdown.classList.add('hidden');
+        dropdown.classList.add('u-hidden');
         toggle.setAttribute('aria-expanded', 'false');
     };
 
     const showDropdown = () => {
-        dropdown.classList.remove('hidden');
+        dropdown.classList.remove('u-hidden');
         toggle.setAttribute('aria-expanded', 'true');
     };
 
@@ -186,7 +186,7 @@ function setupSettingsMenu() {
     });
 
     dropdown.addEventListener('click', (event) => {
-        const item = event.target.closest('.settings-dropdown-item');
+        const item = event.target.closest('.site-header__dropdown-item');
         if (!item) return;
         const targetId = item.dataset.target;
         hideDropdown();
@@ -328,7 +328,7 @@ function toggleSection(header) {
 function saveUIState() {
     try {
         const states = {};
-        document.querySelectorAll('.section-header').forEach((header, i) => {
+        document.querySelectorAll('.panel__header').forEach((header, i) => {
             states[i] = header.classList.contains('collapsed');
         });
         localStorage.setItem('uiState', JSON.stringify(states));
@@ -342,7 +342,7 @@ function loadUIState() {
         const saved = localStorage.getItem('uiState');
         if (saved) {
             const states = JSON.parse(saved);
-            document.querySelectorAll('.section-header').forEach((header, i) => {
+            document.querySelectorAll('.panel__header').forEach((header, i) => {
                 if (states[i]) {
                     header.classList.add('collapsed');
                     header.nextElementSibling.classList.add('collapsed');
@@ -835,7 +835,7 @@ function scrollToCategory(type, category) {
     const list = document.getElementById(config.listId);
     if (!list) return;
 
-    const blocks = Array.from(list.querySelectorAll('.category-block'));
+    const blocks = Array.from(list.querySelectorAll('.category'));
     const targetBlock = blocks.find(block => (block.getAttribute('data-category') || 'none') === category);
 
     if (!targetBlock) return;
@@ -881,38 +881,38 @@ function renderBuffItems(entries = []) {
             const text = getTargetText(t);
             return text === "none" ? "なし" : text;
         });
-        const turnDisplay = item.turn ? `<span class="turn-badge" style="outline:2px solid ${item.color};"><span>${item.turn}</span></span>` : '';
+        const turnDisplay = item.turn ? `<span class="buff__turn-badge" style="outline:2px solid ${item.color};"><span>${item.turn}</span></span>` : '';
         const simpleMemo = getBuffSimpleMemo(item);
         const memoText = getBuffMemoText(item);
-        const memoHtml = memoText ? escapeHtml(memoText).replace(/\n/g, '<br>') : '<span class="memo-empty">メモはありません</span>';
+        const memoHtml = memoText ? escapeHtml(memoText).replace(/\n/g, '<br>') : '<span class="list-item__memo-empty">メモはありません</span>';
         const maxTurnText = item.originalTurn ?? item.turn;
         const maxTurnDisplay = (maxTurnText === undefined || maxTurnText === null || maxTurnText === '') ? 'なし' : maxTurnText;
         const targetsText = targetTexts.length ? targetTexts.join(', ') : 'なし';
         const effectText = item.effect ? item.effect : 'なし';
 
         return `
-            <details class="item buff-item draggable ${item.active ? 'active' : ''}"
+            <details class="list-item buff draggable ${item.active ? 'buff--active' : ''}"
                      style="background-color: ${bgColor}; color: ${textColor};"
                      data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}">
-                <summary class="buff-summary" draggable="true">
-                    <span class="item-param">
-                        <span class="item-name">${escapeHtml(item.name)}</span>
-                        ${simpleMemo ? `<span class="item-description">${escapeHtml(simpleMemo)}</span>` : ''}
+                <summary class="buff__summary" draggable="true">
+                    <span class="list-item__param">
+                        <span class="list-item__name">${escapeHtml(item.name)}</span>
+                        ${simpleMemo ? `<span class="list-item__description">${escapeHtml(simpleMemo)}</span>` : ''}
                     </span>
                     ${turnDisplay}
-                    <span class="buff-btn">
-                        <button class="toggle-btn ${item.active ? 'active' : ''}" data-toggle="${index}" data-toggle-type="buff"></button>
+                    <span class="buff__actions">
+                        <button class="toggle ${item.active ? 'toggle--active' : ''}" data-toggle="${index}" data-toggle-type="buff"></button>
                     </span>
                 </summary>
-                <div class="buff-detail-body">
+                <div class="buff__details">
                     <div>
                         <p><strong>最大ターン：</strong>${escapeHtml(String(maxTurnDisplay))}</p>
                         <p><strong>効果先：</strong>${escapeHtml(targetsText)}</p>
                         <p><strong>コマンド：</strong>${escapeHtml(effectText)}</p>
                     </div>
-                    <div class="item-detail buff-memo">
-                        <p class="item-detail-label"><strong>メモ：</strong></p>
-                        <p class="item-memo-text">${memoHtml}</p>
+                    <div class="list-item__detail buff__memo">
+                        <p class="list-item__detail-label"><strong>メモ：</strong></p>
+                        <p class="list-item__memo-text">${memoHtml}</p>
                     </div>
                 </div>
             </details>
@@ -924,10 +924,10 @@ function renderPackageItems(type, entries = []) {
     if (!Array.isArray(entries) || entries.length === 0) return '';
 
     return entries.map(({ item, index }) => `
-        <div class="item clickable draggable" data-index="${index}" data-type="${type}" data-category="${escapeHtml(item.category || 'none')}" draggable="true">
-            <span class="item-param">
-                <span class="item-name">${escapeHtml(item.name)}</span>
-                <span class="item-detail">${escapeHtml(item.roll)}</span>
+        <div class="list-item list-item--clickable draggable" data-index="${index}" data-type="${type}" data-category="${escapeHtml(item.category || 'none')}" draggable="true">
+            <span class="list-item__param">
+                <span class="list-item__name">${escapeHtml(item.name)}</span>
+                <span class="list-item__detail">${escapeHtml(item.roll)}</span>
         </div>
     `).join('');
 }
@@ -1148,9 +1148,9 @@ function renderMacroItems(entries = []) {
     if (!Array.isArray(entries) || entries.length === 0) return '';
 
     return entries.map(({ item }) => `
-        <div class="item clickable" data-type="macro" data-id="${escapeHtml(item.id)}">
-            <span class="item-param">
-                <span class="item-name">${escapeHtml(item.text)}</span>
+        <div class="list-item list-item--clickable" data-type="macro" data-id="${escapeHtml(item.id)}">
+            <span class="list-item__param">
+                <span class="list-item__name">${escapeHtml(item.text)}</span>
             </span>
         </div>
     `).join('');
@@ -1182,12 +1182,12 @@ function renderMacroDictionary() {
 
     if (categoryMap['none'] && categoryMap['none'].length > 0) {
         sections.push(`
-            <details class="category-block uncategorized" data-category="none" open>
-                <summary class="category-header" data-category="none">
+            <details class="category uncategorized" data-category="none" open>
+                <summary class="category__header" data-category="none">
                     <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
                     <span style="word-break: break-all;">未分類</span>
                 </summary>
-                <div class="category-body" data-category="none">
+                <div class="category__body" data-category="none">
                     ${renderMacroItems(categoryMap['none'])}
                 </div>
             </details>
@@ -1196,12 +1196,12 @@ function renderMacroDictionary() {
 
     categories.forEach(name => {
         sections.push(`
-            <details class="category-block" open data-category="${escapeHtml(name)}">
-                <summary class="category-header" data-category="${escapeHtml(name)}">
+            <details class="category" open data-category="${escapeHtml(name)}">
+                <summary class="category__header" data-category="${escapeHtml(name)}">
                     <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
                     <span style="word-break: break-all;">${escapeHtml(name)}</span>
                 </summary>
-                <div class="category-body" data-category="${escapeHtml(name)}">
+                <div class="category__body" data-category="${escapeHtml(name)}">
                     ${renderMacroItems(categoryMap[name])}
                 </div>
             </details>
@@ -1420,7 +1420,7 @@ function getBuffSimpleMemo(buff) {
 
 function openBuffModal(editIndex = null) {
     const modal = document.getElementById('buffaddmodal');
-    const modalTitle = modal.querySelector('.section-header-title');
+    const modalTitle = modal.querySelector('.panel__title');
     const addBtn = document.getElementById('addBuffBtn');
     const bulkAddSection = document.getElementById('bulkAddArea').parentElement;
     
@@ -1719,13 +1719,13 @@ function setupBulkAddControls({ toggleId, confirmId, cancelId, areaId, textId, t
     if (toggleButton) {
         toggleButton.addEventListener('click', () => {
             if (area) {
-                const isHidden = area.classList.contains('hidden') || area.style.display === 'none';
+                const isHidden = area.classList.contains('u-hidden') || area.style.display === 'none';
                 if (isHidden) {
-                    area.classList.remove('hidden');
+                    area.classList.remove('u-hidden');
                     area.style.display = 'block';
                     text?.focus();
                 } else {
-                    area.classList.add('hidden');
+                    area.classList.add('u-hidden');
                     area.style.display = 'none';
                     if (text) text.value = '';
                 }
@@ -1740,7 +1740,7 @@ function setupBulkAddControls({ toggleId, confirmId, cancelId, areaId, textId, t
     if (cancelButton) {
         cancelButton.addEventListener('click', () => {
             if (area) {
-                area.classList.add('hidden');
+                area.classList.add('u-hidden');
                 area.style.display = 'none';
             }
             if (text) text.value = '';
@@ -1833,11 +1833,11 @@ function renderBuffs() {
     const sections = [];
 
     sections.push(`
-        <details class="category-block uncategorized" data-category="none" open>
-            <summary class="category-header" data-category="none">
+        <details class="category uncategorized" data-category="none" open>
+            <summary class="category__header" data-category="none">
                 <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
             </summary>
-            <div class="category-body" data-category="none">
+            <div class="category__body" data-category="none">
                 ${renderBuffItems(categoryMap['none'])}
             </div>
         </details>
@@ -1845,11 +1845,11 @@ function renderBuffs() {
 
     state.buffCategories.forEach(name => {
         sections.push(`
-            <details class="category-block" open data-category="${escapeHtml(name)}">
-                <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
+            <details class="category" open data-category="${escapeHtml(name)}">
+                <summary class="category__header" data-category="${escapeHtml(name)}" draggable="true">
                     <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span><span style="word-break: break-all;">${escapeHtml(name)}</span>
                 </summary>
-                <div class="category-body" data-category="${escapeHtml(name)}">
+                <div class="category__body" data-category="${escapeHtml(name)}">
                     ${renderBuffItems(categoryMap[name])}
                 </div>
             </details>
@@ -1877,7 +1877,7 @@ function attachBuffEvents() {
         el.addEventListener('contextmenu', (e) => openItemContextMenu(e, 'buff', i));
     });
 
-    buffList.querySelectorAll('.category-header').forEach(header => {
+    buffList.querySelectorAll('.category__header').forEach(header => {
         header.addEventListener('dragstart', (e) => handleCategoryHeaderDragStart(e, 'buff'));
         header.addEventListener('dragover', (e) => handleCategoryDragOver(e, 'buff'));
         header.addEventListener('dragleave', handleCategoryDragLeave);
@@ -1915,7 +1915,7 @@ function handleDragStart(e, index, type) {
         state.draggedCategory = buff ? (buff.category || 'none') : null;
     }
 
-    e.target.classList.add('dragging');
+    e.target.classList.add('list-item--dragging');
     e.dataTransfer.effectAllowed = 'move';
 }
 
@@ -1926,22 +1926,22 @@ function handleDragOver(e) {
     const rect = e.currentTarget.getBoundingClientRect();
     const midY = rect.top + rect.height / 2;
     
-    e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom');
+    e.currentTarget.classList.remove('list-item--drag-over-top', 'list-item--drag-over-bottom');
     
     if (e.clientY < midY) {
-        e.currentTarget.classList.add('drag-over-top');
+        e.currentTarget.classList.add('list-item--drag-over-top');
     } else {
-        e.currentTarget.classList.add('drag-over-bottom');
+        e.currentTarget.classList.add('list-item--drag-over-bottom');
     }
 }
 
 function handleDragLeave(e) {
-    e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom');
+    e.currentTarget.classList.remove('list-item--drag-over-top', 'list-item--drag-over-bottom');
 }
 
 function handleDrop(e, targetIndex, type) {
     e.preventDefault();
-    e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom');
+    e.currentTarget.classList.remove('list-item--drag-over-top', 'list-item--drag-over-bottom');
 
     if (state.draggedIndex === null || state.draggedType !== type || state.draggedIndex === targetIndex) {
         return;
@@ -2000,14 +2000,14 @@ function handleCategoryHeaderDragStart(e, type) {
     state.draggedCategoryName = categoryName;
 
     e.dataTransfer.effectAllowed = 'move';
-    e.currentTarget.classList.add('dragging');
+    e.currentTarget.classList.add('category__header--dragging');
 }
 
 function handleCategoryHeaderDragEnd(e) {
-    document.querySelectorAll('.category-header.dragging')
-        .forEach(header => header.classList.remove('dragging'));
-    document.querySelectorAll('.category-header.category-drag-over')
-        .forEach(header => header.classList.remove('category-drag-over'));
+    document.querySelectorAll('.category__header--dragging')
+        .forEach(header => header.classList.remove('category__header--dragging'));
+    document.querySelectorAll('.category__header--drag-over')
+        .forEach(header => header.classList.remove('category__header--drag-over'));
     state.draggedCategoryType = null;
     state.draggedCategoryName = null;
 }
@@ -2019,11 +2019,11 @@ function handleCategoryDragOver(e, type) {
 
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    e.currentTarget.classList.add('category-drag-over');
+    e.currentTarget.classList.add('category__header--drag-over');
 }
 
 function handleCategoryDragLeave(e) {
-    e.currentTarget.classList.remove('category-drag-over');
+    e.currentTarget.classList.remove('category__header--drag-over');
 }
 
 function reorderCategory(type, targetCategory, dropAfter) {
@@ -2070,7 +2070,7 @@ function handleCategoryDrop(e, type) {
     }
 
     if (state.draggedType !== type || state.draggedIndex === null) {
-        e.currentTarget.classList.remove('category-drag-over');
+        e.currentTarget.classList.remove('category__header--drag-over');
         return;
     }
 
@@ -2080,7 +2080,7 @@ function handleCategoryDrop(e, type) {
     const item = collection ? collection[state.draggedIndex] : null;
 
     if (!collection || !item) {
-        e.currentTarget.classList.remove('category-drag-over');
+        e.currentTarget.classList.remove('category__header--drag-over');
         return;
     }
 
@@ -2100,7 +2100,7 @@ function handleCategoryDrop(e, type) {
     state.draggedCategory = null;
     state.draggedCategoryType = null;
     state.draggedCategoryName = null;
-    e.currentTarget.classList.remove('category-drag-over');
+    e.currentTarget.classList.remove('category__header--drag-over');
 }
 
 function handleCategoryBodyDragOver(e, type) {
@@ -2108,11 +2108,11 @@ function handleCategoryBodyDragOver(e, type) {
 
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    e.currentTarget.classList.add('category-drag-over');
+    e.currentTarget.classList.add('category__header--drag-over');
 }
 
 function handleCategoryBodyDragLeave(e) {
-    e.currentTarget.classList.remove('category-drag-over');
+    e.currentTarget.classList.remove('category__header--drag-over');
 }
 
 function handleCategoryBodyDrop(e, type) {
@@ -2126,7 +2126,7 @@ function handleCategoryBodyDrop(e, type) {
     const collection = getCollection(type);
 
     if (!collection || state.draggedIndex < 0 || state.draggedIndex >= collection.length) {
-        e.currentTarget.classList.remove('category-drag-over');
+        e.currentTarget.classList.remove('category__header--drag-over');
         return;
     }
 
@@ -2144,15 +2144,15 @@ function handleCategoryBodyDrop(e, type) {
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
-    e.currentTarget.classList.remove('category-drag-over');
+    e.currentTarget.classList.remove('category__header--drag-over');
 }
 
 function handleDragEnd(e) {
-    e.target.classList.remove('dragging');
-    document.querySelectorAll('.category-header.category-drag-over')
-        .forEach(header => header.classList.remove('category-drag-over'));
-    document.querySelectorAll('.category-header.dragging')
-        .forEach(header => header.classList.remove('dragging'));
+    e.target.classList.remove('list-item--dragging');
+    document.querySelectorAll('.category__header--drag-over')
+        .forEach(header => header.classList.remove('category__header--drag-over'));
+    document.querySelectorAll('.category__header--dragging')
+        .forEach(header => header.classList.remove('category__header--dragging'));
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
@@ -2166,7 +2166,7 @@ function handleDragEnd(e) {
 
 function openJudgeModal(editIndex = null) {
     const modal = document.getElementById('judgeaddmodal');
-    const modalTitle = modal.querySelector('.section-header-title');
+    const modalTitle = modal.querySelector('.panel__title');
     const addBtn = document.getElementById('addJudgeBtn');
     const bulkAddSection = document.getElementById('bulkAddJudgeArea').parentElement;
 
@@ -2210,7 +2210,7 @@ function resetJudgeForm() {
 
 function openAttackModal(editIndex = null) {
     const modal = document.getElementById('attackaddmodal');
-    const modalTitle = modal.querySelector('.section-header-title');
+    const modalTitle = modal.querySelector('.panel__title');
     const addBtn = document.getElementById('addAttackBtn');
     const bulkAddSection = document.getElementById('bulkAddAttackArea').parentElement;
 
@@ -2335,9 +2335,9 @@ function selectPackage(index, type) {
     if (!array) return;
     if (index < 0 || index >= array.length) return;
     
-    document.querySelectorAll(`[data-type="${type}"]`).forEach(el => el.classList.remove('selected'));
+    document.querySelectorAll(`[data-type="${type}"]`).forEach(el => el.classList.remove('list-item--selected'));
     const target = document.querySelector(`[data-type="${type}"][data-index="${index}"]`);
-    if (target) target.classList.add('selected');
+    if (target) target.classList.add('list-item--selected');
     updatePackageOutput(type, index);
 }
 
@@ -2373,11 +2373,11 @@ function renderPackage(type) {
     const sections = [];
 
     sections.push(`
-        <details class="category-block uncategorized" data-category="none" open>
-            <summary class="category-header" data-category="none">
+        <details class="category uncategorized" data-category="none" open>
+            <summary class="category__header" data-category="none">
                 <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
             </summary>
-            <div class="category-body" data-category="none">
+            <div class="category__body" data-category="none">
                 ${renderPackageItems(type, categoryMap['none'])}
             </div>
         </details>
@@ -2385,11 +2385,11 @@ function renderPackage(type) {
 
     categories.forEach(name => {
         sections.push(`
-            <details class="category-block" open data-category="${escapeHtml(name)}">
-                <summary class="category-header" data-category="${escapeHtml(name)}" draggable="true">
+            <details class="category" open data-category="${escapeHtml(name)}">
+                <summary class="category__header" data-category="${escapeHtml(name)}" draggable="true">
                     <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span><span style="word-break: break-all;">${escapeHtml(name)}</span>
                 </summary>
-                <div class="category-body" data-category="${escapeHtml(name)}">
+                <div class="category__body" data-category="${escapeHtml(name)}">
                     ${renderPackageItems(type, categoryMap[name])}
                 </div>
             </details>
@@ -2437,7 +2437,7 @@ function attachItemEvents(type) {
         el.addEventListener('contextmenu', (e) => openItemContextMenu(e, type, i));
     });
 
-    listElement.querySelectorAll('.category-header').forEach(header => {
+    listElement.querySelectorAll('.category__header').forEach(header => {
         header.addEventListener('dragstart', (e) => handleCategoryHeaderDragStart(e, type));
         header.addEventListener('dragover', (e) => handleCategoryDragOver(e, type));
         header.addEventListener('dragleave', handleCategoryDragLeave);
@@ -2479,7 +2479,7 @@ function attachItemEvents(type) {
         });
     });
 
-    listElement.querySelectorAll('.category-body').forEach(body => {
+    listElement.querySelectorAll('.category__body').forEach(body => {
         body.addEventListener('dragover', (e) => handleCategoryBodyDragOver(e, type));
         body.addEventListener('dragleave', handleCategoryBodyDragLeave);
         body.addEventListener('drop', (e) => handleCategoryBodyDrop(e, type));
@@ -2494,7 +2494,7 @@ function updatePackageOutput(type, selectedIndex = null) {
     if (!array) return;
 
     if (selectedIndex === null) {
-        const selected = document.querySelector(`[data-type="${type}"].selected`);
+        const selected = document.querySelector(`[data-type="${type}"].list-item--selected`);
         if (!selected) {
             document.getElementById(outputId).textContent = emptyMsg;
             return;
@@ -2651,8 +2651,8 @@ function getAutocompleteDropdown() {
     }
 
     const dropdown = document.createElement('div');
-    dropdown.id = 'autocomplete-dropdown';
-    dropdown.className = 'autocomplete-dropdown hidden';
+    dropdown.id = 'autocomplete';
+    dropdown.className = 'autocomplete u-hidden';
     document.body.appendChild(dropdown);
     autocompleteState.dropdownElement = dropdown;
 
@@ -2669,12 +2669,12 @@ function showAutocompleteDropdown(inputElement, suggestions) {
     }
 
     // ドロップダウン要素を強制作成（入力欄の直後に追加）
-    let dropdown = document.getElementById('autocomplete-dropdown');
+    let dropdown = document.getElementById('autocomplete');
     if (!dropdown) {
         console.log('Creating dropdown element');
         dropdown = document.createElement('div');
-        dropdown.id = 'autocomplete-dropdown';
-        dropdown.className = 'autocomplete-dropdown';
+        dropdown.id = 'autocomplete';
+        dropdown.className = 'autocomplete';
         // 入力欄の親要素に追加
         inputElement.parentElement.appendChild(dropdown);
         autocompleteState.dropdownElement = dropdown;
@@ -2684,18 +2684,18 @@ function showAutocompleteDropdown(inputElement, suggestions) {
 
     // ドロップダウンのHTMLを生成
     const itemsHtml = suggestions.map((item, index) => `
-        <div class="autocomplete-item" data-index="${index}" data-text="${escapeHtml(item.text)}">
-            <span class="autocomplete-text">${escapeHtml(item.text)}</span>
-            <span class="autocomplete-category">${escapeHtml(item.category)}</span>
+        <div class="autocomplete__item" data-index="${index}" data-text="${escapeHtml(item.text)}">
+            <span class="autocomplete__text">${escapeHtml(item.text)}</span>
+            <span class="autocomplete__category">${escapeHtml(item.category)}</span>
         </div>
     `).join('');
 
     dropdown.innerHTML = itemsHtml;
-    dropdown.classList.remove('hidden');
+    dropdown.classList.remove('u-hidden');
     autocompleteState.isOpen = true;
 
     // アイテムのクリックイベントを設定
-    dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+    dropdown.querySelectorAll('.autocomplete__item').forEach(item => {
         item.addEventListener('click', () => {
             selectAutocompleteItem(inputElement, item.getAttribute('data-text'));
         });
@@ -2715,7 +2715,7 @@ function showAutocompleteDropdown(inputElement, suggestions) {
 function hideAutocompleteDropdown() {
     const dropdown = autocompleteState.dropdownElement;
     if (dropdown) {
-        dropdown.classList.add('hidden');
+        dropdown.classList.add('u-hidden');
     }
     autocompleteState.isOpen = false;
     autocompleteState.selectedIndex = -1;
@@ -2756,14 +2756,14 @@ function setSelectedAutocompleteIndex(index) {
     // 前の選択項目のハイライトを削除
     if (autocompleteState.selectedIndex >= 0) {
         const prevItem = dropdown.querySelector(`[data-index="${autocompleteState.selectedIndex}"]`);
-        if (prevItem) prevItem.classList.remove('selected');
+        if (prevItem) prevItem.classList.remove('autocomplete__item--selected');
     }
 
     // 新しい選択項目にハイライトを追加
     autocompleteState.selectedIndex = index;
     const item = dropdown.querySelector(`[data-index="${index}"]`);
     if (item) {
-        item.classList.add('selected');
+        item.classList.add('autocomplete__item--selected');
         item.scrollIntoView({ block: 'nearest' });
     }
 }
@@ -2811,7 +2811,7 @@ function setupAutocompleteFields() {
             if (!autocompleteState.isOpen) return;
 
             const dropdown = autocompleteState.dropdownElement;
-            const itemCount = dropdown.querySelectorAll('.autocomplete-item').length;
+            const itemCount = dropdown.querySelectorAll('.autocomplete__item').length;
 
             // Enterキーとエスケープはここで処理
             if (e.key === 'Enter') {
@@ -2840,7 +2840,7 @@ function setupAutocompleteFields() {
             if (!autocompleteState.isOpen) return;
 
             const dropdown = autocompleteState.dropdownElement;
-            const itemCount = dropdown.querySelectorAll('.autocomplete-item').length;
+            const itemCount = dropdown.querySelectorAll('.autocomplete__item').length;
 
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
@@ -2936,10 +2936,10 @@ function copyItemData(type, index, button) {
         if (button) {
             const original = button.textContent;
             button.textContent = 'コピー済み!';
-            button.classList.add('copied');
+            button.classList.add('button--copied');
             setTimeout(() => {
                 button.textContent = original;
-                button.classList.remove('copied');
+                button.classList.remove('button--copied');
             }, 2000);
         }
         showToast('クリップボードにコピーしました', 'success');
@@ -2958,10 +2958,10 @@ function copyToClipboard(elementId, button) {
     
     navigator.clipboard.writeText(text).then(() => {
         button.textContent = 'コピー済み!';
-        button.classList.add('copied');
+        button.classList.add('button--copied');
         setTimeout(() => {
             button.textContent = 'コピー';
-            button.classList.remove('copied');
+            button.classList.remove('button--copied');
         }, 2000);
     }).catch(() => {
         showToast('コピーに失敗しました', 'error');
@@ -2975,7 +2975,7 @@ function copyToClipboard(elementId, button) {
 document.addEventListener('DOMContentLoaded', () => {
     setupSettingsMenu();
 
-    document.querySelectorAll('.section-header').forEach(header => {
+    document.querySelectorAll('.panel__header').forEach(header => {
         header.addEventListener('click', () => toggleSection(header));
     });
 
@@ -3051,7 +3051,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('userMacroModal')?.close();
     });
     
-    document.querySelectorAll('.copy-btn').forEach(btn => {
+    document.querySelectorAll('.button--copy').forEach(btn => {
         btn.addEventListener('click', function() {
             const targetId = this.getAttribute('data-target');
             if (targetId) copyToClipboard(targetId, this);
