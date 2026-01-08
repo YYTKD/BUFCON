@@ -16,11 +16,11 @@
             <div class="site-header__title">JET-PALET</div>
         </div>
         <div class="site-header__menu">
-                <a type="button" class="site-header__menu-item" id="settingsToggle" aria-haspopup="true" aria-expanded="false" style="anchor-name: --settings">
-                    <div class="tooltip" style="--target: --settings">設定</div>
+                <a type="button" class="site-header__menu-item site-header__menu-item--settings" id="settingsToggle" aria-haspopup="true" aria-expanded="false">
+                    <div class="tooltip tooltip--settings">設定</div>
                     <span class="material-symbols-rounded">settings</span>
                 </a>
-                <div class="site-header__dropdown u-hidden" id="settingsDropdown" style="--target: --settings">
+                <div class="site-header__dropdown site-header__dropdown--settings u-hidden" id="settingsDropdown">
                     <button class="site-header__dropdown-item" data-target="DataOption">
                         <span class="material-symbols-rounded">checkbook</span>
                         <span>データ管理</span>
@@ -30,12 +30,12 @@
                         <span>ユーザー辞書</span>
                     </button>
                 </div>
-            <a class="site-header__menu-item" style="anchor-name: --help" href="https://unexpected-avatar-e3c.notion.site/BUFCON-2d1c2563a7d8804b97f9e64754356198" target="_blank" rel="noopener noreferrer">
-                <div class="tooltip" style="--target: --help">使い方</div>
+            <a class="site-header__menu-item site-header__menu-item--help" href="https://unexpected-avatar-e3c.notion.site/BUFCON-2d1c2563a7d8804b97f9e64754356198" target="_blank" rel="noopener noreferrer">
+                <div class="tooltip tooltip--help">使い方</div>
                 <span class="material-symbols-rounded">help</span>
             </a>
-            <a class="site-header__menu-item" style="anchor-name: --feedback" href="https://forms.gle/Z5YU8JaAVVUmWMaZ7" target="_blank" rel="noopener noreferrer">
-                <div class="tooltip" style="--target: --feedback">感想投稿フォーム</div>
+            <a class="site-header__menu-item site-header__menu-item--feedback" href="https://forms.gle/Z5YU8JaAVVUmWMaZ7" target="_blank" rel="noopener noreferrer">
+                <div class="tooltip tooltip--feedback">感想投稿フォーム</div>
                 <span class="material-symbols-rounded">feedback</span>
             </a>
         </div>
@@ -53,7 +53,7 @@
                     <div class="modal__body" style="margin-top: 32px;">
                         <div class="form__group form__group--spaced">
                             <label class="form__label form__label--small">クリップボードから貼り付けて読み込み:</label>
-                                <textarea id="importText" placeholder='.txtまたは.jsonファイルを直接ドロップしても読み込めます' class="form__textarea form__textarea--mono" style="height:120px; flex: 3;"></textarea>
+                                <textarea id="importText" placeholder='.txtまたは.jsonファイルを直接ドロップしても読み込めます' class="form__textarea form__textarea--mono form__textarea--import-lg"></textarea>
                         </div>
                         <div class="form__group form__group--spaced" style="display: flex; gap: 12px;">
                             <button class="button button--secondary button--grow" id="importConfirm">
@@ -117,9 +117,9 @@
                     <span class="material-symbols-rounded">list</span>
                     <span>登録済み辞書</span>
                 </div>
-            <div class="control-bar" style="margin-bottom: 8px;">
-                <label class="list__index" style="anchor-name: --macro-bookmark; margin-left: auto">
-                    <div class="tooltip" style="--target: --macro-bookmark">カテゴリへ移動</div>
+            <div class="control-bar control-bar--spaced">
+                <label class="list__index list__index--macro-bookmark list__index--aligned-end">
+                    <div class="tooltip tooltip--macro-bookmark">カテゴリへ移動</div>
                     <span class="material-symbols-rounded">bookmark</span>
                     <select class="button" id="macroItemIndex"></select>
                 </label>
@@ -138,7 +138,7 @@
             </div>
             <div class="form__group form__group--spaced">
                 <label class="form__label form__label--small">ユーザー辞書を貼り付けて読み込み</label>
-                <textarea id="macroImportText" placeholder=".txtまたは.jsonファイルを直接ドロップしても読み込めます" class="form__textarea form__textarea--mono" style="height: 80px; flex: 3;"></textarea>
+                <textarea id="macroImportText" placeholder=".txtまたは.jsonファイルを直接ドロップしても読み込めます" class="form__textarea form__textarea--mono form__textarea--import-md"></textarea>
             </div>
             <div class="form__group form__group--spaced" style="display: flex; gap: 12px;">  
                 <button class="button button--secondary button--grow" id="macroImportBtn">
@@ -169,14 +169,14 @@
                             <button class="button button--turn" style="anchor-name: --getTurn;" id="turnProgressBtn">
                                 <div class="tooltip" style="--target: --getTurn">すべてのアクティブなターンを１減らす</div>
                                 <span class="material-symbols-rounded">skip_next</span></button>
-                            <button class="button button--turn" style="anchor-name: --reset;" id="turnResetBtn">
-                                <div class="tooltip" style="--target: --reset">すべてのターンをリセット</div>
+                            <button class="button button--turn button--anchor-turn-reset" id="turnResetBtn">
+                                <div class="tooltip tooltip--turn-reset">すべてのターンをリセット</div>
                                 <span class="material-symbols-rounded">replay</span></button>
                             <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openBuffModal()">
                             add_2<div class="tooltip" style="--target: --addbuffbtn;">バフ/デバフを追加</div>
                             </button>
-                            <label class="list__index" style="anchor-name: --bookmark;">
-                                <div class="tooltip" style="--target: --bookmark">カテゴリへ移動</div>
+                            <label class="list__index list__index--bookmark">
+                                <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
                                 <span class="material-symbols-rounded">bookmark</span>
                                 <select class="button" id="buffItemIndex">
                                 </select>
@@ -219,7 +219,7 @@
                                 </div>
                                 <div class="form__group">
                                     <label for="buffEffect" class="form__label form__label--small">コマンド</label>
-                                    <div style="display: flex;">
+                                    <div class="form__row form__row--inline">
                                         <input type="text" id="buffEffect" placeholder="例：+2,-1d6,//ダイスボーナス=+1" class="form__input">
                                         <button class="button button--muted" onclick="insertText('//NAME=')">//=</button>
                                     </div>
@@ -237,7 +237,7 @@
                                     </div>
                                     <div class="form__note">効果時間がターンで決められている場合、効果の続くターン数を指定します。
                                     </div>
-                                    <div style="width: 50%;">
+                                    <div class="form__column form__column--half">
                                         <label for="buffColor" class="form__label form__label--small">ラベルの色を選択</label>
                                         <input type="color" id="buffColor" value="#0079FF" list="buffColor-list" class="form__input">
                                         <datalist id="buffColor-list">
@@ -271,7 +271,7 @@
                                             <p>簡易メモを表示</p>
                                         </label>
                                     </div>
-                                    <textarea id="buffMemo" class="form__textarea form__textarea--mono" style="height: calc(100% - 1rem - 8px);" placeholder="簡易メモにはメモの1行目を使用します。"></textarea>
+                                    <textarea id="buffMemo" class="form__textarea form__textarea--mono form__textarea--memo-buff" placeholder="簡易メモにはメモの1行目を使用します。"></textarea>
                                     <div class="form__note">簡易メモにはメモの1行目を使用します。</div>
                                 </div>
                             <div type="button" class="button" id="addBuffBtn">追加</div>
@@ -280,7 +280,7 @@
                 <div class="modal__divider"></div>
                 <div class="modal__section">
                     <label for="buffCategoryInput" class="form__label form__label--small">新規カテゴリ追加</label>
-                    <div style="display: flex; gap: 8px; flex-direction: column;">
+                    <div class="form__group form__group--stacked">
                         <input type="text" id="buffCategoryInput" placeholder="例：魔法、装備" aria-label="バフカテゴリの新規追加" class="form__input">
                         <div class="form__note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
                         <span type="button" class="button button--half" id="addBuffCategoryBtn" title="カテゴリを追加">追加</span>
@@ -333,8 +333,8 @@
                         <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openJudgeModal()">
                             add_2<div class="tooltip" style="--target: --addbuffbtn;">判定を追加</div>
                             </button>
-                        <label class="list__index" style="anchor-name: --bookmark;">
-                            <div class="tooltip" style="--target: --bookmark">カテゴリへ移動</div>
+                        <label class="list__index list__index--bookmark">
+                            <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
                             <span class="material-symbols-rounded">bookmark</span>
                             <select class="button" id="judgeItemIndex"></select>
                         </label>
@@ -376,7 +376,7 @@
                                 </div>
                                 <div class="form__group">
                                     <label for="judgeRoll" class="form__label form__label--small">判定ロール</label>
-                                <div style="display: flex;">    
+                                <div class="form__row form__row--inline">    
                                     <input type="text" id="judgeRoll" placeholder="例：1d20,2d6" class="form__input">
                                     <button class="button button--muted" onclick="insertText('//NAME//')">//</button>
                                 </div>
@@ -393,7 +393,7 @@
                             </div>
                             <div class="form__group">
                                     <label class="form__label form__label--small">メモ欄</label>
-                                    <textarea id="judgeMemo" class="form__textarea form__textarea--mono" style="height: calc(100% - 20px);"></textarea>
+                                    <textarea id="judgeMemo" class="form__textarea form__textarea--mono form__textarea--memo"></textarea>
                             </div>
                             <div type="button" class="button" id="addJudgeBtn">追加</div>
                         </div>
@@ -401,7 +401,7 @@
                         <div class="modal__divider"></div>
                         <div class="modal__section">
                             <label for="judgeCategoryInput" class="form__label form__label--small">新規カテゴリ追加</label>
-                            <div style="display: flex; gap: 8px; flex-direction: column;">
+                            <div class="form__group form__group--stacked">
                                 <input type="text" id="judgeCategoryInput" placeholder="例：戦闘、探索" aria-label="判定カテゴリの新規追加" class="form__input">
                                 <div class="form__note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
                                 <span type="button" class="button button--half" id="addJudgeCategoryBtn" title="カテゴリを追加">追加</span>
@@ -438,8 +438,8 @@
                         <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openAttackModal()">
                             add_2<div class="tooltip" style="--target: --addbuffbtn;">攻撃を追加</div>
                             </button>
-                        <label class="list__index" style="anchor-name: --bookmark;">
-                            <div class="tooltip" style="--target: --bookmark">カテゴリへ移動</div>
+                        <label class="list__index list__index--bookmark">
+                            <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
                             <span class="material-symbols-rounded">bookmark</span>
                             <select class="button" id="attackItemIndex"></select>
                         </label>
@@ -481,7 +481,7 @@
                                 </div>
                                 <div class="form__group">
                                 <label for="attackRoll" class="form__label form__label--small">攻撃ロール</label>
-                                <div style="display: flex;">
+                                <div class="form__row form__row--inline">
                                     <input type="text" id="attackRoll" placeholder="例: 2d6,K20@10" class="form__input">
                                     <button class="button button--muted" onclick="insertText('//NAME//')">//</button>
                                 </div>
@@ -500,7 +500,7 @@
                             </div>
                                 <div class="form__group">
                                     <label class="form__label form__label--small">メモ欄</label>
-                                    <textarea id="attackMemo" class="form__textarea form__textarea--mono" style="height: calc(100% - 20px);"></textarea>
+                                    <textarea id="attackMemo" class="form__textarea form__textarea--mono form__textarea--memo"></textarea>
                                 </div>
                             <div type="button" class="button" id="addAttackBtn">追加</div>
                         </div>
@@ -508,7 +508,7 @@
                         <div class="modal__divider"></div>
                         <div class="modal__section">
                             <label for="attackCategoryInput" class="form__label form__label--small">新規カテゴリ追加</label>
-                            <div style="display: flex; gap: 8px; flex-direction: column;">
+                            <div class="form__group form__group--stacked">
                                 <input type="text" id="attackCategoryInput" placeholder="例：近接、魔法" aria-label="攻撃カテゴリの新規追加" class="form__input">
                                 <div class="form__note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
                                 <span type="button"n class="button button--half" id="addAttackCategoryBtn" title="カテゴリを追加">追加</span>

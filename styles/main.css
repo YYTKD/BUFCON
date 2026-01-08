@@ -285,6 +285,38 @@ dialog::backdrop {
     transform-origin: bottom center;
 }
 
+.tooltip--settings {
+    --target: --settings;
+}
+
+.tooltip--help {
+    --target: --help;
+}
+
+.tooltip--feedback {
+    --target: --feedback;
+}
+
+.tooltip--macro-bookmark {
+    --target: --macro-bookmark;
+}
+
+.tooltip--bookmark {
+    --target: --bookmark;
+}
+
+.tooltip--turn-progress {
+    --target: --getTurn;
+}
+
+.tooltip--turn-reset {
+    --target: --reset;
+}
+
+.tooltip--add {
+    --target: --addbuffbtn;
+}
+
 /* 出力ボックス */
 .output {
     background: var(--secondary-color-1);
@@ -373,6 +405,18 @@ dialog::backdrop {
     background: rgba(255,255,255,0.1);
 }
 
+.site-header__menu-item--settings {
+    anchor-name: --settings;
+}
+
+.site-header__menu-item--help {
+    anchor-name: --help;
+}
+
+.site-header__menu-item--feedback {
+    anchor-name: --feedback;
+}
+
 .site-header__menu-item:hover .tooltip {
     background: var(--primary-color-1);
     opacity: 1;
@@ -401,6 +445,10 @@ dialog::backdrop {
     padding: 6px 0;
     z-index: 1100;
     position-anchor: var(--target);
+}
+
+.site-header__dropdown--settings {
+    --target: --settings;
 }
 
 .site-header__dropdown.u-hidden {
@@ -710,6 +758,22 @@ dialog .modal__body {
     top: 12px;
 }
 
+.button--anchor-turn-progress {
+    anchor-name: --getTurn;
+}
+
+.button--anchor-turn-reset {
+    anchor-name: --reset;
+}
+
+.button--anchor-add {
+    anchor-name: --addbuffbtn;
+}
+
+.button--hidden {
+    display: none;
+}
+
 /* トグルボタン（ON/OFF切り替え） */
 .toggle {
     width: 48px;
@@ -807,6 +871,18 @@ dialog .modal__body {
     position: relative;
     display: flex;
     align-items: center;
+}
+
+.list__index--macro-bookmark {
+    anchor-name: --macro-bookmark;
+}
+
+.list__index--bookmark {
+    anchor-name: --bookmark;
+}
+
+.list__index--aligned-end {
+    margin-left: auto;
 }
 
 .list__index  select {
