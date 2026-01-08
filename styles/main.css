@@ -507,11 +507,13 @@ dialog .modal__body {
     flex-wrap: wrap;
 }
 
-.tabs > label + div{
+.tabs__tab {
+    display: flex;
+    flex-wrap: wrap;
     flex: 1 720px;
 }
 
-.tabs > label {
+.tabs__label {
     flex: 1;
     background: var(--secondary-color-1);
     cursor: pointer;
@@ -520,19 +522,19 @@ dialog .modal__body {
     transition: all 0.1s ease-out;
 }
 
-.tabs__content {
+.tabs__panel {
     display: none;
+    flex: 1 720px;
 }
 
-
-.tabs > label:has(:checked) {
+.tabs__label:has(:checked) {
     flex: 1;
     background: var(--secondary-color-1);
     color: var(--primary-color-1);
     transition: all 0.1s ease-out;
 }
 
-.tabs > label:has(:checked) + .tabs__content {
+.tabs__label:has(:checked) + .tabs__panel {
     display: flex;
 }
 
