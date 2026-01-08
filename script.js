@@ -328,7 +328,7 @@ function toggleSection(header) {
 function saveUIState() {
     try {
         const states = {};
-        document.querySelectorAll('.panel__header').forEach((header, i) => {
+        document.querySelectorAll('.section__header').forEach((header, i) => {
             states[i] = header.classList.contains('collapsed');
         });
         localStorage.setItem('uiState', JSON.stringify(states));
@@ -342,7 +342,7 @@ function loadUIState() {
         const saved = localStorage.getItem('uiState');
         if (saved) {
             const states = JSON.parse(saved);
-            document.querySelectorAll('.panel__header').forEach((header, i) => {
+            document.querySelectorAll('.section__header').forEach((header, i) => {
                 if (states[i]) {
                     header.classList.add('collapsed');
                     header.nextElementSibling.classList.add('collapsed');
@@ -1420,7 +1420,7 @@ function getBuffSimpleMemo(buff) {
 
 function openBuffModal(editIndex = null) {
     const modal = document.getElementById('buffaddmodal');
-    const modalTitle = modal.querySelector('.panel__title');
+    const modalTitle = modal.querySelector('.modal__title');
     const addBtn = document.getElementById('addBuffBtn');
     const bulkAddSection = document.getElementById('bulkAddArea').parentElement;
     
@@ -2166,7 +2166,7 @@ function handleDragEnd(e) {
 
 function openJudgeModal(editIndex = null) {
     const modal = document.getElementById('judgeaddmodal');
-    const modalTitle = modal.querySelector('.panel__title');
+    const modalTitle = modal.querySelector('.modal__title');
     const addBtn = document.getElementById('addJudgeBtn');
     const bulkAddSection = document.getElementById('bulkAddJudgeArea').parentElement;
 
@@ -2210,7 +2210,7 @@ function resetJudgeForm() {
 
 function openAttackModal(editIndex = null) {
     const modal = document.getElementById('attackaddmodal');
-    const modalTitle = modal.querySelector('.panel__title');
+    const modalTitle = modal.querySelector('.modal__title');
     const addBtn = document.getElementById('addAttackBtn');
     const bulkAddSection = document.getElementById('bulkAddAttackArea').parentElement;
 
@@ -2975,7 +2975,7 @@ function copyToClipboard(elementId, button) {
 document.addEventListener('DOMContentLoaded', () => {
     setupSettingsMenu();
 
-    document.querySelectorAll('.panel__header').forEach(header => {
+    document.querySelectorAll('.section__header').forEach(header => {
         header.addEventListener('click', () => toggleSection(header));
     });
 

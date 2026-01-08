@@ -207,7 +207,8 @@ details[open] summary .material-symbols-rounded {
 }
 
 /* 区切り線 */
-.panel__divider {
+.section__divider,
+.modal__divider {
     display: flex;
     align-self: center;
     border: 1px solid var(--primary-color-3);
@@ -420,7 +421,7 @@ dialog::backdrop {
    ======================================== */
 
 /* セクション本体 */
-.panel {
+.section {
     flex: 1 720px;
     max-width: 720px;
     background: none;
@@ -430,14 +431,15 @@ dialog::backdrop {
     .app__content {
         flex-wrap: nowrap;
     }
-    .panel {
+    .section {
         flex: 1 300px;
     }
 }
 
 /* セクションヘッダー */
 
-.panel__header, .panel__header--modal {
+.section__header,
+.modal__header {
     background: var(--secondary-color-1);
     padding: 4px 8px;
     border-radius: 4px 4px 0 0;
@@ -452,7 +454,8 @@ dialog::backdrop {
     align-items: center;
 }
 
-.panel__header--modal {
+.section__header--modal,
+.modal__header {
     position: fixed;
     width: calc(100% - 16px);
     outline: 2px solid var(--primary-color-2);
@@ -464,7 +467,8 @@ input[type="radio"] {
 }
 
 /* セクションボディ */
-.panel__body {
+.section__body,
+.modal__body {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -485,11 +489,12 @@ input[type="radio"] {
     z-index: 1;
 }
 
-.panel__body::-webkit-scrollbar {
+.section__body::-webkit-scrollbar,
+.modal__body::-webkit-scrollbar {
     display: none;
 }
 
-dialog .panel__body {
+dialog .modal__body {
     margin-top: 40px;
     width: 100%;
     padding: 16px;
@@ -1169,9 +1174,10 @@ dialog .panel__body {
     display: none;
 }
 
-.panel__body:has(.help-toggle input:checked) .u-margin-8 .help-note {
-     display: block;
- }
+.section__body:has(.help-toggle input:checked) .u-margin-8 .help-note,
+.modal__body:has(.help-toggle input:checked) .u-margin-8 .help-note {
+    display: block;
+}
 
 /* 空メッセージ */
 .list__empty {
