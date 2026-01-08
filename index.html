@@ -306,12 +306,13 @@
         </dialog>
 <!--タブ-->
         <div class="tabs section">
-            <label class="section__header"><input type="radio" name="TAB" checked>
-                    <span class="material-symbols-rounded">ifl</span>
-                    <span class="section__title">判定</span>
-            </label>
+            <div class="tabs__tab">
+                <label class="tabs__label section__header"><input class="tabs__input" type="radio" name="TAB" checked>
+                        <span class="material-symbols-rounded">ifl</span>
+                        <span class="section__title">判定</span>
+                </label>
 <!--判定-->
-            <div class="section__body tabs__content" id="judgeSection">
+                <div class="tabs__panel section__body" id="judgeSection">
                     <div class="control-bar u-full-width">
                         <div class="target-selector">
                             <span class="form-label form-label--small">目標値：</span>
@@ -348,6 +349,7 @@
                             <button class="button button--copy" data-target="judgeOutput">コピー</button>
                         </div>
                 </div>
+            </div>
 <!--判定　モーダル-->
             <dialog class="modal" id="judgeaddmodal" closedby="any">
                     <div class="modal__header section__header section__header--modal">
@@ -425,12 +427,13 @@
                     </div>
             </dialog>
 <!--タブ-->
-            <label class="section__header"><input class="tabs__input" type="radio" name="TAB">
-                <span class="material-symbols-rounded">swords</span>
-                <span class="section__title">攻撃</span>
-            </label>
-<!--攻撃-->           
-                <div class="section__body tabs__content">
+            <div class="tabs__tab">
+                <label class="tabs__label section__header"><input class="tabs__input" type="radio" name="TAB">
+                    <span class="material-symbols-rounded">swords</span>
+                    <span class="section__title">攻撃</span>
+                </label>
+<!--攻撃-->
+                <div class="tabs__panel section__body">
                     <div class="control-bar u-full-width">
                         <button class="material-symbols-rounded button u-push-right" style="anchor-name: --addbuffbtn;" onclick="openAttackModal()">
                             add_2<div class="tooltip" style="--target: --addbuffbtn;">攻撃を追加</div>
@@ -450,6 +453,7 @@
                         <button class="button button--copy" data-target="attackOutput">コピー</button>
                     </div>
                 </div>
+            </div>
                 
 <!--攻撃　モーダル-->
             <dialog class="modal" id="attackaddmodal" closedby="any">
