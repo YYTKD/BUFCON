@@ -194,6 +194,18 @@ input[type="number"]::-webkit-outer-spin-button {
     flex-wrap: wrap;
 }
 
+.button--grow {
+    flex: 1;
+}
+
+.button--half {
+    width: 50%;
+}
+
+.button--spaced {
+    margin: 8px 0;
+}
+
 /* プルダウン矢印 */
 
 details .material-symbols-rounded {
@@ -499,6 +511,19 @@ dialog .modal__body {
     overflow-x: hidden;
 }
 
+.modal__section {
+    margin: 8px 0;
+}
+
+.modal__section--divider {
+    padding-top: 12px;
+    border-top: 2px solid var(--primary-color-1);
+}
+
+.modal__close {
+    margin-left: auto;
+}
+
 /*タブ要素*/
 .tabs {
     display: flex;
@@ -547,12 +572,20 @@ dialog .modal__body {
     gap: 4px;
 }
 
+.form__group--spaced {
+    margin-bottom: 12px;
+}
+
 .form__grid {
     position: relative;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
     border-radius: 8px;
+}
+
+.form__grid--stacked {
+    flex-direction: column;
 }
 
 .form__grid > div {
@@ -562,6 +595,13 @@ dialog .modal__body {
 
 .form__grid label {
     word-break: keep-all;
+}
+
+.form__row--split {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: flex-start;
 }
 
 .form__grid input {
@@ -632,6 +672,14 @@ dialog .modal__body {
     gap: 8px;
     flex-wrap: wrap;
     container-type: inline-size;
+}
+
+.control-bar--full {
+    width: 100%;
+}
+
+.control-bar__item--end {
+    margin-left: auto;
 }
 
 .control-bar > *:not(div) {
@@ -1198,8 +1246,8 @@ dialog .modal__body {
     display: none;
 }
 
-.section__body:has(.help-toggle input:checked) .u-margin-8 .form__note,
-.modal__body:has(.help-toggle input:checked) .u-margin-8 .form__note {
+.section__body:has(.help-toggle input:checked) .modal__section .form__note,
+.modal__body:has(.help-toggle input:checked) .modal__section .form__note {
     display: block;
 }
 
@@ -1236,25 +1284,20 @@ dialog .modal__body {
    ユーティリティクラス
    ======================================== */
 
-.u-full-width { width: 100%; }
-.u-half-width { width: 50%; }
 .u-hidden { display: none; }
-.u-margin-8 { margin: 8px 0; }
-.u-margin-4 { margin: 4px 4; }
-.u-margin-bottom-12 { margin-bottom: 12px; }
-.u-padding-top-12 { padding-top: 12px; }
-.u-border-top { border-top: 2px solid var(--primary-color-1); }
 .form__textarea--mono { width: 100%; padding: 8px; border: 1px solid var(--secondary-color-2); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; }
 .form__row { display: flex; gap: 6px; margin-top: 6px; }
-.u-flex-1 { flex: 1; }
-.u-flex-row { flex-direction: row; }
-.u-flex-column { flex-direction: column; }
-.u-justify-end { justify-content: flex-end; }
-.u-push-right {justify-items: flex-end;margin-left: auto;}
 .button--muted { background: var(--primary-color-3); color: var(--secondary-color-1); outline: none;}
 .button--info { background: var(--primary-color-3); color: var(--secondary-color-1);}
 .button--danger { background: var(--danger-color); width: 30%; color: var(--secondary-color-1);}
-.u-text-small { font-size: 11px; color: var(--primary-color-1); margin-top: 6px; }
+.form__text { font-size: 11px; color: var(--primary-color-1); margin-top: 6px; }
 .form__label--small { font-size: 12px; font-weight: 600; color: var(--primary-color-2); display: block; margin: 8px 0 2px 2px;}
 .form__label--large { font-size: 16px; font-weight: 600; color: var(--primary-color-2); display: flex; margin: 0 0 4px 2px; gap: 8px; align-items: center; }
 .form__input--compact { width: 60px; padding: 4px 6px; border: 1px solid var(--primary-color-1); border-radius: 4px; }
+
+.form__label--row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}

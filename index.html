@@ -51,21 +51,21 @@
                         <span class="modal__title">データ管理</span>
                     </div>
                     <div class="modal__body" style="margin-top: 32px;">
-                        <div class="u-margin-bottom-12 form__group">
+                        <div class="form__group form__group--spaced">
                             <label class="form__label form__label--small">クリップボードから貼り付けて読み込み:</label>
                                 <textarea id="importText" placeholder='.txtまたは.jsonファイルを直接ドロップしても読み込めます' class="form__textarea form__textarea--mono" style="height:120px; flex: 3;"></textarea>
                         </div>
-                        <div class="u-margin-bottom-12 form__group" style="display: flex; gap: 12px;">
-                            <button class="button button--secondary u-flex-1" id="importConfirm">
+                        <div class="form__group form__group--spaced" style="display: flex; gap: 12px;">
+                            <button class="button button--secondary button--grow" id="importConfirm">
                                 <span class="material-symbols-rounded">download</span>
                                 <span>このデータを読み込み</span>
                             </button>
-                            <button class="button button--secondary button--info u-flex-1" id="exportToClipboard">
+                            <button class="button button--secondary button--info button--grow" id="exportToClipboard">
                                 <span class="material-symbols-rounded">content_copy</span>
                                 <span>現在の設定を</span><span>クリップボードにコピー</span>
                             </button>
                         </div>
-                        <div class="u-padding-top-12 u-border-top">
+                        <div class="modal__section modal__section--divider">
                             <button class="button button--secondary button--danger" id="resetBtn">
                                 <span class="material-symbols-rounded">delete_forever</span>
                                 <span>すべて初期化</span>
@@ -78,12 +78,12 @@
     <div class="modal__header section__header section__header--modal">
         <span class="material-symbols-rounded">bookmarks</span>
         <span class="modal__title">ユーザー辞書</span>
-        <button class="material-symbols-rounded button u-push-right button--danger modal__close" command="close" commandfor="userMacroModal">
+        <button class="material-symbols-rounded button button--danger modal__close" command="close" commandfor="userMacroModal">
         close
         </button>
     </div>
     <div class="modal__body" style="margin-top: 32px;">
-    <div class="u-margin-8">
+    <div class="modal__section">
         <!-- 登録フォーム -->
             <div class="form__label form__label--large">
                 <span class="material-symbols-rounded">add_box</span>
@@ -106,13 +106,13 @@
             <div class="form__note">オートコンプリート機能では、記号（;:!?'"(){}\[\]&lt;.&gt;.|\\/+*-）は無視して検索されます。</div>
         </div>        
         <div type="button" class="button" id="macroAddBtn">登録</button>
-                <span type="button" class="button button--muted u-flex-1" id="macroCancelBtn" style="display: none;">キャンセル</buttn>                <div id="macroDuplicateWarning" class="u-text-small" style="color: var(--danger-color); display: none;">
+                <span type="button" class="button button--muted button--grow" id="macroCancelBtn" style="display: none;">キャンセル</buttn>                <div id="macroDuplicateWarning" class="form__text" style="color: var(--danger-color); display: none;">
                     この文字列は既に登録されています
                 </div>
             </div>
         <div class="modal__divider"></div>
         <!-- 一覧表示 -->
-        <div class="u-margin-8">
+        <div class="modal__section">
                 <div class="form__label form__label--large">
                     <span class="material-symbols-rounded">list</span>
                     <span>登録済み辞書</span>
@@ -131,27 +131,27 @@
         <div class="modal__divider"></div>
     </div>
         <!-- 出力・読込 -->
-    <div class="u-margin-8">
+    <div class="modal__section">
             <div class="form__label form__label--large">
                 <span class="material-symbols-rounded">save_alt</span>
                 <span>データ管理</span>
             </div>
-            <div class="u-margin-bottom-12 form__group">
+            <div class="form__group form__group--spaced">
                 <label class="form__label form__label--small">ユーザー辞書を貼り付けて読み込み</label>
                 <textarea id="macroImportText" placeholder=".txtまたは.jsonファイルを直接ドロップしても読み込めます" class="form__textarea form__textarea--mono" style="height: 80px; flex: 3;"></textarea>
             </div>
-            <div class="u-margin-bottom-12 form__group" style="display: flex; gap: 12px;">  
-                <button class="button button--secondary u-flex-1" id="macroImportBtn">
+            <div class="form__group form__group--spaced" style="display: flex; gap: 12px;">  
+                <button class="button button--secondary button--grow" id="macroImportBtn">
                     <span class="material-symbols-rounded">download</span>
                     <span>このデータを読み込み</span>
                 </button>
-                <button class="button button--secondary button--info u-flex-1" id="macroExportBtn">
+                <button class="button button--secondary button--info button--grow" id="macroExportBtn">
                     <span class="material-symbols-rounded">upload</span>
                     <span>ユーザー辞書を</span><span>クリップボードにコピー</span>
                 </button>  
             </div>
             <div class="modal__divider"></div>
-                <button class="u-margin-8 button button--secondary button--danger" id="resetDictionaryBtn">
+                <button class="button button--secondary button--danger button--spaced" id="resetDictionaryBtn">
                     <span class="material-symbols-rounded">delete_forever</span>
                     <span>辞書データを初期化</span>
                 </button>
@@ -165,14 +165,14 @@
                     <span class="section__title">バフ/デバフ</span>
                 </div>
                 <div class="section__body">
-                    <div class="control-bar u-full-width">
+                    <div class="control-bar control-bar--full">
                             <button class="button button--turn" style="anchor-name: --getTurn;" id="turnProgressBtn">
                                 <div class="tooltip" style="--target: --getTurn">すべてのアクティブなターンを１減らす</div>
                                 <span class="material-symbols-rounded">skip_next</span></button>
                             <button class="button button--turn" style="anchor-name: --reset;" id="turnResetBtn">
                                 <div class="tooltip" style="--target: --reset">すべてのターンをリセット</div>
                                 <span class="material-symbols-rounded">replay</span></button>
-                            <button class="material-symbols-rounded button u-push-right" style="anchor-name: --addbuffbtn;" onclick="openBuffModal()">
+                            <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openBuffModal()">
                             add_2<div class="tooltip" style="--target: --addbuffbtn;">バフ/デバフを追加</div>
                             </button>
                             <label class="list__index" style="anchor-name: --bookmark;">
@@ -191,12 +191,12 @@
         <dialog class="modal" id="buffaddmodal" closedby="any">
             <div class="modal__header section__header section__header--modal">
                 <span class="modal__title">バフ追加</span>
-                        <button class="material-symbols-rounded button u-push-right button--danger modal__close" command="close" commandfor="buffaddmodal">
+                        <button class="material-symbols-rounded button button--danger modal__close" command="close" commandfor="buffaddmodal">
                         close
                         </button>
             </div>
             <div class="modal__body">
-                <div class="u-margin-8">
+                <div class="modal__section">
                             <div class="form__label form__label--large">
                                     <span class="material-symbols-rounded">add_box</span>
                                     <span>個別追加</span>
@@ -230,7 +230,7 @@
                                 </div>
                                 <div class="form__note">代入記法は「,」で区切ることで、一つのバフから複数の場所へ代入を指示することができます。<br>通常の記法とも併用できます。<br>例：//ダイスボーナス=+1,//ダイスの種類=20,-2
                                 </div>
-                                <div class="u-flex-row">
+                                <div class="form__row form__row--split">
                                     <div style="width: 50%;">
                                         <label for="buffTurn" class="form__label form__label--small">ターン</label>
                                         <input type="number" id="buffTurn" placeholder="数値" class="form__input">
@@ -266,7 +266,7 @@
                                 <div>
                                     <div class="memo__header">
                                         <label class="form__label form__label--small" for="buffMemo">メモ欄</label>
-                                        <label class="form__label form__label--small u-flex-row" style="display: flex;">
+                                        <label class="form__label form__label--small form__label--row">
                                             <input type="checkbox" id="buffSimpleMemoToggle" style="vertical-align: middle; width: 12px; height: 12px;">
                                             <p>簡易メモを表示</p>
                                         </label>
@@ -278,27 +278,27 @@
                         </div>
                     </div>
                 <div class="modal__divider"></div>
-                <div class="u-margin-8">
+                <div class="modal__section">
                     <label for="buffCategoryInput" class="form__label form__label--small">新規カテゴリ追加</label>
                     <div style="display: flex; gap: 8px; flex-direction: column;">
                         <input type="text" id="buffCategoryInput" placeholder="例：魔法、装備" aria-label="バフカテゴリの新規追加" class="form__input">
                         <div class="form__note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
-                        <span type="button" class="button u-half-width" id="addBuffCategoryBtn" title="カテゴリを追加">追加</span>
+                        <span type="button" class="button button--half" id="addBuffCategoryBtn" title="カテゴリを追加">追加</span>
                     </div>
 
                 </div>
                 <div class="modal__divider"></div>
-                <div class="u-margin-8">
+                <div class="modal__section">
                     <div class="form__label form__label--large">
                         <span class="material-symbols-rounded">clear_all</span>
                         <span>一括追加</span>
                     </div>
-                        <p class="u-text-small" style="margin-left: 3em; text-indent: -3em;">形式：バフ名|効果先1,効果先2|簡易メモ|コマンド|ターン|カラーコード|メモ</p>
-                        <p class="u-text-small" style="margin-left: 5em; text-indent: -5em;">カテゴリ：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
-                    <div class="form__grid u-flex-column u-margin-8" id="bulkAddArea">
+                        <p class="form__text" style="margin-left: 3em; text-indent: -3em;">形式：バフ名|効果先1,効果先2|簡易メモ|コマンド|ターン|カラーコード|メモ</p>
+                        <p class="form__text" style="margin-left: 5em; text-indent: -5em;">カテゴリ：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
+                    <div class="form__grid form__grid--stacked modal__section" id="bulkAddArea">
                         <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="form__textarea form__textarea--mono" style="height:100px;"></textarea>
                         <div class="form__row">
-                            <span type="button" class="button u-flex-1" id="bulkAddConfirm">追加を実行</span>
+                            <span type="button" class="button button--grow" id="bulkAddConfirm">追加を実行</span>
                         </div>
                     </div>
                 </div>
@@ -313,7 +313,7 @@
                 </label>
 <!--判定-->
                 <div class="tabs__panel section__body" id="judgeSection">
-                    <div class="control-bar u-full-width">
+                    <div class="control-bar control-bar--full">
                         <div class="target-selector">
                             <span class="form__label form__label--small">目標値：</span>
                             <label class="target-selector__option button">
@@ -330,7 +330,7 @@
                             </label>
                             <input type="number" id="targetValue" placeholder="値" class="form__input form__input--compact">
                         </div>
-                        <button class="material-symbols-rounded button u-push-right" style="anchor-name: --addbuffbtn;" onclick="openJudgeModal()">
+                        <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openJudgeModal()">
                             add_2<div class="tooltip" style="--target: --addbuffbtn;">判定を追加</div>
                             </button>
                         <label class="list__index" style="anchor-name: --bookmark;">
@@ -354,12 +354,12 @@
             <dialog class="modal" id="judgeaddmodal" closedby="any">
                     <div class="modal__header section__header section__header--modal">
                         <span class="modal__title">判定パッケージ追加</span>
-                        <button class="material-symbols-rounded button u-push-right button--danger modal__close" command="close" commandfor="judgeaddmodal">
+                        <button class="material-symbols-rounded button button--danger modal__close" command="close" commandfor="judgeaddmodal">
                         close
                         </button>
                     </div>
                     <div class="modal__body">
-                        <div class="u-margin-8">
+                        <div class="modal__section">
                             <div class="form__label form__label--large">
                                 <span class="material-symbols-rounded">add_box</span>
                                 <span>個別追加</span>
@@ -399,27 +399,27 @@
                         </div>
                         </div>
                         <div class="modal__divider"></div>
-                        <div class="u-margin-8">
+                        <div class="modal__section">
                             <label for="judgeCategoryInput" class="form__label form__label--small">新規カテゴリ追加</label>
                             <div style="display: flex; gap: 8px; flex-direction: column;">
                                 <input type="text" id="judgeCategoryInput" placeholder="例：戦闘、探索" aria-label="判定カテゴリの新規追加" class="form__input">
                                 <div class="form__note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
-                                <span type="button" class="button u-half-width" id="addJudgeCategoryBtn" title="カテゴリを追加">追加</span>
+                                <span type="button" class="button button--half" id="addJudgeCategoryBtn" title="カテゴリを追加">追加</span>
                             </div>
                         </div>
                         <div class="modal__divider"></div>
-                        <div class="u-margin-8">
+                        <div class="modal__section">
                             <div class="form__label form__label--large">
                                 <span class="material-symbols-rounded">clear_all</span>
                                 <span>一括追加</span>
                             </div>
-                                <p class="u-text-small">形式：判定名|判定ロール</p>
-                                <p class="u-text-small" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
-                            <div class="form__grid u-flex-column u-margin-8" id="bulkAddJudgeArea">
+                                <p class="form__text">形式：判定名|判定ロール</p>
+                                <p class="form__text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
+                            <div class="form__grid form__grid--stacked modal__section" id="bulkAddJudgeArea">
                                 <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1&#10;回避判定|1d20" class="form__textarea form__textarea--mono" style="height:80px;"></textarea>
                                 <div>
                                     <div class="form__row">
-                                        <span type="button" class="button u-flex-1" id="bulkAddJudgeConfirm">追加を実行</span>
+                                        <span type="button" class="button button--grow" id="bulkAddJudgeConfirm">追加を実行</span>
                                     </div>
                                 </div>
                             </div>
@@ -434,8 +434,8 @@
                 </label>
 <!--攻撃-->
                 <div class="tabs__panel section__body">
-                    <div class="control-bar u-full-width">
-                        <button class="material-symbols-rounded button u-push-right" style="anchor-name: --addbuffbtn;" onclick="openAttackModal()">
+                    <div class="control-bar control-bar--full">
+                        <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openAttackModal()">
                             add_2<div class="tooltip" style="--target: --addbuffbtn;">攻撃を追加</div>
                             </button>
                         <label class="list__index" style="anchor-name: --bookmark;">
@@ -459,12 +459,12 @@
             <dialog class="modal" id="attackaddmodal" closedby="any">
                     <div class="modal__header section__header section__header--modal">
                         <span class="modal__title">攻撃パッケージ追加</span>
-                        <button class="material-symbols-rounded button u-push-right button--danger modal__close" command="close" commandfor="attackaddmodal">
+                        <button class="material-symbols-rounded button button--danger modal__close" command="close" commandfor="attackaddmodal">
                         close
                         </button>
                     </div>
                     <div class="modal__body">
-                        <div class="u-margin-8">
+                        <div class="modal__section">
                             <div class="form__label form__label--large">
                                     <span class="material-symbols-rounded">add_box</span>
                                     <span>個別追加</span>
@@ -506,27 +506,27 @@
                         </div>
                         </div>
                         <div class="modal__divider"></div>
-                        <div class="u-margin-8">
+                        <div class="modal__section">
                             <label for="attackCategoryInput" class="form__label form__label--small">新規カテゴリ追加</label>
                             <div style="display: flex; gap: 8px; flex-direction: column;">
                                 <input type="text" id="attackCategoryInput" placeholder="例：近接、魔法" aria-label="攻撃カテゴリの新規追加" class="form__input">
                                 <div class="form__note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
-                                <span type="button"n class="button u-half-width" id="addAttackCategoryBtn" title="カテゴリを追加">追加</span>
+                                <span type="button"n class="button button--half" id="addAttackCategoryBtn" title="カテゴリを追加">追加</span>
                             </div>
                         </div>
                         <div class="modal__divider"></div>
-                        <div class="u-margin-8">
+                        <div class="modal__section">
                             <div class="form__label form__label--large">
                                 <span class="material-symbols-rounded">clear_all</span>
                                 <span>一括追加</span>
                             </div>
-                                <p class="u-text-small">形式：攻撃名|攻撃ロール</p>
-                                <p class="u-text-small" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
-                            <div class="form__grid u-flex-column u-margin-8" id="bulkAddAttackArea">
+                                <p class="form__text">形式：攻撃名|攻撃ロール</p>
+                                <p class="form__text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
+                            <div class="form__grid form__grid--stacked modal__section" id="bulkAddAttackArea">
                                 <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10&#10;ファイアボール|1d6+3" class="form__textarea form__textarea--mono" style="height:80px;"></textarea>
                                 <div>
                                     <div class="form__row">
-                                        <span type="button" class="button u-flex-1" id="bulkAddAttackConfirm">追加を実行</span>
+                                        <span type="button" class="button button--grow" id="bulkAddAttackConfirm">追加を実行</span>
                                     </div>
                                 </div>
                             </div>
