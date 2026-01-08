@@ -61,6 +61,11 @@ function showContextMenu(x, y, actions = []) {
     const menu = getContextMenu();
     menu.innerHTML = '';
 
+    const openDialog = getActiveModal();
+    if (openDialog) {
+        openDialog.appendChild(contextMenuElement);
+    }
+
     actions.forEach((action, index) => {
         if (index > 0) {
             const separator = document.createElement('div');
@@ -468,6 +473,7 @@ function resetAll() {
     try {
         localStorage.removeItem('trpgData');
         localStorage.removeItem('uiState');
+        localStorage.removeItem('userDictionary');
         location.reload();
     } catch (e) {
         showToast('初期化に失敗しました', 'error');
@@ -534,78 +540,78 @@ function importData() {
  * ファイルドロップ機能の初期化
  */
 function initFileDropZone() {
-    const dropZone = document.getElementById('importText');
-    if (!dropZone) return;
+    const dropZones = [
+        { elementId: 'importText', type: 'data' },
+        { elementId: 'macroImportText', type: 'macro' }
+    ];
     
-    // ドラッグオーバー時の処理
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropZone.style.borderColor = '#4769b3';
-        dropZone.style.borderStyle = 'dashed';
-        dropZone.style.borderWidth = '3px';
-        dropZone.style.background = '#e7f3ff';
-    });
-    
-    // ドラッグが離れた時の処理
-    dropZone.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropZone.style.borderColor = '';
-        dropZone.style.borderStyle = '';
-        dropZone.style.borderWidth = '';
-        dropZone.style.background = '';
-    });
-    
-    // ドロップ時の処理
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+    dropZones.forEach(({ elementId, type }) => {
+        const dropZone = document.getElementById(elementId);
+        if (!dropZone) return;
         
-        // スタイルを元に戻す
-        dropZone.style.borderColor = '';
-        dropZone.style.borderStyle = '';
-        dropZone.style.borderWidth = '';
-        dropZone.style.background = '';
+        // ドラッグオーバー時の処理
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = '#4769b3';
+            dropZone.style.borderStyle = 'dashed';
+            dropZone.style.borderWidth = '3px';
+            dropZone.style.background = '#e7f3ff';
+        });
         
-        // ファイルを取得
-        const files = e.dataTransfer.files;
+        // ドラッグが離れた時の処理
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = '';
+            dropZone.style.borderStyle = '';
+            dropZone.style.borderWidth = '';
+            dropZone.style.background = '';
+        });
         
-        if (files.length === 0) {
-            showToast('ファイルが見つかりません', 'error');
-            return;
-        }
-        
-        // 最初のファイルのみ処理
-        const file = files[0];
-        
-        // ファイル拡張子チェック
-        const fileName = file.name.toLowerCase();
-        if (!fileName.endsWith('.txt') && !fileName.endsWith('.json')) {
-            showToast('.txtまたは.jsonファイルのみ対応しています', 'error');
-            return;
-        }
-        
-        // FileReader APIでファイルを読み込む
-        const reader = new FileReader();
-        
-        // 読み込み完了時の処理
-        reader.onload = (event) => {
-            const content = event.target.result;
-            dropZone.value = content;
-            showToast(`${file.name} を読み込みました`, 'success');
-        };
-        
-        // 読み込みエラー時の処理
-        reader.onerror = () => {
-            showToast('ファイルの読み込みに失敗しました', 'error');
-        };
-        
-        // テキストとして読み込み開始
-        reader.readAsText(file);
+        // ドロップ時の処理
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // スタイルを元に戻す
+            dropZone.style.borderColor = '';
+            dropZone.style.borderStyle = '';
+            dropZone.style.borderWidth = '';
+            dropZone.style.background = '';
+            
+            // ファイルを取得
+            const files = e.dataTransfer.files;
+            
+            if (files.length === 0) {
+                showToast('ファイルが見つかりません', 'error');
+                return;
+            }
+            
+            const file = files[0];
+            const fileName = file.name.toLowerCase();
+            
+            if (!fileName.endsWith('.txt') && !fileName.endsWith('.json')) {
+                showToast('.txtまたは.jsonファイルのみ対応しています', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = (event) => {
+                const content = event.target.result;
+                dropZone.value = content;
+                showToast(`${file.name} を読み込みました`, 'success');
+            };
+            
+            reader.onerror = () => {
+                showToast('ファイルの読み込みに失敗しました', 'error');
+            };
+            
+            reader.readAsText(file);
+        });
     });
 }
-
 
 // ========================================
 // カテゴリ管理
@@ -618,18 +624,45 @@ function addCategory(type, inputId) {
     const input = document.getElementById(inputId);
     if (!input) return;
 
-    const name = input.value.trim();
-    if (!name) {
+    const rawInput = input.value.trim();
+    if (!rawInput) {
         showToast('カテゴリ名を入力してください', 'error');
         return;
     }
 
-    if (categories.includes(name)) {
-        showToast('同名のカテゴリが既に存在します', 'error');
+    // 複数の区切り文字で分割
+    const names = rawInput
+        .split(/[、,　\s]+/)
+        .map(n => n.trim())
+        .filter(n => n.length > 0);
+
+    if (names.length === 0) {
+        showToast('カテゴリ名を入力してください', 'error');
         return;
     }
 
-    categories.push(name);
+    // 重複チェック＆登録
+    let addedCount = 0;
+    let skippedCount = 0;
+
+    names.forEach(name => {
+        if (categories.includes(name)) {
+            skippedCount++;
+        } else {
+            categories.push(name);
+            addedCount++;
+        }
+    });
+
+    // トースト表示
+    if (addedCount === 0) {
+        showToast('すでに存在するカテゴリです', 'error');
+    } else if (skippedCount === 0) {
+        showToast(`${addedCount}件のカテゴリを追加しました`, 'success');
+    } else {
+        showToast(`${addedCount}件のカテゴリを追加しました`, 'success');
+    }
+
     input.value = '';
 
     if (type === 'buff') {
@@ -1010,15 +1043,17 @@ function addOrUpdateMacro() {
         return;
     }
 
-    if (macroState.editingId) {
-        // 編集モード：既存アイテムを更新
-        const index = macroState.dictionary.findIndex(item => item.id === macroState.editingId);
-        if (index !== -1) {
-            macroState.dictionary[index].text = text;
-            macroState.dictionary[index].category = category;
-            showToast('辞書項目を更新しました', 'success');
-        }
-        cancelMacroEdit();
+if (macroState.editingId) {
+    // 編集モード：`localStorage`から最新データを読み込み直してから更新
+    loadUserDictionary();
+    const index = macroState.dictionary.findIndex(item => item.id === macroState.editingId);
+    if (index !== -1) {
+        macroState.dictionary[index].text = text;
+        macroState.dictionary[index].category = category;
+        saveUserDictionary();
+        showToast('辞書項目を更新しました', 'success');
+    }
+    cancelMacroEdit();
     } else {
         // 追加モード：新規アイテムを作成
         const newItem = {
@@ -1238,6 +1273,23 @@ function generateUUID() {
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
+}
+
+/**
+ * ユーザー辞書の初期化
+ */
+
+function resetDictionary() {
+    if (!confirm('ユーザー辞書の設定を初期化しますか?この操作は取り消せません。')) {
+        return;
+    }
+    
+    try {
+        localStorage.removeItem('userDictionary');
+        location.reload();
+    } catch (e) {
+        showToast('初期化に失敗しました', 'error');
+    }
 }
 
 /**
@@ -2524,7 +2576,8 @@ const autocompleteState = {
     suggestions: [],
     selectedIndex: -1,
     dropdownElement: null,
-    isOpen: false
+    isOpen: false,
+    tokenRange: null
 };
 
 /**
@@ -2562,6 +2615,31 @@ function getAutocompleteSuggestions(input) {
 
     // 先頭一致を優先し、最大5件まで
     return [...exact, ...partial].slice(0, 5);
+}
+
+/**
+ * キャレット位置の単語断片を取得
+ */
+function getTokenAtCaret(value, caretPos) {
+    const length = value.length;
+    const safeCaret = Math.max(0, Math.min(caretPos ?? 0, length));
+    const isSeparator = (char) => /[\s\u3000,.;:!?'"(){}\[\]<>|\\/+*-]/.test(char);
+
+    let start = safeCaret;
+    while (start > 0 && !isSeparator(value[start - 1])) {
+        start -= 1;
+    }
+
+    let end = safeCaret;
+    while (end < length && !isSeparator(value[end])) {
+        end += 1;
+    }
+
+    return {
+        token: value.slice(start, end),
+        start,
+        end
+    };
 }
 
 /**
@@ -2648,9 +2726,21 @@ function hideAutocompleteDropdown() {
  * オートコンプリート項目を選択
  */
 function selectAutocompleteItem(inputElement, text) {
-    inputElement.value = text;
+    const value = inputElement.value;
+    const caretPos = inputElement.selectionStart ?? value.length;
+    let { start, end } = getTokenAtCaret(value, caretPos);
+
+    if (start === end && autocompleteState.tokenRange) {
+        start = autocompleteState.tokenRange.start;
+        end = autocompleteState.tokenRange.end;
+    }
+
+    inputElement.value = value.slice(0, start) + text + value.slice(end);
     hideAutocompleteDropdown();
     inputElement.focus();
+    const caret = start + text.length;
+    inputElement.selectionStart = caret;
+    inputElement.selectionEnd = caret;
 
     // inputイベントを発火させて他の処理をトリガー
     inputElement.dispatchEvent(new Event('input', { bubbles: true }));
@@ -2699,7 +2789,10 @@ function setupAutocompleteFields() {
             }
 
             const input = e.target.value;
-            const suggestions = getAutocompleteSuggestions(input);
+            const caretPos = e.target.selectionStart ?? input.length;
+            const { token, start, end } = getTokenAtCaret(input, caretPos);
+            autocompleteState.tokenRange = { start, end };
+            const suggestions = getAutocompleteSuggestions(token);
             console.log(`Suggestions found: ${suggestions.length}`);
 
             if (suggestions.length > 0) {
@@ -2953,6 +3046,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('exportToClipboard')?.addEventListener('click', exportData);
     document.getElementById('importConfirm')?.addEventListener('click', importData);
     document.getElementById('resetBtn')?.addEventListener('click', resetAll);
+    document.getElementById('resetDictionaryBtn')?.addEventListener('click', resetDictionary);
     document.getElementById('userMacroClose')?.addEventListener('click', () => {
         document.getElementById('userMacroModal')?.close();
     });

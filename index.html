@@ -376,14 +376,10 @@ header {
     font-variation-settings: 'FILL' 1;
 }
 
-.settings-menu {
-    position: relative;
-}
-
 .settings-dropdown {
     position: absolute;
     top: 100%;
-    right: 0;
+    right: anchor(right);
     background: var(--primary-color-1);
     border: 1px solid var(--primary-color-2);
     border-radius: 8px;
@@ -391,6 +387,7 @@ header {
     min-width: 180px;
     padding: 6px 0;
     z-index: 1100;
+    position-anchor: var(--target);
 }
 
 .settings-dropdown.hidden {
@@ -479,11 +476,11 @@ input[type="radio"] {
     transition:
         max-height 0.2s ease-out,
         padding 0.2s;
-    overflow: visible;
+    overflow-y: visible;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    z-index: 1;
     box-shadow: 0 4px 8px 2px var(--primary-color-3);
+    z-index: 1;
 }
 
 .section-body::-webkit-scrollbar {
@@ -494,6 +491,7 @@ dialog .section-body {
     margin-top: 40px;
     width: 100%;
     padding: 16px;
+    overflow-x: hidden;
 }
 
 /*タブ要素*/
@@ -736,22 +734,6 @@ dialog .section-body {
 .item-list::-webkit-scrollbar {
     display: none;
 }
-
-.item-list.no-resize {
-    resize: none;
-}
-
-.list-header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-}
-
-.list-header-row .label-L {
-    margin-bottom: 0;
-}
-
 
 
 .itemindex {
@@ -1031,11 +1013,13 @@ dialog .section-body {
     padding: 8px;
     display: flex;
     flex-direction: column;
+    justify-self: center;
     gap: 4px;
     font-size: 12px;
     background: rgba(255,255,255,0.8);
     color: var(--primary-color-2);
     cursor: auto;
+    width: calc(100% + 8px);
 }
 
 .buff-detail-body div {
@@ -1050,6 +1034,10 @@ dialog .section-body {
 .buff-detail-body div:first-of-type p{
     word-break: break-all;
     margin-right: 8px;
+}
+
+.buff-detail-body div:last-of-type {
+    border-bottom: none;
 }
 
 .buff-memo {
@@ -1248,12 +1236,11 @@ dialog .section-body {
             <div class="title">JET-PALET</div>
         </div>
         <div class="header-menu">
-            <div class="settings-menu">
-                <button class="header-menu-item" id="settingsToggle" aria-haspopup="true" aria-expanded="false" style="anchor-name: --settings">
+                <a type="button" class="header-menu-item" id="settingsToggle" aria-haspopup="true" aria-expanded="false" style="anchor-name: --settings">
                     <div class="tooltip" style="--target: --settings">設定</div>
                     <span class="material-symbols-rounded">settings</span>
-                </button>
-                <div class="settings-dropdown hidden" id="settingsDropdown">
+                </a>
+                <div class="settings-dropdown hidden" id="settingsDropdown" style="--target: --settings">
                     <button class="settings-dropdown-item" data-target="DataOption">
                         <span class="material-symbols-rounded">checkbook</span>
                         <span>データ管理</span>
@@ -1263,7 +1250,6 @@ dialog .section-body {
                         <span>ユーザー辞書</span>
                     </button>
                 </div>
-            </div>
             <a class="header-menu-item" style="anchor-name: --help" href="https://unexpected-avatar-e3c.notion.site/BUFCON-2d1c2563a7d8804b97f9e64754356198" target="_blank" rel="noopener noreferrer">
                 <div class="tooltip" style="--target: --help">使い方</div>
                 <span class="material-symbols-rounded">help</span>
@@ -1302,7 +1288,7 @@ dialog .section-body {
                         <div class="pt-12 bt-top">
                             <button class="add-btn secondary-btn btn--danger" id="resetBtn">
                                 <span class="material-symbols-rounded">delete_forever</span>
-                                <span>すべて</span><span>初期化</span>
+                                <span>すべて初期化</span>
                             </button>
                         </div>
                     </div>
@@ -1316,13 +1302,16 @@ dialog .section-body {
         close
         </button>
     </div>
-    <div class="section-body" style="margin-top: 32px; display: flex; flex-direction: column; gap: 16px;">
-        
+    <div class="section-body" style="margin-top: 32px;">
+    <div class="m-8">
         <!-- 登録フォーム -->
-        <div class="m-8">
             <div class="label-L">
                 <span class="material-symbols-rounded">add_box</span>
                 <span>新規登録・編集</span>
+                <label class="add-btn btn-help">
+                    <input type="checkbox"/>
+                    <span class="material-symbols-rounded">help</span>
+                </label>
             </div>
             <div class="add-area">
                 <div>
@@ -1333,56 +1322,59 @@ dialog .section-body {
                     <label for="macroCategory" class="label-s">カテゴリー</label>
                     <input type="text" id="macroCategory" placeholder="例：代入記法" autocomplete="off">
                 </div>
-                <div class="row-controls" style="margin-top: 8px;">
-                    <button class="add-btn flex-1" id="macroAddBtn">登録</button>
-                    <button class="add-btn btn--muted flex-1" id="macroCancelBtn" style="display: none;">キャンセル</button>
-                </div>
-                <div id="macroDuplicateWarning" class="small-text" style="color: var(--danger-color); display: none;">
+            </div>
+            <div class="note">オートコンプリート機能では、記号（;:!?'"(){}\[\]&lt;.&gt;.|\\/+*-）は無視して検索されます。</div>
+        </div>        
+        <div type="button" class="add-btn" id="macroAddBtn">登録</button>
+                <span type="button" class="add-btn btn--muted flex-1" id="macroCancelBtn" style="display: none;">キャンセル</buttn>                <div id="macroDuplicateWarning" class="small-text" style="color: var(--danger-color); display: none;">
                     この文字列は既に登録されています
                 </div>
             </div>
-        </div>
-
         <div class="section-line"></div>
-
         <!-- 一覧表示 -->
         <div class="m-8">
-            <div class="list-header-row">
                 <div class="label-L">
                     <span class="material-symbols-rounded">list</span>
                     <span>登録済み辞書</span>
                 </div>
-                <label class="itemindex" style="anchor-name: --macro-bookmark;">
+            <div class="buff-control" style="margin-bottom: 8px;">
+                <label class="itemindex" style="anchor-name: --macro-bookmark; margin-left: auto">
                     <div class="tooltip" style="--target: --macro-bookmark">カテゴリへ移動</div>
                     <span class="material-symbols-rounded">bookmark</span>
                     <select class="add-btn" id="macroItemIndex"></select>
                 </label>
             </div>
-            <div id="macroDictionaryList" class="item-list no-resize">
+            <div id="macroDictionaryList" class="item-list">
                 <div class="empty-message">辞書が登録されていません</div>
             </div>
-        </div>
 
         <div class="section-line"></div>
-
+    </div>
         <!-- 出力・読込 -->
-        <div class="m-8">
+    <div class="m-8">
             <div class="label-L">
                 <span class="material-symbols-rounded">save_alt</span>
                 <span>データ管理</span>
             </div>
-            <div style="display: flex; gap: 8px; flex-direction: column;">
-                <button class="add-btn secondary-btn" id="macroExportBtn">
-                    <span class="material-symbols-rounded">download</span>
-                    <span>ユーザー辞書をエクスポート</span>
-                </button>
-                <label class="label-s">ユーザー辞書をインポート</label>
-                <textarea id="macroImportText" placeholder="JSONを貼り付けてください" class="textarea-mono" style="height: 80px;"></textarea>
-                <button class="add-btn secondary-btn btn--info" id="macroImportBtn">
-                    <span class="material-symbols-rounded">upload</span>
-                    <span>読み込む</span>
-                </button>
+            <div class="mb-12">
+                <label class="label-s">ユーザー辞書を貼り付けて読み込み</label>
+                <textarea id="macroImportText" placeholder=".txtまたは.jsonファイルを直接ドロップしても読み込めます" class="textarea-mono" style="height: 80px; flex: 3;"></textarea>
             </div>
+            <div class="mb-12" style="display: flex; gap: 12px;">  
+                <button class="add-btn secondary-btn flex-1" id="macroImportBtn">
+                    <span class="material-symbols-rounded">download</span>
+                    <span>このデータを読み込み</span>
+                </button>
+                <button class="add-btn secondary-btn btn--info flex-1" id="macroExportBtn">
+                    <span class="material-symbols-rounded">upload</span>
+                    <span>ユーザー辞書を</span><span>クリップボードにコピー</span>
+                </button>  
+            </div>
+            <div class="section-line"></div>
+                <button class="m-8 add-btn secondary-btn btn--danger" id="resetDictionaryBtn">
+                    <span class="material-symbols-rounded">delete_forever</span>
+                    <span>辞書データを初期化</span>
+                </button>
         </div>
     </div>
 </dialog>
@@ -1448,7 +1440,7 @@ dialog .section-body {
                                 <div>
                                     <label for="buffEffect" class="label-s">コマンド</label>
                                     <div style="display: flex;">
-                                        <input type="text" id="buffEffect" placeholder="例：+2,-1d6,//ダイスボーナス}=+1">
+                                        <input type="text" id="buffEffect" placeholder="例：+2,-1d6,//ダイスボーナス=+1">
                                         <button class="add-btn btn--muted" onclick="insertText('//NAME=')">//=</button>
                                     </div>
                                     </div>
@@ -1494,12 +1486,12 @@ dialog .section-body {
                                 <div>
                                     <div class="memo-header">
                                         <label class="label-s" for="buffMemo">メモ欄</label>
-                                        <label class="label-s">
-                                            <input type="checkbox" id="buffSimpleMemoToggle" style="min-width: 0px;">
-                                            簡易メモを表示
+                                        <label class="label-s fd-rw" style="display: flex;">
+                                            <input type="checkbox" id="buffSimpleMemoToggle" style="vertical-align: middle; width: 12px; height: 12px;">
+                                            <p>簡易メモを表示</p>
                                         </label>
                                     </div>
-                                    <textarea id="buffMemo" class="textarea-mono" style="height: calc(100% - 22px);"></textarea>
+                                    <textarea id="buffMemo" class="textarea-mono" style="height: calc(100% - 1rem - 8px);" placeholder="簡易メモにはメモの1行目を使用します。"></textarea>
                                     <div class="note">簡易メモにはメモの1行目を使用します。</div>
                                 </div>
                             <div type="button" class="add-btn" id="addBuffBtn">追加</div>
@@ -1510,8 +1502,10 @@ dialog .section-body {
                     <label for="buffCategoryInput" class="label-s">新規カテゴリ追加</label>
                     <div style="display: flex; gap: 8px; flex-direction: column;">
                         <input type="text" id="buffCategoryInput" placeholder="例：魔法、装備" aria-label="バフカテゴリの新規追加">
+                        <div class="note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
                         <span type="button" class="add-btn harf-width" id="addBuffCategoryBtn" title="カテゴリを追加">追加</span>
                     </div>
+
                 </div>
                 <div class="section-line"></div>
                 <div class="m-8">
@@ -1600,7 +1594,10 @@ dialog .section-body {
                                 </div>
                                 <div>
                                     <label for="judgeRoll" class="label-s">判定ロール</label>
+                                <div style="display: flex;">    
                                     <input type="text" id="judgeRoll" placeholder="例：1d20,2d6">
+                                    <button class="add-btn btn--muted" onclick="insertText('//NAME//')">//</button>
+                                </div>
                                 </div>
                                 <div class="note">判定の基本となるダイスロールを記入します。システムごとの独自のコマンドも入力できます。</div>
                                 <div class="note">代入記法：<br>//NAME//　*NAMEは任意の文字列<br>という記述で、//NAME//を指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。</div>
@@ -1624,6 +1621,7 @@ dialog .section-body {
                             <label for="judgeCategoryInput" class="label-s">新規カテゴリ追加</label>
                             <div style="display: flex; gap: 8px; flex-direction: column;">
                                 <input type="text" id="judgeCategoryInput" placeholder="例：戦闘、探索" aria-label="判定カテゴリの新規追加">
+                                <div class="note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
                                 <span type="button" class="add-btn harf-width" id="addJudgeCategoryBtn" title="カテゴリを追加">追加</span>
                             </div>
                         </div>
@@ -1698,8 +1696,11 @@ dialog .section-body {
                                     <input type="text" id="attackName" placeholder="例：ソード(1H)">
                                 </div>
                                 <div>
-                                    <label for="attackRoll" class="label-s">攻撃ロール</label>
+                                <label for="attackRoll" class="label-s">攻撃ロール</label>
+                                <div style="display: flex;">
                                     <input type="text" id="attackRoll" placeholder="例: 2d6,K20@10">
+                                    <button class="add-btn btn--muted" onclick="insertText('//NAME//')">//</button>
+                                </div>
                                 </div>
                                 <div class="note">攻撃の基本となるダイスロールや固定値を記入できます。
                                 </div>
@@ -1725,6 +1726,7 @@ dialog .section-body {
                             <label for="attackCategoryInput" class="label-s">新規カテゴリ追加</label>
                             <div style="display: flex; gap: 8px; flex-direction: column;">
                                 <input type="text" id="attackCategoryInput" placeholder="例：近接、魔法" aria-label="攻撃カテゴリの新規追加">
+                                <div class="note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
                                 <span type="button"n class="add-btn harf-width" id="addAttackCategoryBtn" title="カテゴリを追加">追加</span>
                             </div>
                         </div>
