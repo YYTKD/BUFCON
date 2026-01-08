@@ -118,7 +118,7 @@
                     <span>登録済み辞書</span>
                 </div>
             <div class="control-bar control-bar--spaced">
-                <label class="list__index list__index--macro-bookmark list__index--aligned-end">
+                <label class="control-bar__item list__index list__index--macro-bookmark list__index--aligned-end">
                     <div class="tooltip tooltip--macro-bookmark">カテゴリへ移動</div>
                     <span class="material-symbols-rounded">bookmark</span>
                     <select class="button" id="macroItemIndex"></select>
@@ -166,16 +166,16 @@
                 </div>
                 <div class="section__body">
                     <div class="control-bar control-bar--full">
-                            <button class="button button--turn" style="anchor-name: --getTurn;" id="turnProgressBtn">
+                            <button class="control-bar__item button button--turn" style="anchor-name: --getTurn;" id="turnProgressBtn">
                                 <div class="tooltip" style="--target: --getTurn">すべてのアクティブなターンを１減らす</div>
                                 <span class="material-symbols-rounded">skip_next</span></button>
-                            <button class="button button--turn button--anchor-turn-reset" id="turnResetBtn">
+                            <button class="control-bar__item button button--turn button--anchor-turn-reset" id="turnResetBtn">
                                 <div class="tooltip tooltip--turn-reset">すべてのターンをリセット</div>
                                 <span class="material-symbols-rounded">replay</span></button>
-                            <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openBuffModal()">
+                            <button class="control-bar__item control-bar__item--end material-symbols-rounded button" style="anchor-name: --addbuffbtn;" onclick="openBuffModal()">
                             add_2<div class="tooltip" style="--target: --addbuffbtn;">バフ/デバフを追加</div>
                             </button>
-                            <label class="list__index list__index--bookmark">
+                            <label class="control-bar__item list__index list__index--bookmark">
                                 <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
                                 <span class="material-symbols-rounded">bookmark</span>
                                 <select class="button" id="buffItemIndex">
@@ -330,10 +330,10 @@
                             </label>
                             <input type="number" id="targetValue" placeholder="値" class="form__input form__input--compact">
                         </div>
-                        <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openJudgeModal()">
+                        <button class="control-bar__item control-bar__item--end material-symbols-rounded button" style="anchor-name: --addbuffbtn;" onclick="openJudgeModal()">
                             add_2<div class="tooltip" style="--target: --addbuffbtn;">判定を追加</div>
                             </button>
-                        <label class="list__index list__index--bookmark">
+                        <label class="control-bar__item list__index list__index--bookmark">
                             <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
                             <span class="material-symbols-rounded">bookmark</span>
                             <select class="button" id="judgeItemIndex"></select>
@@ -435,10 +435,10 @@
 <!--攻撃-->
                 <div class="tabs__panel section__body">
                     <div class="control-bar control-bar--full">
-                        <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openAttackModal()">
+                        <button class="control-bar__item control-bar__item--end material-symbols-rounded button" style="anchor-name: --addbuffbtn;" onclick="openAttackModal()">
                             add_2<div class="tooltip" style="--target: --addbuffbtn;">攻撃を追加</div>
                             </button>
-                        <label class="list__index list__index--bookmark">
+                        <label class="control-bar__item list__index list__index--bookmark">
                             <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
                             <span class="material-symbols-rounded">bookmark</span>
                             <select class="button" id="attackItemIndex"></select>

@@ -726,14 +726,14 @@ dialog .modal__body {
     width: 100%;
 }
 
-.control-bar__item--end {
-    margin-left: auto;
-}
-
-.control-bar > *:not(div) {
+.control-bar__item {
     height: 32px;
     width: 32px;
     aspect-ratio: 1 / 1;
+}
+
+.control-bar__item--end {
+    margin-left: auto;
 }
 
 .button--turn {
@@ -1050,7 +1050,7 @@ dialog .modal__body {
     font-family: Noto Sans JP;;
 }
 
-.item__meta {
+.list__item-meta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -1058,7 +1058,7 @@ dialog .modal__body {
 }
 
 /* アイテムインタラクション */
-.item--clickable {
+.list__item--clickable {
     cursor: pointer;
 }
 
@@ -1072,7 +1072,7 @@ dialog .modal__body {
     overflow: hidden;
 }
 
-.item--clickable:hover {
+.list__item--clickable:hover {
     outline: 2px solid var(--btn-color);
 }
 
@@ -1084,14 +1084,14 @@ dialog .modal__body {
     transform: translateX(-10px);
 }
 
-.item--selected {
+.list__item--selected {
     background: var(--bg-color);
     outline: 1px solid var(--btn-color);
     box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
 }
 
 /* ドラッグ機能 */
-.item--dragging {
+.list__item--dragging {
     opacity: 30% !important;
     background: none !important;
     outline: 1px solid var(--add-color) !important;
@@ -1099,7 +1099,7 @@ dialog .modal__body {
     cursor: grabbing;
 }
 
-.item--drag-over-top::before {
+.list__item--drag-over-top::before {
     content: '';
     position: absolute;
     top: -3px;
@@ -1109,7 +1109,7 @@ dialog .modal__body {
     background: var(--danger-color);
 }
 
-.item--drag-over-bottom::after {
+.list__item--drag-over-bottom::after {
     content: '';
     position: absolute;
     bottom: -3px;
@@ -1196,13 +1196,13 @@ dialog .modal__body {
     align-items: flex-start;
 }
 
-.item__memo-text {
+.list__item-memo-text {
     white-space: pre-wrap;
     word-break: break-word;
     font-weight: 400;
 }
 
-.item__memo-empty {
+.list__item-memo-empty {
     opacity: 0.7;
 }
 
@@ -1214,34 +1214,34 @@ dialog .modal__body {
 }
 
 /* アイテム内要素 */
-.item__title {
+.list__item-title {
     font-size: 17px;
     font-weight: 600;
     margin-left: 16px;
     margin-top: -3px;
 }
 
-.item__meta-text {
+.list__item-meta-text {
     font-size: 12px;
     opacity: 0.9;
     margin-right: 8px;
     font-weight: 600;
 }
 
-.item__effect {
+.list__item-effect {
     color: inherit;
     font-size: 12px;
     font-weight: 400;
     margin-right: auto;
 }
 
-.item__detail {
+.list__item-detail {
     color: var(--primary-color-2);
     font-size: 12px;
     font-weight: 600;
 }
 
-.item__detail-label {
+.list__item-detail-label {
     font-size: 12px;
     font-weight: 600;
     color: var(--primary-color-2);
