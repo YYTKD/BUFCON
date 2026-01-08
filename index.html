@@ -50,12 +50,12 @@
                         <span class="material-symbols-rounded">checkbook</span>
                         <span class="modal__title">データ管理</span>
                     </div>
-                    <div class="modal__body modal__body--offset-md">
+                    <div class="modal__body" style="margin-top: 32px;">
                         <div class="form__group form__group--spaced">
                             <label class="form__label form__label--small">クリップボードから貼り付けて読み込み:</label>
                                 <textarea id="importText" placeholder='.txtまたは.jsonファイルを直接ドロップしても読み込めます' class="form__textarea form__textarea--mono form__textarea--import-lg"></textarea>
                         </div>
-                        <div class="form__group form__group--spaced form__group--row">
+                        <div class="form__group form__group--spaced" style="display: flex; gap: 12px;">
                             <button class="button button--secondary button--grow" id="importConfirm">
                                 <span class="material-symbols-rounded">download</span>
                                 <span>このデータを読み込み</span>
@@ -82,7 +82,7 @@
         close
         </button>
     </div>
-    <div class="modal__body modal__body--offset-md">
+    <div class="modal__body" style="margin-top: 32px;">
     <div class="modal__section">
         <!-- 登録フォーム -->
             <div class="form__label form__label--large">
@@ -106,7 +106,7 @@
             <div class="form__note">オートコンプリート機能では、記号（;:!?'"(){}\[\]&lt;.&gt;.|\\/+*-）は無視して検索されます。</div>
         </div>        
         <div type="button" class="button" id="macroAddBtn">登録</button>
-                <span type="button" class="button button--muted button--grow button--hidden" id="macroCancelBtn">キャンセル</buttn>                <div id="macroDuplicateWarning" class="form__text form__text--danger form__text--hidden">
+                <span type="button" class="button button--muted button--grow" id="macroCancelBtn" style="display: none;">キャンセル</buttn>                <div id="macroDuplicateWarning" class="form__text" style="color: var(--danger-color); display: none;">
                     この文字列は既に登録されています
                 </div>
             </div>
@@ -140,7 +140,7 @@
                 <label class="form__label form__label--small">ユーザー辞書を貼り付けて読み込み</label>
                 <textarea id="macroImportText" placeholder=".txtまたは.jsonファイルを直接ドロップしても読み込めます" class="form__textarea form__textarea--mono form__textarea--import-md"></textarea>
             </div>
-            <div class="form__group form__group--spaced form__group--row">  
+            <div class="form__group form__group--spaced" style="display: flex; gap: 12px;">  
                 <button class="button button--secondary button--grow" id="macroImportBtn">
                     <span class="material-symbols-rounded">download</span>
                     <span>このデータを読み込み</span>
@@ -166,14 +166,14 @@
                 </div>
                 <div class="section__body">
                     <div class="control-bar control-bar--full">
-                            <button class="button button--turn button--anchor-turn-progress" id="turnProgressBtn">
-                                <div class="tooltip tooltip--turn-progress">すべてのアクティブなターンを１減らす</div>
+                            <button class="button button--turn" style="anchor-name: --getTurn;" id="turnProgressBtn">
+                                <div class="tooltip" style="--target: --getTurn">すべてのアクティブなターンを１減らす</div>
                                 <span class="material-symbols-rounded">skip_next</span></button>
                             <button class="button button--turn button--anchor-turn-reset" id="turnResetBtn">
                                 <div class="tooltip tooltip--turn-reset">すべてのターンをリセット</div>
                                 <span class="material-symbols-rounded">replay</span></button>
-                            <button class="material-symbols-rounded button control-bar__item--end button--anchor-add" onclick="openBuffModal()">
-                            add_2<div class="tooltip tooltip--add">バフ/デバフを追加</div>
+                            <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openBuffModal()">
+                            add_2<div class="tooltip" style="--target: --addbuffbtn;">バフ/デバフを追加</div>
                             </button>
                             <label class="list__index list__index--bookmark">
                                 <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
@@ -231,7 +231,7 @@
                                 <div class="form__note">代入記法は「,」で区切ることで、一つのバフから複数の場所へ代入を指示することができます。<br>通常の記法とも併用できます。<br>例：//ダイスボーナス=+1,//ダイスの種類=20,-2
                                 </div>
                                 <div class="form__row form__row--split">
-                                    <div class="form__column form__column--half">
+                                    <div style="width: 50%;">
                                         <label for="buffTurn" class="form__label form__label--small">ターン</label>
                                         <input type="number" id="buffTurn" placeholder="数値" class="form__input">
                                     </div>
@@ -267,7 +267,7 @@
                                     <div class="memo__header">
                                         <label class="form__label form__label--small" for="buffMemo">メモ欄</label>
                                         <label class="form__label form__label--small form__label--row">
-                                            <input type="checkbox" id="buffSimpleMemoToggle" class="form__checkbox form__checkbox--compact">
+                                            <input type="checkbox" id="buffSimpleMemoToggle" style="vertical-align: middle; width: 12px; height: 12px;">
                                             <p>簡易メモを表示</p>
                                         </label>
                                     </div>
@@ -293,10 +293,10 @@
                         <span class="material-symbols-rounded">clear_all</span>
                         <span>一括追加</span>
                     </div>
-                        <p class="form__text form__text--indent-3em">形式：バフ名|効果先1,効果先2|簡易メモ|コマンド|ターン|カラーコード|メモ</p>
-                        <p class="form__text form__text--indent-5em">カテゴリ：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
+                        <p class="form__text" style="margin-left: 3em; text-indent: -3em;">形式：バフ名|効果先1,効果先2|簡易メモ|コマンド|ターン|カラーコード|メモ</p>
+                        <p class="form__text" style="margin-left: 5em; text-indent: -5em;">カテゴリ：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                     <div class="form__grid form__grid--stacked modal__section" id="bulkAddArea">
-                        <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="form__textarea form__textarea--mono form__textarea--bulk-lg"></textarea>
+                        <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="form__textarea form__textarea--mono" style="height:100px;"></textarea>
                         <div class="form__row">
                             <span type="button" class="button button--grow" id="bulkAddConfirm">追加を実行</span>
                         </div>
@@ -330,8 +330,8 @@
                             </label>
                             <input type="number" id="targetValue" placeholder="値" class="form__input form__input--compact">
                         </div>
-                        <button class="material-symbols-rounded button control-bar__item--end button--anchor-add" onclick="openJudgeModal()">
-                            add_2<div class="tooltip tooltip--add">判定を追加</div>
+                        <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openJudgeModal()">
+                            add_2<div class="tooltip" style="--target: --addbuffbtn;">判定を追加</div>
                             </button>
                         <label class="list__index list__index--bookmark">
                             <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
@@ -414,9 +414,9 @@
                                 <span>一括追加</span>
                             </div>
                                 <p class="form__text">形式：判定名|判定ロール</p>
-                                <p class="form__text form__text--indent-7em">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
+                                <p class="form__text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="form__grid form__grid--stacked modal__section" id="bulkAddJudgeArea">
-                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1&#10;回避判定|1d20" class="form__textarea form__textarea--mono form__textarea--bulk-md"></textarea>
+                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1&#10;回避判定|1d20" class="form__textarea form__textarea--mono" style="height:80px;"></textarea>
                                 <div>
                                     <div class="form__row">
                                         <span type="button" class="button button--grow" id="bulkAddJudgeConfirm">追加を実行</span>
@@ -435,8 +435,8 @@
 <!--攻撃-->
                 <div class="tabs__panel section__body">
                     <div class="control-bar control-bar--full">
-                        <button class="material-symbols-rounded button control-bar__item--end button--anchor-add" onclick="openAttackModal()">
-                            add_2<div class="tooltip tooltip--add">攻撃を追加</div>
+                        <button class="material-symbols-rounded button control-bar__item--end" style="anchor-name: --addbuffbtn;" onclick="openAttackModal()">
+                            add_2<div class="tooltip" style="--target: --addbuffbtn;">攻撃を追加</div>
                             </button>
                         <label class="list__index list__index--bookmark">
                             <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
@@ -521,9 +521,9 @@
                                 <span>一括追加</span>
                             </div>
                                 <p class="form__text">形式：攻撃名|攻撃ロール</p>
-                                <p class="form__text form__text--indent-7em">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
+                                <p class="form__text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="form__grid form__grid--stacked modal__section" id="bulkAddAttackArea">
-                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10&#10;ファイアボール|1d6+3" class="form__textarea form__textarea--mono form__textarea--bulk-md"></textarea>
+                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10&#10;ファイアボール|1d6+3" class="form__textarea form__textarea--mono" style="height:80px;"></textarea>
                                 <div>
                                     <div class="form__row">
                                         <span type="button" class="button button--grow" id="bulkAddAttackConfirm">追加を実行</span>
