@@ -45,12 +45,12 @@
 
 <div class="app__content">
 <!--データ管理　モーダル-->
-            <dialog class="panel modal" id="DataOption" closedby="any">
-                    <div class="panel__header panel__header--modal">
+            <dialog class="modal" id="DataOption" closedby="any">
+                    <div class="modal__header section__header section__header--modal">
                         <span class="material-symbols-rounded">checkbook</span>
-                        <span class="panel__title">データ管理</span>
+                        <span class="modal__title">データ管理</span>
                     </div>
-                    <div class="panel__body" style="margin-top: 32px;">
+                    <div class="modal__body" style="margin-top: 32px;">
                         <div class="u-margin-bottom-12">
                             <label class="form-label form-label--small">クリップボードから貼り付けて読み込み:</label>
                                 <textarea id="importText" placeholder='.txtまたは.jsonファイルを直接ドロップしても読み込めます' class="form-textarea form-textarea--mono" style="height:120px; flex: 3;"></textarea>
@@ -74,15 +74,15 @@
                     </div>
             </dialog>
 <!-- ユーザー辞書 モーダル -->
-<dialog class="panel modal" id="userMacroModal" closedby="any">
-    <div class="panel__header panel__header--modal">
+<dialog class="modal" id="userMacroModal" closedby="any">
+    <div class="modal__header section__header section__header--modal">
         <span class="material-symbols-rounded">bookmarks</span>
-        <span class="panel__title">ユーザー辞書</span>
-        <button class="material-symbols-rounded button u-push-right button--danger" command="close" commandfor="userMacroModal">
+        <span class="modal__title">ユーザー辞書</span>
+        <button class="material-symbols-rounded button u-push-right button--danger modal__close" command="close" commandfor="userMacroModal">
         close
         </button>
     </div>
-    <div class="panel__body" style="margin-top: 32px;">
+    <div class="modal__body" style="margin-top: 32px;">
     <div class="u-margin-8">
         <!-- 登録フォーム -->
             <div class="form-label form-label--large">
@@ -110,7 +110,7 @@
                     この文字列は既に登録されています
                 </div>
             </div>
-        <div class="panel__divider"></div>
+        <div class="modal__divider"></div>
         <!-- 一覧表示 -->
         <div class="u-margin-8">
                 <div class="form-label form-label--large">
@@ -128,7 +128,7 @@
                 <div class="list__empty">辞書が登録されていません</div>
             </div>
 
-        <div class="panel__divider"></div>
+        <div class="modal__divider"></div>
     </div>
         <!-- 出力・読込 -->
     <div class="u-margin-8">
@@ -150,7 +150,7 @@
                     <span>ユーザー辞書を</span><span>クリップボードにコピー</span>
                 </button>  
             </div>
-            <div class="panel__divider"></div>
+            <div class="modal__divider"></div>
                 <button class="u-margin-8 button button--secondary button--danger" id="resetDictionaryBtn">
                     <span class="material-symbols-rounded">delete_forever</span>
                     <span>辞書データを初期化</span>
@@ -159,12 +159,12 @@
     </div>
 </dialog>
 <!--バフ/デバフ-->
-            <div class="panel">
-                <div class="panel__header">
+            <div class="section">
+                <div class="section__header">
                     <span class="material-symbols-rounded">azm</span>
-                    <span class="panel__title">バフ/デバフ</span>
+                    <span class="section__title">バフ/デバフ</span>
                 </div>
-                <div class="panel__body">
+                <div class="section__body">
                     <div class="control-bar u-full-width">
                             <button class="button button--turn" style="anchor-name: --getTurn;" id="turnProgressBtn">
                                 <div class="tooltip" style="--target: --getTurn">すべてのアクティブなターンを１減らす</div>
@@ -188,14 +188,14 @@
                 </div>
             </div>
 <!--バフ/デバフ モーダル-->
-        <dialog class="panel modal" id="buffaddmodal" closedby="any">
-            <div class="panel__header panel__header--modal">
-                <span class="panel__title">バフ追加</span>
-                        <button class="material-symbols-rounded button u-push-right button--danger" command="close" commandfor="buffaddmodal">
+        <dialog class="modal" id="buffaddmodal" closedby="any">
+            <div class="modal__header section__header section__header--modal">
+                <span class="modal__title">バフ追加</span>
+                        <button class="material-symbols-rounded button u-push-right button--danger modal__close" command="close" commandfor="buffaddmodal">
                         close
                         </button>
             </div>
-            <div class="panel__body">
+            <div class="modal__body">
                 <div class="u-margin-8">
                             <div class="form-label form-label--large">
                                     <span class="material-symbols-rounded">add_box</span>
@@ -277,7 +277,7 @@
                             <div type="button" class="button" id="addBuffBtn">追加</div>
                         </div>
                     </div>
-                <div class="panel__divider"></div>
+                <div class="modal__divider"></div>
                 <div class="u-margin-8">
                     <label for="buffCategoryInput" class="form-label form-label--small">新規カテゴリ追加</label>
                     <div style="display: flex; gap: 8px; flex-direction: column;">
@@ -287,7 +287,7 @@
                     </div>
 
                 </div>
-                <div class="panel__divider"></div>
+                <div class="modal__divider"></div>
                 <div class="u-margin-8">
                     <div class="form-label form-label--large">
                         <span class="material-symbols-rounded">clear_all</span>
@@ -305,13 +305,13 @@
             </div>
         </dialog>
 <!--タブ-->
-        <div class="tabs panel">
-            <label class="panel__header"><input type="radio" name="TAB" checked>
+        <div class="tabs section">
+            <label class="section__header"><input type="radio" name="TAB" checked>
                     <span class="material-symbols-rounded">ifl</span>
-                    <span class="panel__title">判定</span>
+                    <span class="section__title">判定</span>
             </label>
 <!--判定-->
-            <div class="panel__body tabs__content" id="judgeSection">
+            <div class="section__body tabs__content" id="judgeSection">
                     <div class="control-bar u-full-width">
                         <div class="target-selector">
                             <span class="form-label form-label--small">目標値：</span>
@@ -349,14 +349,14 @@
                         </div>
                 </div>
 <!--判定　モーダル-->
-            <dialog class="panel modal" id="judgeaddmodal" closedby="any">
-                    <div class="panel__header panel__header--modal">
-                        <span class="panel__title">判定パッケージ追加</span>
-                        <button class="material-symbols-rounded button u-push-right button--danger" command="close" commandfor="judgeaddmodal">
+            <dialog class="modal" id="judgeaddmodal" closedby="any">
+                    <div class="modal__header section__header section__header--modal">
+                        <span class="modal__title">判定パッケージ追加</span>
+                        <button class="material-symbols-rounded button u-push-right button--danger modal__close" command="close" commandfor="judgeaddmodal">
                         close
                         </button>
                     </div>
-                    <div class="panel__body">
+                    <div class="modal__body">
                         <div class="u-margin-8">
                             <div class="form-label form-label--large">
                                 <span class="material-symbols-rounded">add_box</span>
@@ -396,7 +396,7 @@
                             <div type="button" class="button" id="addJudgeBtn">追加</div>
                         </div>
                         </div>
-                        <div class="panel__divider"></div>
+                        <div class="modal__divider"></div>
                         <div class="u-margin-8">
                             <label for="judgeCategoryInput" class="form-label form-label--small">新規カテゴリ追加</label>
                             <div style="display: flex; gap: 8px; flex-direction: column;">
@@ -405,7 +405,7 @@
                                 <span type="button" class="button u-half-width" id="addJudgeCategoryBtn" title="カテゴリを追加">追加</span>
                             </div>
                         </div>
-                        <div class="panel__divider"></div>
+                        <div class="modal__divider"></div>
                         <div class="u-margin-8">
                             <div class="form-label form-label--large">
                                 <span class="material-symbols-rounded">clear_all</span>
@@ -425,12 +425,12 @@
                     </div>
             </dialog>
 <!--タブ-->
-            <label class="panel__header"><input class="tabs__input" type="radio" name="TAB">
+            <label class="section__header"><input class="tabs__input" type="radio" name="TAB">
                 <span class="material-symbols-rounded">swords</span>
-                <span class="panel__title">攻撃</span>
+                <span class="section__title">攻撃</span>
             </label>
 <!--攻撃-->           
-                <div class="panel__body tabs__content">
+                <div class="section__body tabs__content">
                     <div class="control-bar u-full-width">
                         <button class="material-symbols-rounded button u-push-right" style="anchor-name: --addbuffbtn;" onclick="openAttackModal()">
                             add_2<div class="tooltip" style="--target: --addbuffbtn;">攻撃を追加</div>
@@ -452,14 +452,14 @@
                 </div>
                 
 <!--攻撃　モーダル-->
-            <dialog class="panel modal" id="attackaddmodal" closedby="any">
-                    <div class="panel__header panel__header--modal">
-                        <span class="panel__title">攻撃パッケージ追加</span>
-                        <button class="material-symbols-rounded button u-push-right button--danger" command="close" commandfor="attackaddmodal">
+            <dialog class="modal" id="attackaddmodal" closedby="any">
+                    <div class="modal__header section__header section__header--modal">
+                        <span class="modal__title">攻撃パッケージ追加</span>
+                        <button class="material-symbols-rounded button u-push-right button--danger modal__close" command="close" commandfor="attackaddmodal">
                         close
                         </button>
                     </div>
-                    <div class="panel__body">
+                    <div class="modal__body">
                         <div class="u-margin-8">
                             <div class="form-label form-label--large">
                                     <span class="material-symbols-rounded">add_box</span>
@@ -501,7 +501,7 @@
                             <div type="button" class="button" id="addAttackBtn">追加</div>
                         </div>
                         </div>
-                        <div class="panel__divider"></div>
+                        <div class="modal__divider"></div>
                         <div class="u-margin-8">
                             <label for="attackCategoryInput" class="form-label form-label--small">新規カテゴリ追加</label>
                             <div style="display: flex; gap: 8px; flex-direction: column;">
@@ -510,7 +510,7 @@
                                 <span type="button"n class="button u-half-width" id="addAttackCategoryBtn" title="カテゴリを追加">追加</span>
                             </div>
                         </div>
-                        <div class="panel__divider"></div>
+                        <div class="modal__divider"></div>
                         <div class="u-margin-8">
                             <div class="form-label form-label--large">
                                 <span class="material-symbols-rounded">clear_all</span>
