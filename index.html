@@ -88,7 +88,7 @@
             <div class="form__label form__label--large">
                 <span class="material-symbols-rounded">add_box</span>
                 <span>新規登録・編集</span>
-                <label class="button help-toggle">
+                <label class="button form__help-toggle">
                     <input type="checkbox"/>
                     <span class="material-symbols-rounded">help</span>
                 </label>
@@ -104,12 +104,14 @@
                 </div>
             </div>
             <div class="form__note">オートコンプリート機能では、記号（;:!?'"(){}\[\]&lt;.&gt;.|\\/+*-）は無視して検索されます。</div>
-        </div>        
-        <div type="button" class="button" id="macroAddBtn">登録</button>
-                <span type="button" class="button button--muted button--grow" id="macroCancelBtn" style="display: none;">キャンセル</buttn>                <div id="macroDuplicateWarning" class="form__text" style="color: var(--danger-color); display: none;">
-                    この文字列は既に登録されています
-                </div>
+            <div class="form__row">
+                <button type="button" class="button" id="macroAddBtn">登録</button>
+                <button type="button" class="button button--muted button--grow" id="macroCancelBtn" style="display: none;">キャンセル</button>
             </div>
+            <div id="macroDuplicateWarning" class="form__text" style="color: var(--danger-color); display: none;">
+                この文字列は既に登録されています
+            </div>
+        </div>
         <div class="modal__divider"></div>
         <!-- 一覧表示 -->
         <div class="modal__section">
@@ -200,7 +202,7 @@
                             <div class="form__label form__label--large">
                                     <span class="material-symbols-rounded">add_box</span>
                                     <span>個別追加</span>
-                                    <label class="button help-toggle">
+                                    <label class="button form__help-toggle">
                                         <input type="checkbox"/>
                                         <span class="material-symbols-rounded">help</span>
                                     </label>
@@ -363,7 +365,7 @@
                             <div class="form__label form__label--large">
                                 <span class="material-symbols-rounded">add_box</span>
                                 <span>個別追加</span>
-                                <label class="button help-toggle">
+                                <label class="button form__help-toggle">
                                     <input type="checkbox"/>
                                     <span class="material-symbols-rounded">help</span>
                                 </label>
@@ -468,7 +470,7 @@
                             <div class="form__label form__label--large">
                                     <span class="material-symbols-rounded">add_box</span>
                                     <span>個別追加</span>
-                                    <label class="button help-toggle">
+                                    <label class="button form__help-toggle">
                                         <input type="checkbox"/>
                                         <span class="material-symbols-rounded">help</span>
                                     </label>
