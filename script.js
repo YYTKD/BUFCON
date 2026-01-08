@@ -884,20 +884,20 @@ function renderBuffItems(entries = []) {
         const turnDisplay = item.turn ? `<span class="buff__turn-badge" style="outline:2px solid ${item.color};"><span>${item.turn}</span></span>` : '';
         const simpleMemo = getBuffSimpleMemo(item);
         const memoText = getBuffMemoText(item);
-        const memoHtml = memoText ? escapeHtml(memoText).replace(/\n/g, '<br>') : '<span class="item__memo-empty">メモはありません</span>';
+        const memoHtml = memoText ? escapeHtml(memoText).replace(/\n/g, '<br>') : '<span class="list__item-memo-empty">メモはありません</span>';
         const maxTurnText = item.originalTurn ?? item.turn;
         const maxTurnDisplay = (maxTurnText === undefined || maxTurnText === null || maxTurnText === '') ? 'なし' : maxTurnText;
         const targetsText = targetTexts.length ? targetTexts.join(', ') : 'なし';
         const effectText = item.effect ? item.effect : 'なし';
 
         return `
-            <details class="list__item item buff draggable ${item.active ? 'buff--active' : ''}"
+            <details class="list__item buff draggable ${item.active ? 'buff--active' : ''}"
                      style="background-color: ${bgColor}; color: ${textColor};"
                      data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}">
                 <summary class="buff__summary" draggable="true">
-                    <span class="item__meta">
-                        <span class="item__title">${escapeHtml(item.name)}</span>
-                        ${simpleMemo ? `<span class="item__meta-text">${escapeHtml(simpleMemo)}</span>` : ''}
+                    <span class="list__item-meta">
+                        <span class="list__item-title">${escapeHtml(item.name)}</span>
+                        ${simpleMemo ? `<span class="list__item-meta-text">${escapeHtml(simpleMemo)}</span>` : ''}
                     </span>
                     ${turnDisplay}
                     <span class="buff__actions">
@@ -910,9 +910,9 @@ function renderBuffItems(entries = []) {
                         <p><strong>効果先：</strong>${escapeHtml(targetsText)}</p>
                         <p><strong>コマンド：</strong>${escapeHtml(effectText)}</p>
                     </div>
-                    <div class="item__detail buff__memo">
-                        <p class="item__detail-label"><strong>メモ：</strong></p>
-                        <p class="item__memo-text">${memoHtml}</p>
+                    <div class="list__item-detail buff__memo">
+                        <p class="list__item-detail-label"><strong>メモ：</strong></p>
+                        <p class="list__item-memo-text">${memoHtml}</p>
                     </div>
                 </div>
             </details>
@@ -924,10 +924,10 @@ function renderPackageItems(type, entries = []) {
     if (!Array.isArray(entries) || entries.length === 0) return '';
 
     return entries.map(({ item, index }) => `
-        <div class="list__item item item--clickable draggable" data-index="${index}" data-type="${type}" data-category="${escapeHtml(item.category || 'none')}" draggable="true">
-            <span class="item__meta">
-                <span class="item__title">${escapeHtml(item.name)}</span>
-                <span class="item__detail">${escapeHtml(item.roll)}</span>
+        <div class="list__item list__item--clickable draggable" data-index="${index}" data-type="${type}" data-category="${escapeHtml(item.category || 'none')}" draggable="true">
+            <span class="list__item-meta">
+                <span class="list__item-title">${escapeHtml(item.name)}</span>
+                <span class="list__item-detail">${escapeHtml(item.roll)}</span>
             </span>
         </div>
     `).join('');
@@ -1149,9 +1149,9 @@ function renderMacroItems(entries = []) {
     if (!Array.isArray(entries) || entries.length === 0) return '';
 
     return entries.map(({ item }) => `
-        <div class="list__item item item--clickable" data-type="macro" data-id="${escapeHtml(item.id)}">
-            <span class="item__meta">
-                <span class="item__title">${escapeHtml(item.text)}</span>
+        <div class="list__item list__item--clickable" data-type="macro" data-id="${escapeHtml(item.id)}">
+            <span class="list__item-meta">
+                <span class="list__item-title">${escapeHtml(item.text)}</span>
             </span>
         </div>
     `).join('');
@@ -1916,7 +1916,7 @@ function handleDragStart(e, index, type) {
         state.draggedCategory = buff ? (buff.category || 'none') : null;
     }
 
-    e.target.classList.add('item--dragging');
+    e.target.classList.add('list__item--dragging');
     e.dataTransfer.effectAllowed = 'move';
 }
 
@@ -1927,22 +1927,22 @@ function handleDragOver(e) {
     const rect = e.currentTarget.getBoundingClientRect();
     const midY = rect.top + rect.height / 2;
     
-    e.currentTarget.classList.remove('item--drag-over-top', 'item--drag-over-bottom');
+    e.currentTarget.classList.remove('list__item--drag-over-top', 'list__item--drag-over-bottom');
     
     if (e.clientY < midY) {
-        e.currentTarget.classList.add('item--drag-over-top');
+        e.currentTarget.classList.add('list__item--drag-over-top');
     } else {
-        e.currentTarget.classList.add('item--drag-over-bottom');
+        e.currentTarget.classList.add('list__item--drag-over-bottom');
     }
 }
 
 function handleDragLeave(e) {
-    e.currentTarget.classList.remove('item--drag-over-top', 'item--drag-over-bottom');
+    e.currentTarget.classList.remove('list__item--drag-over-top', 'list__item--drag-over-bottom');
 }
 
 function handleDrop(e, targetIndex, type) {
     e.preventDefault();
-    e.currentTarget.classList.remove('item--drag-over-top', 'item--drag-over-bottom');
+    e.currentTarget.classList.remove('list__item--drag-over-top', 'list__item--drag-over-bottom');
 
     if (state.draggedIndex === null || state.draggedType !== type || state.draggedIndex === targetIndex) {
         return;
@@ -2149,7 +2149,7 @@ function handleCategoryBodyDrop(e, type) {
 }
 
 function handleDragEnd(e) {
-    e.target.classList.remove('item--dragging');
+    e.target.classList.remove('list__item--dragging');
     document.querySelectorAll('.list__category-header--drag-over')
         .forEach(header => header.classList.remove('list__category-header--drag-over'));
     document.querySelectorAll('.list__category-body--drag-over')
@@ -2338,9 +2338,9 @@ function selectPackage(index, type) {
     if (!array) return;
     if (index < 0 || index >= array.length) return;
     
-    document.querySelectorAll(`[data-type="${type}"]`).forEach(el => el.classList.remove('item--selected'));
+    document.querySelectorAll(`[data-type="${type}"]`).forEach(el => el.classList.remove('list__item--selected'));
     const target = document.querySelector(`[data-type="${type}"][data-index="${index}"]`);
-    if (target) target.classList.add('item--selected');
+    if (target) target.classList.add('list__item--selected');
     updatePackageOutput(type, index);
 }
 
@@ -2497,7 +2497,7 @@ function updatePackageOutput(type, selectedIndex = null) {
     if (!array) return;
 
     if (selectedIndex === null) {
-        const selected = document.querySelector(`[data-type="${type}"].item--selected`);
+        const selected = document.querySelector(`[data-type="${type}"].list__item--selected`);
         if (!selected) {
             document.getElementById(outputId).textContent = emptyMsg;
             return;
