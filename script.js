@@ -884,20 +884,20 @@ function renderBuffItems(entries = []) {
         const turnDisplay = item.turn ? `<span class="buff__turn-badge" style="outline:2px solid ${item.color};"><span>${item.turn}</span></span>` : '';
         const simpleMemo = getBuffSimpleMemo(item);
         const memoText = getBuffMemoText(item);
-        const memoHtml = memoText ? escapeHtml(memoText).replace(/\n/g, '<br>') : '<span class="list-item__memo-empty">メモはありません</span>';
+        const memoHtml = memoText ? escapeHtml(memoText).replace(/\n/g, '<br>') : '<span class="item__memo-empty">メモはありません</span>';
         const maxTurnText = item.originalTurn ?? item.turn;
         const maxTurnDisplay = (maxTurnText === undefined || maxTurnText === null || maxTurnText === '') ? 'なし' : maxTurnText;
         const targetsText = targetTexts.length ? targetTexts.join(', ') : 'なし';
         const effectText = item.effect ? item.effect : 'なし';
 
         return `
-            <details class="list-item buff draggable ${item.active ? 'buff--active' : ''}"
+            <details class="list__item item buff draggable ${item.active ? 'buff--active' : ''}"
                      style="background-color: ${bgColor}; color: ${textColor};"
                      data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}">
                 <summary class="buff__summary" draggable="true">
-                    <span class="list-item__param">
-                        <span class="list-item__name">${escapeHtml(item.name)}</span>
-                        ${simpleMemo ? `<span class="list-item__description">${escapeHtml(simpleMemo)}</span>` : ''}
+                    <span class="item__meta">
+                        <span class="item__title">${escapeHtml(item.name)}</span>
+                        ${simpleMemo ? `<span class="item__meta-text">${escapeHtml(simpleMemo)}</span>` : ''}
                     </span>
                     ${turnDisplay}
                     <span class="buff__actions">
@@ -910,9 +910,9 @@ function renderBuffItems(entries = []) {
                         <p><strong>効果先：</strong>${escapeHtml(targetsText)}</p>
                         <p><strong>コマンド：</strong>${escapeHtml(effectText)}</p>
                     </div>
-                    <div class="list-item__detail buff__memo">
-                        <p class="list-item__detail-label"><strong>メモ：</strong></p>
-                        <p class="list-item__memo-text">${memoHtml}</p>
+                    <div class="item__detail buff__memo">
+                        <p class="item__detail-label"><strong>メモ：</strong></p>
+                        <p class="item__memo-text">${memoHtml}</p>
                     </div>
                 </div>
             </details>
@@ -924,10 +924,11 @@ function renderPackageItems(type, entries = []) {
     if (!Array.isArray(entries) || entries.length === 0) return '';
 
     return entries.map(({ item, index }) => `
-        <div class="list-item list-item--clickable draggable" data-index="${index}" data-type="${type}" data-category="${escapeHtml(item.category || 'none')}" draggable="true">
-            <span class="list-item__param">
-                <span class="list-item__name">${escapeHtml(item.name)}</span>
-                <span class="list-item__detail">${escapeHtml(item.roll)}</span>
+        <div class="list__item item item--clickable draggable" data-index="${index}" data-type="${type}" data-category="${escapeHtml(item.category || 'none')}" draggable="true">
+            <span class="item__meta">
+                <span class="item__title">${escapeHtml(item.name)}</span>
+                <span class="item__detail">${escapeHtml(item.roll)}</span>
+            </span>
         </div>
     `).join('');
 }
@@ -1148,9 +1149,9 @@ function renderMacroItems(entries = []) {
     if (!Array.isArray(entries) || entries.length === 0) return '';
 
     return entries.map(({ item }) => `
-        <div class="list-item list-item--clickable" data-type="macro" data-id="${escapeHtml(item.id)}">
-            <span class="list-item__param">
-                <span class="list-item__name">${escapeHtml(item.text)}</span>
+        <div class="list__item item item--clickable" data-type="macro" data-id="${escapeHtml(item.id)}">
+            <span class="item__meta">
+                <span class="item__title">${escapeHtml(item.text)}</span>
             </span>
         </div>
     `).join('');
@@ -1171,7 +1172,7 @@ function renderMacroDictionary() {
     const listContainer = document.getElementById('macroDictionaryList');
 
     if (macroState.dictionary.length === 0) {
-        listContainer.innerHTML = '<div class="empty-message">辞書が登録されていません</div>';
+        listContainer.innerHTML = '<div class="list__empty">辞書が登録されていません</div>';
         updateCategoryIndexDropdown('macro');
         return;
     }
@@ -1182,12 +1183,12 @@ function renderMacroDictionary() {
 
     if (categoryMap['none'] && categoryMap['none'].length > 0) {
         sections.push(`
-            <details class="category uncategorized" data-category="none" open>
-                <summary class="category__header" data-category="none">
+            <details class="list__category list__category--uncategorized" data-category="none" open>
+                <summary class="list__category-header" data-category="none">
                     <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
                     <span style="word-break: break-all;">未分類</span>
                 </summary>
-                <div class="category__body" data-category="none">
+                <div class="list__category-body" data-category="none">
                     ${renderMacroItems(categoryMap['none'])}
                 </div>
             </details>
@@ -1196,12 +1197,12 @@ function renderMacroDictionary() {
 
     categories.forEach(name => {
         sections.push(`
-            <details class="category" open data-category="${escapeHtml(name)}">
-                <summary class="category__header" data-category="${escapeHtml(name)}">
+            <details class="list__category" open data-category="${escapeHtml(name)}">
+                <summary class="list__category-header" data-category="${escapeHtml(name)}">
                     <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
                     <span style="word-break: break-all;">${escapeHtml(name)}</span>
                 </summary>
-                <div class="category__body" data-category="${escapeHtml(name)}">
+                <div class="list__category-body" data-category="${escapeHtml(name)}">
                     ${renderMacroItems(categoryMap[name])}
                 </div>
             </details>
@@ -1825,7 +1826,7 @@ function renderBuffs() {
     const hasContent = (state.buffs.length + state.buffCategories.length) > 0;
 
     if (!hasContent) {
-        list.innerHTML = '<div class="empty-message">バフを追加してください</div>';
+        list.innerHTML = '<div class="list__empty">バフを追加してください</div>';
         updateCategoryIndexDropdown('buff');
         return;
     }
@@ -1833,11 +1834,11 @@ function renderBuffs() {
     const sections = [];
 
     sections.push(`
-        <details class="category uncategorized" data-category="none" open>
-            <summary class="category__header" data-category="none">
+        <details class="list__category list__category--uncategorized" data-category="none" open>
+            <summary class="list__category-header" data-category="none">
                 <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
             </summary>
-            <div class="category__body" data-category="none">
+            <div class="list__category-body" data-category="none">
                 ${renderBuffItems(categoryMap['none'])}
             </div>
         </details>
@@ -1845,11 +1846,11 @@ function renderBuffs() {
 
     state.buffCategories.forEach(name => {
         sections.push(`
-            <details class="category" open data-category="${escapeHtml(name)}">
-                <summary class="category__header" data-category="${escapeHtml(name)}" draggable="true">
+            <details class="list__category" open data-category="${escapeHtml(name)}">
+                <summary class="list__category-header" data-category="${escapeHtml(name)}" draggable="true">
                     <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span><span style="word-break: break-all;">${escapeHtml(name)}</span>
                 </summary>
-                <div class="category__body" data-category="${escapeHtml(name)}">
+                <div class="list__category-body" data-category="${escapeHtml(name)}">
                     ${renderBuffItems(categoryMap[name])}
                 </div>
             </details>
@@ -1877,7 +1878,7 @@ function attachBuffEvents() {
         el.addEventListener('contextmenu', (e) => openItemContextMenu(e, 'buff', i));
     });
 
-    buffList.querySelectorAll('.category__header').forEach(header => {
+    buffList.querySelectorAll('.list__category-header').forEach(header => {
         header.addEventListener('dragstart', (e) => handleCategoryHeaderDragStart(e, 'buff'));
         header.addEventListener('dragover', (e) => handleCategoryDragOver(e, 'buff'));
         header.addEventListener('dragleave', handleCategoryDragLeave);
@@ -1915,7 +1916,7 @@ function handleDragStart(e, index, type) {
         state.draggedCategory = buff ? (buff.category || 'none') : null;
     }
 
-    e.target.classList.add('list-item--dragging');
+    e.target.classList.add('item--dragging');
     e.dataTransfer.effectAllowed = 'move';
 }
 
@@ -1926,22 +1927,22 @@ function handleDragOver(e) {
     const rect = e.currentTarget.getBoundingClientRect();
     const midY = rect.top + rect.height / 2;
     
-    e.currentTarget.classList.remove('list-item--drag-over-top', 'list-item--drag-over-bottom');
+    e.currentTarget.classList.remove('item--drag-over-top', 'item--drag-over-bottom');
     
     if (e.clientY < midY) {
-        e.currentTarget.classList.add('list-item--drag-over-top');
+        e.currentTarget.classList.add('item--drag-over-top');
     } else {
-        e.currentTarget.classList.add('list-item--drag-over-bottom');
+        e.currentTarget.classList.add('item--drag-over-bottom');
     }
 }
 
 function handleDragLeave(e) {
-    e.currentTarget.classList.remove('list-item--drag-over-top', 'list-item--drag-over-bottom');
+    e.currentTarget.classList.remove('item--drag-over-top', 'item--drag-over-bottom');
 }
 
 function handleDrop(e, targetIndex, type) {
     e.preventDefault();
-    e.currentTarget.classList.remove('list-item--drag-over-top', 'list-item--drag-over-bottom');
+    e.currentTarget.classList.remove('item--drag-over-top', 'item--drag-over-bottom');
 
     if (state.draggedIndex === null || state.draggedType !== type || state.draggedIndex === targetIndex) {
         return;
@@ -2000,14 +2001,14 @@ function handleCategoryHeaderDragStart(e, type) {
     state.draggedCategoryName = categoryName;
 
     e.dataTransfer.effectAllowed = 'move';
-    e.currentTarget.classList.add('category__header--dragging');
+    e.currentTarget.classList.add('list__category-header--dragging');
 }
 
 function handleCategoryHeaderDragEnd(e) {
-    document.querySelectorAll('.category__header--dragging')
-        .forEach(header => header.classList.remove('category__header--dragging'));
-    document.querySelectorAll('.category__header--drag-over')
-        .forEach(header => header.classList.remove('category__header--drag-over'));
+    document.querySelectorAll('.list__category-header--dragging')
+        .forEach(header => header.classList.remove('list__category-header--dragging'));
+    document.querySelectorAll('.list__category-header--drag-over')
+        .forEach(header => header.classList.remove('list__category-header--drag-over'));
     state.draggedCategoryType = null;
     state.draggedCategoryName = null;
 }
@@ -2019,11 +2020,11 @@ function handleCategoryDragOver(e, type) {
 
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    e.currentTarget.classList.add('category__header--drag-over');
+    e.currentTarget.classList.add('list__category-header--drag-over');
 }
 
 function handleCategoryDragLeave(e) {
-    e.currentTarget.classList.remove('category__header--drag-over');
+    e.currentTarget.classList.remove('list__category-header--drag-over');
 }
 
 function reorderCategory(type, targetCategory, dropAfter) {
@@ -2070,7 +2071,7 @@ function handleCategoryDrop(e, type) {
     }
 
     if (state.draggedType !== type || state.draggedIndex === null) {
-        e.currentTarget.classList.remove('category__header--drag-over');
+        e.currentTarget.classList.remove('list__category-header--drag-over');
         return;
     }
 
@@ -2080,7 +2081,7 @@ function handleCategoryDrop(e, type) {
     const item = collection ? collection[state.draggedIndex] : null;
 
     if (!collection || !item) {
-        e.currentTarget.classList.remove('category__header--drag-over');
+        e.currentTarget.classList.remove('list__category-header--drag-over');
         return;
     }
 
@@ -2100,7 +2101,7 @@ function handleCategoryDrop(e, type) {
     state.draggedCategory = null;
     state.draggedCategoryType = null;
     state.draggedCategoryName = null;
-    e.currentTarget.classList.remove('category__header--drag-over');
+    e.currentTarget.classList.remove('list__category-header--drag-over');
 }
 
 function handleCategoryBodyDragOver(e, type) {
@@ -2108,11 +2109,11 @@ function handleCategoryBodyDragOver(e, type) {
 
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    e.currentTarget.classList.add('category__header--drag-over');
+    e.currentTarget.classList.add('list__category-body--drag-over');
 }
 
 function handleCategoryBodyDragLeave(e) {
-    e.currentTarget.classList.remove('category__header--drag-over');
+    e.currentTarget.classList.remove('list__category-body--drag-over');
 }
 
 function handleCategoryBodyDrop(e, type) {
@@ -2126,7 +2127,7 @@ function handleCategoryBodyDrop(e, type) {
     const collection = getCollection(type);
 
     if (!collection || state.draggedIndex < 0 || state.draggedIndex >= collection.length) {
-        e.currentTarget.classList.remove('category__header--drag-over');
+        e.currentTarget.classList.remove('list__category-body--drag-over');
         return;
     }
 
@@ -2144,15 +2145,17 @@ function handleCategoryBodyDrop(e, type) {
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
-    e.currentTarget.classList.remove('category__header--drag-over');
+    e.currentTarget.classList.remove('list__category-body--drag-over');
 }
 
 function handleDragEnd(e) {
-    e.target.classList.remove('list-item--dragging');
-    document.querySelectorAll('.category__header--drag-over')
-        .forEach(header => header.classList.remove('category__header--drag-over'));
-    document.querySelectorAll('.category__header--dragging')
-        .forEach(header => header.classList.remove('category__header--dragging'));
+    e.target.classList.remove('item--dragging');
+    document.querySelectorAll('.list__category-header--drag-over')
+        .forEach(header => header.classList.remove('list__category-header--drag-over'));
+    document.querySelectorAll('.list__category-body--drag-over')
+        .forEach(body => body.classList.remove('list__category-body--drag-over'));
+    document.querySelectorAll('.list__category-header--dragging')
+        .forEach(header => header.classList.remove('list__category-header--dragging'));
     state.draggedIndex = null;
     state.draggedType = null;
     state.draggedCategory = null;
@@ -2335,9 +2338,9 @@ function selectPackage(index, type) {
     if (!array) return;
     if (index < 0 || index >= array.length) return;
     
-    document.querySelectorAll(`[data-type="${type}"]`).forEach(el => el.classList.remove('list-item--selected'));
+    document.querySelectorAll(`[data-type="${type}"]`).forEach(el => el.classList.remove('item--selected'));
     const target = document.querySelector(`[data-type="${type}"][data-index="${index}"]`);
-    if (target) target.classList.add('list-item--selected');
+    if (target) target.classList.add('item--selected');
     updatePackageOutput(type, index);
 }
 
@@ -2365,7 +2368,7 @@ function renderPackage(type) {
     const hasContent = (array.length + categories.length) > 0;
 
     if (!hasContent) {
-        list.innerHTML = `<div class="empty-message">${config.emptyMsg}</div>`;
+        list.innerHTML = `<div class="list__empty">${config.emptyMsg}</div>`;
         updateCategoryIndexDropdown(type);
         return;
     }
@@ -2373,11 +2376,11 @@ function renderPackage(type) {
     const sections = [];
 
     sections.push(`
-        <details class="category uncategorized" data-category="none" open>
-            <summary class="category__header" data-category="none">
+        <details class="list__category list__category--uncategorized" data-category="none" open>
+            <summary class="list__category-header" data-category="none">
                 <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span>
             </summary>
-            <div class="category__body" data-category="none">
+            <div class="list__category-body" data-category="none">
                 ${renderPackageItems(type, categoryMap['none'])}
             </div>
         </details>
@@ -2385,11 +2388,11 @@ function renderPackage(type) {
 
     categories.forEach(name => {
         sections.push(`
-            <details class="category" open data-category="${escapeHtml(name)}">
-                <summary class="category__header" data-category="${escapeHtml(name)}" draggable="true">
+            <details class="list__category" open data-category="${escapeHtml(name)}">
+                <summary class="list__category-header" data-category="${escapeHtml(name)}" draggable="true">
                     <span class="material-symbols-rounded" style="margin-right: 4px;">arrow_right</span><span style="word-break: break-all;">${escapeHtml(name)}</span>
                 </summary>
-                <div class="category__body" data-category="${escapeHtml(name)}">
+                <div class="list__category-body" data-category="${escapeHtml(name)}">
                     ${renderPackageItems(type, categoryMap[name])}
                 </div>
             </details>
@@ -2437,7 +2440,7 @@ function attachItemEvents(type) {
         el.addEventListener('contextmenu', (e) => openItemContextMenu(e, type, i));
     });
 
-    listElement.querySelectorAll('.category__header').forEach(header => {
+    listElement.querySelectorAll('.list__category-header').forEach(header => {
         header.addEventListener('dragstart', (e) => handleCategoryHeaderDragStart(e, type));
         header.addEventListener('dragover', (e) => handleCategoryDragOver(e, type));
         header.addEventListener('dragleave', handleCategoryDragLeave);
@@ -2479,7 +2482,7 @@ function attachItemEvents(type) {
         });
     });
 
-    listElement.querySelectorAll('.category__body').forEach(body => {
+    listElement.querySelectorAll('.list__category-body').forEach(body => {
         body.addEventListener('dragover', (e) => handleCategoryBodyDragOver(e, type));
         body.addEventListener('dragleave', handleCategoryBodyDragLeave);
         body.addEventListener('drop', (e) => handleCategoryBodyDrop(e, type));
@@ -2494,7 +2497,7 @@ function updatePackageOutput(type, selectedIndex = null) {
     if (!array) return;
 
     if (selectedIndex === null) {
-        const selected = document.querySelector(`[data-type="${type}"].list-item--selected`);
+        const selected = document.querySelector(`[data-type="${type}"].item--selected`);
         if (!selected) {
             document.getElementById(outputId).textContent = emptyMsg;
             return;
