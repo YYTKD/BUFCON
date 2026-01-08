@@ -285,6 +285,38 @@ dialog::backdrop {
     transform-origin: bottom center;
 }
 
+.tooltip--settings {
+    --target: --settings;
+}
+
+.tooltip--help {
+    --target: --help;
+}
+
+.tooltip--feedback {
+    --target: --feedback;
+}
+
+.tooltip--macro-bookmark {
+    --target: --macro-bookmark;
+}
+
+.tooltip--bookmark {
+    --target: --bookmark;
+}
+
+.tooltip--turn-progress {
+    --target: --getTurn;
+}
+
+.tooltip--turn-reset {
+    --target: --reset;
+}
+
+.tooltip--add {
+    --target: --addbuffbtn;
+}
+
 /* 出力ボックス */
 .output {
     background: var(--secondary-color-1);
@@ -373,6 +405,18 @@ dialog::backdrop {
     background: rgba(255,255,255,0.1);
 }
 
+.site-header__menu-item--settings {
+    anchor-name: --settings;
+}
+
+.site-header__menu-item--help {
+    anchor-name: --help;
+}
+
+.site-header__menu-item--feedback {
+    anchor-name: --feedback;
+}
+
 .site-header__menu-item:hover .tooltip {
     background: var(--primary-color-1);
     opacity: 1;
@@ -401,6 +445,10 @@ dialog::backdrop {
     padding: 6px 0;
     z-index: 1100;
     position-anchor: var(--target);
+}
+
+.site-header__dropdown--settings {
+    --target: --settings;
 }
 
 .site-header__dropdown.u-hidden {
@@ -511,6 +559,10 @@ dialog .modal__body {
     overflow-x: hidden;
 }
 
+.modal__body--offset-md {
+    margin-top: 32px;
+}
+
 .modal__section {
     margin: 8px 0;
 }
@@ -572,6 +624,15 @@ dialog .modal__body {
     gap: 4px;
 }
 
+.form__group--row {
+    flex-direction: row;
+    gap: 12px;
+}
+
+.form__group--stacked {
+    gap: 8px;
+}
+
 .form__group--spaced {
     margin-bottom: 12px;
 }
@@ -602,6 +663,16 @@ dialog .modal__body {
     flex-direction: row;
     gap: 8px;
     align-items: flex-start;
+}
+
+.form__row--inline {
+    display: flex;
+    gap: 0;
+    margin-top: 0;
+}
+
+.form__column--half {
+    width: 50%;
 }
 
 .form__grid input {
@@ -678,6 +749,10 @@ dialog .modal__body {
     width: 100%;
 }
 
+.control-bar--spaced {
+    margin-bottom: 8px;
+}
+
 .control-bar__item--end {
     margin-left: auto;
 }
@@ -708,6 +783,22 @@ dialog .modal__body {
 
 .button--turn:hover .tooltip::before {
     top: 12px;
+}
+
+.button--anchor-turn-progress {
+    anchor-name: --getTurn;
+}
+
+.button--anchor-turn-reset {
+    anchor-name: --reset;
+}
+
+.button--anchor-add {
+    anchor-name: --addbuffbtn;
+}
+
+.button--hidden {
+    display: none;
 }
 
 /* トグルボタン（ON/OFF切り替え） */
@@ -807,6 +898,18 @@ dialog .modal__body {
     position: relative;
     display: flex;
     align-items: center;
+}
+
+.list__index--macro-bookmark {
+    anchor-name: --macro-bookmark;
+}
+
+.list__index--bookmark {
+    anchor-name: --bookmark;
+}
+
+.list__index--aligned-end {
+    margin-left: auto;
 }
 
 .list__index  select {
@@ -1291,9 +1394,27 @@ dialog .modal__body {
 .button--info { background: var(--primary-color-3); color: var(--secondary-color-1);}
 .button--danger { background: var(--danger-color); width: 30%; color: var(--secondary-color-1);}
 .form__text { font-size: 11px; color: var(--primary-color-1); margin-top: 6px; }
+.form__text--danger { color: var(--danger-color); }
+.form__text--hidden { display: none; }
+.form__text--indent-3em { margin-left: 3em; text-indent: -3em; }
+.form__text--indent-5em { margin-left: 5em; text-indent: -5em; }
+.form__text--indent-7em { margin-left: 7em; text-indent: -7em; }
 .form__label--small { font-size: 12px; font-weight: 600; color: var(--primary-color-2); display: block; margin: 8px 0 2px 2px;}
 .form__label--large { font-size: 16px; font-weight: 600; color: var(--primary-color-2); display: flex; margin: 0 0 4px 2px; gap: 8px; align-items: center; }
 .form__input--compact { width: 60px; padding: 4px 6px; border: 1px solid var(--primary-color-1); border-radius: 4px; }
+        
+.form__textarea--import-lg { height: 120px; flex: 3; }
+.form__textarea--import-md { height: 80px; flex: 3; }
+.form__textarea--bulk-lg { height: 100px; }
+.form__textarea--bulk-md { height: 80px; }
+.form__textarea--memo-buff { height: calc(100% - 1rem - 8px); }
+.form__textarea--memo { height: calc(100% - 20px); }
+
+.form__checkbox--compact {
+    vertical-align: middle;
+    width: 12px;
+    height: 12px;
+}
 
 .form__label--row {
     display: flex;
