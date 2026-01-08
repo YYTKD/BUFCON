@@ -1281,7 +1281,7 @@ dialog .modal__body {
    ======================================== */
 
 /* ヘルプ */
-.help-toggle {
+.form__help-toggle {
     position: fixed;
     right: calc(anchor(right) + 12px);
     top: calc(anchor(bottom) + 8px);
@@ -1292,20 +1292,20 @@ dialog .modal__body {
     position-anchor: --S-header;
 }
 
-.help-toggle:hover {
+.form__help-toggle:hover {
     background: var(--pickup-color);
 }
 
-.help-toggle span {
+.form__help-toggle span {
     position:relative;
     color: var(--primary-color-1);
 }
 
-.help-toggle input {
+.form__help-toggle input {
     display: none;
 }
         
-.help-toggle:has(input:checked) {
+.form__help-toggle:has(input:checked) {
     background: #fff3cd;
     outline:inset 1px solid #ffc107 !important;
     color: #ffc107 !important;
@@ -1322,8 +1322,8 @@ dialog .modal__body {
     display: none;
 }
 
-.section__body:has(.help-toggle input:checked) .modal__section .form__note,
-.modal__body:has(.help-toggle input:checked) .modal__section .form__note {
+.section__body:has(.form__help-toggle input:checked) .modal__section .form__note,
+.modal__body:has(.form__help-toggle input:checked) .modal__section .form__note {
     display: block;
 }
 
