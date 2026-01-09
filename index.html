@@ -45,17 +45,20 @@
 
 <div class="app__content">
 <!--データ管理　モーダル-->
-            <dialog class="modal" id="DataOption" closedby="any">
-                    <div class="modal__header section__header section__header--modal">
+            <dialog class="modal section" id="DataOption" closedby="any">
+                    <div class="section__header section__header--modal">
                         <span class="material-symbols-rounded">checkbook</span>
                         <span class="modal__title">データ管理</span>
+                        <button class="material-symbols-rounded button button--danger modal__close" command="close" commandfor="DataOption">
+                        close
+                        </button>
                     </div>
-                    <div class="modal__body" style="margin-top: 32px;">
+                    <div class="modal__body">
                         <div class="form__group form__group--spaced">
                             <label class="form__label form__label--small">クリップボードから貼り付けて読み込み:</label>
                                 <textarea id="importText" placeholder='.txtまたは.jsonファイルを直接ドロップしても読み込めます' class="form__textarea form__textarea--mono form__textarea--import-lg"></textarea>
                         </div>
-                        <div class="form__group form__group--spaced" style="display: flex; gap: 12px;">
+                        <div class="form__group form__group--spaced">
                             <button class="button button--secondary button--grow" id="importConfirm">
                                 <span class="material-symbols-rounded">download</span>
                                 <span>このデータを読み込み</span>
@@ -75,14 +78,14 @@
             </dialog>
 <!-- ユーザー辞書 モーダル -->
 <dialog class="modal" id="userMacroModal" closedby="any">
-    <div class="modal__header section__header section__header--modal">
+    <div class="section__header section__header--modal">
         <span class="material-symbols-rounded">bookmarks</span>
         <span class="modal__title">ユーザー辞書</span>
         <button class="material-symbols-rounded button button--danger modal__close" command="close" commandfor="userMacroModal">
         close
         </button>
     </div>
-    <div class="modal__body" style="margin-top: 32px;">
+    <div class="modal__body">
     <div class="modal__section">
         <!-- 登録フォーム -->
             <div class="form__label form__label--large">
@@ -102,11 +105,11 @@
                     <label for="macroCategory" class="form__label form__label--small">カテゴリー</label>
                     <input type="text" id="macroCategory" placeholder="例：代入記法" autocomplete="off" class="form__input">
                 </div>
-            </div>
-            <div class="form__note">オートコンプリート機能では、記号（;:!?'"(){}\[\]&lt;.&gt;.|\\/+*-）は無視して検索されます。</div>
-            <div class="form__row">
-                <button type="button" class="button" id="macroAddBtn">登録</button>
-                <button type="button" class="button button--muted button--grow" id="macroCancelBtn" style="display: none;">キャンセル</button>
+                <div class="form__note">オートコンプリート機能では、記号（;:!?'"(){}\[\]&lt;.&gt;.|\\/+*-）は無視して検索されます。</div>
+                <div class="form__row">
+                    <button type="button" class="button" id="macroAddBtn">登録</button>
+                    <button type="button" class="button button--muted button--grow" id="macroCancelBtn" style="display: none;">キャンセル</button>
+                </div>
             </div>
             <div id="macroDuplicateWarning" class="form__text" style="color: var(--danger-color); display: none;">
                 この文字列は既に登録されています
@@ -142,7 +145,7 @@
                 <label class="form__label form__label--small">ユーザー辞書を貼り付けて読み込み</label>
                 <textarea id="macroImportText" placeholder=".txtまたは.jsonファイルを直接ドロップしても読み込めます" class="form__textarea form__textarea--mono form__textarea--import-md"></textarea>
             </div>
-            <div class="form__group form__group--spaced" style="display: flex; gap: 12px;">  
+            <div class="form__group form__group--spaced">  
                 <button class="button button--secondary button--grow" id="macroImportBtn">
                     <span class="material-symbols-rounded">download</span>
                     <span>このデータを読み込み</span>
@@ -191,7 +194,7 @@
             </div>
 <!--バフ/デバフ モーダル-->
         <dialog class="modal" id="buffaddmodal" closedby="any">
-            <div class="modal__header section__header section__header--modal">
+            <div class="section__header section__header--modal">
                 <span class="modal__title">バフ追加</span>
                         <button class="material-symbols-rounded button button--danger modal__close" command="close" commandfor="buffaddmodal">
                         close
@@ -243,16 +246,16 @@
                                         <label for="buffColor" class="form__label form__label--small">ラベルの色を選択</label>
                                         <input type="color" id="buffColor" value="#0079FF" list="buffColor-list" class="form__input">
                                         <datalist id="buffColor-list">
-                                            <option value="#0079FF"></option>
-                                            <option value="#953D96"></option>
-                                            <option value="#F64E9D"></option>
-                                            <option value="#DF383E"></option>
-                                            <option value="#F7821B"></option>
-                                            <option value="#FEC626"></option>
-                                            <option value="#62BA46"></option>
-                                            <option value="#F8F9FA"></option>
-                                        <option value="#141414"></option>
-                                        <option value="#595959"></option>
+                                            <option value="#0079FF"></option><!--青-->
+                                            <option value="#953D96"></option><!--紫-->
+                                            <option value="#F64E9D"></option><!--ピンク-->
+                                            <option value="#DF383E"></option><!--赤-->
+                                            <option value="#F7821B"></option><!--オレンジ-->
+                                            <option value="#FEC626"></option><!--黄色-->
+                                            <option value="#62BA46"></option><!--緑-->
+                                            <option value="#F8F9FA"></option><!--白-->
+                                        <option value="#141414"></option><!--黒-->
+                                        <option value="#595959"></option><!--灰-->
                                         </datalist>
                                     </div>
                                     <div class="form__note">その他からより詳細に色を指定できます。</div>
@@ -268,7 +271,7 @@
                                 <div>
                                     <div class="memo__header">
                                         <label class="form__label form__label--small" for="buffMemo">メモ欄</label>
-                                        <label class="form__label form__label--small form__label--row">
+                                        <label class="form__label form__label--small form__label--row form__label--btn">
                                             <input type="checkbox" id="buffSimpleMemoToggle" style="vertical-align: middle; width: 12px; height: 12px;">
                                             <p>簡易メモを表示</p>
                                         </label>
@@ -298,7 +301,7 @@
                         <p class="form__text" style="margin-left: 3em; text-indent: -3em;">形式：バフ名|効果先1,効果先2|簡易メモ|コマンド|ターン|カラーコード|メモ</p>
                         <p class="form__text" style="margin-left: 5em; text-indent: -5em;">カテゴリ：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                     <div class="form__grid form__grid--stacked modal__section" id="bulkAddArea">
-                        <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="form__textarea form__textarea--mono" style="height:100px;"></textarea>
+                        <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="form__textarea form__textarea--mono"></textarea>
                         <div class="form__row">
                             <span type="button" class="button button--grow" id="bulkAddConfirm">追加を実行</span>
                         </div>
@@ -308,53 +311,78 @@
         </dialog>
 <!--タブ-->
         <div class="tabs section">
-            <div class="tabs__tab">
-                <label class="tabs__label section__header"><input class="tabs__input" type="radio" name="TAB" checked>
-                        <span class="material-symbols-rounded">ifl</span>
-                        <span class="section__title">判定</span>
-                </label>
+            <label class="tabs__label section__header"><input class="tabs__input" type="radio" name="TAB" checked>
+                    <span class="material-symbols-rounded">ifl</span>
+                    <span class="section__title">判定</span>
+            </label>
 <!--判定-->
-                <div class="tabs__panel section__body" id="judgeSection">
-                    <div class="control-bar control-bar--full">
-                        <div class="target-selector">
-                            <span class="form__label form__label--small">目標値：</span>
-                            <label class="target-selector__option button">
-                                <input type="radio" name="targetType" id="targetNone" value="none" checked>
-                                <label for="targetNone" class="form__label form__label--small">＼</label>
-                            </label>
-                            <label class="target-selector__option button">
-                                <input type="radio" name="targetType" id="targetGte" value="gte">
-                                <label for="targetGte" class="form__label form__label--small">≧</label>
-                            </label>
-                            <label class="target-selector__option button">
-                                <input type="radio" name="targetType" id="targetLte" value="lte">
-                                <label for="targetLte" class="form__label form__label--small">≦</label>
-                            </label>
-                            <input type="number" id="targetValue" placeholder="値" class="form__input form__input--compact">
-                        </div>
-                        <button class="control-bar__item control-bar__item--end material-symbols-rounded button" style="anchor-name: --addbuffbtn;" onclick="openJudgeModal()">
-                            add_2<div class="tooltip" style="--target: --addbuffbtn;">判定を追加</div>
-                            </button>
-                        <label class="control-bar__item list__index list__index--bookmark">
-                            <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
-                            <span class="material-symbols-rounded">bookmark</span>
-                            <select class="button" id="judgeItemIndex"></select>
+            <div class="tabs__panel section__body" id="judgeSection">
+                <div class="control-bar control-bar--full">
+                    <div class="target-selector">
+                        <span class="form__label form__label--small">目標値：</span>
+                        <label class="target-selector__option button">
+                            <input type="radio" name="targetType" id="targetNone" value="none" checked>
+                            <label for="targetNone" class="form__label form__label--small">＼</label>
                         </label>
+                        <label class="target-selector__option button">
+                            <input type="radio" name="targetType" id="targetGte" value="gte">
+                            <label for="targetGte" class="form__label form__label--small">≧</label>
+                        </label>
+                        <label class="target-selector__option button">
+                            <input type="radio" name="targetType" id="targetLte" value="lte">
+                            <label for="targetLte" class="form__label form__label--small">≦</label>
+                        </label>
+                        <input type="number" id="targetValue" placeholder="値" class="form__input form__input--compact">
                     </div>
+                    <button class="control-bar__item control-bar__item--end material-symbols-rounded button" style="anchor-name: --addbuffbtn;" onclick="openJudgeModal()">
+                        add_2<div class="tooltip" style="--target: --addbuffbtn;">判定を追加</div>
+                        </button>
+                    <label class="control-bar__item list__index list__index--bookmark">
+                        <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
+                        <span class="material-symbols-rounded">bookmark</span>
+                        <select class="button" id="judgeItemIndex"></select>
+                    </label>
+                </div>
 
-                                <div class="list" id="judgeList">
-                                    <div class="list__empty">判定パッケージを追加してください</div>
-                                </div>
-                        <div class="output">
-                            <div class="output__label">コピペ用コマンド</div>
-                            <div class="output__text" id="judgeOutput">判定を選択してください</div>
-                            <button class="button button--copy" data-target="judgeOutput">コピー</button>
-                        </div>
+                <div class="list" id="judgeList">
+                    <div class="list__empty">判定パッケージを追加してください</div>
+                </div>
+                <div class="output">
+                    <div class="output__label">コピペ用コマンド</div>
+                    <div class="output__text" id="judgeOutput">判定を選択してください</div>
+                    <button class="button button--copy" data-target="judgeOutput">コピー</button>
                 </div>
             </div>
+<!--タブ-->
+            <label class="tabs__label section__header"><input class="tabs__input" type="radio" name="TAB">
+                <span class="material-symbols-rounded">swords</span>
+                <span class="section__title">攻撃</span>
+            </label>
+<!--攻撃-->
+            <div class="tabs__panel section__body">
+                <div class="control-bar control-bar--full">
+                    <button class="control-bar__item control-bar__item--end material-symbols-rounded button" style="anchor-name: --addbuffbtn;" onclick="openAttackModal()">
+                        add_2<div class="tooltip" style="--target: --addbuffbtn;">攻撃を追加</div>
+                        </button>
+                    <label class="control-bar__item list__index list__index--bookmark">
+                        <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
+                        <span class="material-symbols-rounded">bookmark</span>
+                        <select class="button" id="attackItemIndex"></select>
+                    </label>
+                </div>
+                <div class="list" id="attackList">
+                    <div class="list__empty">攻撃パッケージを追加してください</div>
+                </div>
+                <div class="output">
+                    <div class="output__label">コピペ用コマンド</div>
+                    <div class="output__text" id="attackOutput">攻撃を選択してください</div>
+                    <button class="button button--copy" data-target="attackOutput">コピー</button>
+                </div>
+            </div>
+        </div>
 <!--判定　モーダル-->
             <dialog class="modal" id="judgeaddmodal" closedby="any">
-                    <div class="modal__header section__header section__header--modal">
+                    <div class="section__header section__header--modal">
                         <span class="modal__title">判定パッケージ追加</span>
                         <button class="material-symbols-rounded button button--danger modal__close" command="close" commandfor="judgeaddmodal">
                         close
@@ -418,7 +446,7 @@
                                 <p class="form__text">形式：判定名|判定ロール</p>
                                 <p class="form__text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="form__grid form__grid--stacked modal__section" id="bulkAddJudgeArea">
-                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1&#10;回避判定|1d20" class="form__textarea form__textarea--mono" style="height:80px;"></textarea>
+                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1&#10;回避判定|1d20" class="form__textarea form__textarea--mono"></textarea>
                                 <div>
                                     <div class="form__row">
                                         <span type="button" class="button button--grow" id="bulkAddJudgeConfirm">追加を実行</span>
@@ -428,38 +456,10 @@
                         </div>
                     </div>
             </dialog>
-<!--タブ-->
-            <div class="tabs__tab">
-                <label class="tabs__label section__header"><input class="tabs__input" type="radio" name="TAB">
-                    <span class="material-symbols-rounded">swords</span>
-                    <span class="section__title">攻撃</span>
-                </label>
-<!--攻撃-->
-                <div class="tabs__panel section__body">
-                    <div class="control-bar control-bar--full">
-                        <button class="control-bar__item control-bar__item--end material-symbols-rounded button" style="anchor-name: --addbuffbtn;" onclick="openAttackModal()">
-                            add_2<div class="tooltip" style="--target: --addbuffbtn;">攻撃を追加</div>
-                            </button>
-                        <label class="control-bar__item list__index list__index--bookmark">
-                            <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
-                            <span class="material-symbols-rounded">bookmark</span>
-                            <select class="button" id="attackItemIndex"></select>
-                        </label>
-                    </div>
-                    <div class="list" id="attackList">
-                        <div class="list__empty">攻撃パッケージを追加してください</div>
-                    </div>
-                    <div class="output">
-                        <div class="output__label">コピペ用コマンド</div>
-                        <div class="output__text" id="attackOutput">攻撃を選択してください</div>
-                        <button class="button button--copy" data-target="attackOutput">コピー</button>
-                    </div>
-                </div>
-            </div>
                 
 <!--攻撃　モーダル-->
             <dialog class="modal" id="attackaddmodal" closedby="any">
-                    <div class="modal__header section__header section__header--modal">
+                    <div class="section__header section__header--modal">
                         <span class="modal__title">攻撃パッケージ追加</span>
                         <button class="material-symbols-rounded button button--danger modal__close" command="close" commandfor="attackaddmodal">
                         close
@@ -525,7 +525,7 @@
                                 <p class="form__text">形式：攻撃名|攻撃ロール</p>
                                 <p class="form__text" style="margin-left: 7em; text-indent: -7em;">カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>間の行はそのカテゴリに入った状態で登録されます。<br>存在していないカテゴリの場合、カテゴリも同時に登録されます。
                             <div class="form__grid form__grid--stacked modal__section" id="bulkAddAttackArea">
-                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10&#10;ファイアボール|1d6+3" class="form__textarea form__textarea--mono" style="height:80px;"></textarea>
+                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10&#10;ファイアボール|1d6+3" class="form__textarea form__textarea--mono"></textarea>
                                 <div>
                                     <div class="form__row">
                                         <span type="button" class="button button--grow" id="bulkAddAttackConfirm">追加を実行</span>
