@@ -237,7 +237,7 @@ function getContrastColor(hexColor) {
     const g = parseInt(hexColor.slice(3, 5), 16);
     const b = parseInt(hexColor.slice(5, 7), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    return luminance > 0.5 ? '#000000' : '#ffffff';
+    return luminance > 0.5 ? '#282A36' : '#F8F8F2';
 }
 
 /**
@@ -1500,6 +1500,13 @@ function resetBuffForm() {
     document.getElementById('buffMemo').value = '';
     document.getElementById('buffSimpleMemoToggle').checked = false;
     state.selectedBuffTargets = [];
+    
+    const buffTargetSelect = document.getElementById('buffTargetSelect');
+    if (buffTargetSelect) {
+        Array.from(buffTargetSelect.options).forEach(option => {
+            option.selected = false;
+        });
+    }
     updateBuffTargetDropdown();
 }
 
@@ -2556,55 +2563,123 @@ function updatePackageOutput(type, selectedIndex = null) {
          (itemCategory && b.targets.includes(categoryKey + itemCategory)))
     );
     
-    const slotMap = {};
-    const normalEffects = [];
+const slotMap = {};
+const normalEffects = [];
+const buffColorMap = {};
+
+activeBuffs.forEach(buff => {
+    const effects = buff.effect.split(',').map(e => e.trim());
     
-    activeBuffs.forEach(buff => {
-        const effects = buff.effect.split(',').map(e => e.trim());
+    effects.forEach(effect => {
+        const slotMatch = effect.match(/\/\/([^/]+)=(.+)/);
         
-        effects.forEach(effect => {
-            const slotMatch = effect.match(/\/\/([^/]+)=(.+)/);
+        if (slotMatch) {
+            const slotName = slotMatch[1];
+            const slotValue = slotMatch[2];
             
-            if (slotMatch) {
-                const slotName = slotMatch[1];
-                const slotValue = slotMatch[2];
-                
-                if (!slotMap[slotName]) {
-                    slotMap[slotName] = [];
-                }
-                slotMap[slotName].push(slotValue);
-            } else if (effect) {
-                normalEffects.push(effect);
+            if (!slotMap[slotName]) {
+                slotMap[slotName] = [];
+                buffColorMap[slotName] = [];
             }
-        });
-    });
-    
-    command = command.replace(/\/\/([^/]+)\/\//g, (match, slotName) => {
-        if (slotMap[slotName] && slotMap[slotName].length > 0) {
-            return slotMap[slotName].join('');
+            slotMap[slotName].push(slotValue);
+            buffColorMap[slotName].push(buff.color);
+        } else if (effect) {
+            normalEffects.push({ text: effect, color: buff.color });
         }
-        return '';
     });
-    
-    normalEffects.forEach(effect => {
-        command += effect;
-    });
-    
-    if (type === 'judge') {
-        const targetType = document.querySelector('input[name="targetType"]:checked')?.value || 'none';
-        const targetValue = document.getElementById('targetValue').value.trim();
-        
-        if (targetType === 'gte' && targetValue) {
-            command += `>=${targetValue}`;
-        } else if (targetType === 'lte' && targetValue) {
-            command += `=<${targetValue}`;
-        }
+});
+
+// 基本ロールの部分（色なし）を配列で管理
+const commandParts = [{ text: command, color: null }];
+
+// 代入スロットを置換
+commandParts[0].text = commandParts[0].text.replace(/\/\/([^/]+)\/\//g, (match, slotName) => {
+    if (slotMap[slotName] && slotMap[slotName].length > 0) {
+        // ここで色付きパーツを挿入する印をつける
+        return `__SLOT_${slotName}__`;
     }
-    command += ` ${item.name}`
+    return '';
+});
+
+// スロット部分を色付きパーツに展開
+let finalParts = [];
+const baseText = commandParts[0].text;
+let lastIndex = 0;
+
+// スロット位置を探して分割
+const slotRegex = /__SLOT_([^_]+)__/g;
+let match;
+
+while ((match = slotRegex.exec(baseText)) !== null) {
+    // スロット前までのテキスト
+    if (match.index > lastIndex) {
+        finalParts.push({ 
+            text: baseText.substring(lastIndex, match.index), 
+            color: null 
+        });
+    }
     
-    document.getElementById(outputId).textContent = command;
+    // スロット内容を色付きで追加
+    const slotName = match[1];
+    if (slotMap[slotName]) {
+        slotMap[slotName].forEach((value, idx) => {
+            finalParts.push({ 
+                text: value, 
+                color: buffColorMap[slotName][idx]
+            });
+        });
+    }
+    
+    lastIndex = match.index + match[0].length;
 }
 
+// 残りのテキスト
+if (lastIndex < baseText.length) {
+    finalParts.push({ 
+        text: baseText.substring(lastIndex), 
+        color: null 
+    });
+}
+
+// 通常のバフ効果を追加（色付き）
+normalEffects.forEach(effect => {
+    finalParts.push(effect);
+});
+
+// 目標値処理
+let targetSuffix = '';
+if (type === 'judge') {
+    const targetType = document.querySelector('input[name="targetType"]:checked')?.value || 'none';
+    const targetValue = document.getElementById('targetValue').value.trim();
+    
+    if (targetType === 'gte' && targetValue) {
+        targetSuffix = `>=${targetValue}`;
+    } else if (targetType === 'lte' && targetValue) {
+        targetSuffix = `=<${targetValue}`;
+    }
+}
+
+finalParts.push({ text: targetSuffix, color: null });
+finalParts.push({ text: ` ${item.name}`, color: null });
+
+// HTML化して出力
+const outputElement = document.getElementById(outputId);
+outputElement.innerHTML = finalParts
+    .map(part => {
+        if (part.color) {
+            const textColor = getContrastColor(part.color);
+            return `<span style="color: ${part.color}">${escapeHtml(part.text)}</span>`;
+        }
+        return escapeHtml(part.text);
+    })
+    .join('');
+
+// テキスト版も保持（コピー用）
+outputElement.dataset.plainText = finalParts
+    .map(p => p.text)
+    .join('');
+
+}
 // ========================================
 // オートコンプリート機能
 // ========================================
@@ -2987,9 +3062,11 @@ function copyItemData(type, index, button) {
 }
 
 function copyToClipboard(elementId, button) {
-    const text = document.getElementById(elementId)?.textContent;
+    const element = document.getElementById(elementId);
+    // HTMLではなくdata属性のプレーンテキストをコピー
+    const text = element.dataset.plainText || element.textContent;
     
-    if (!text || text === '判定パッケージを選択してください' || text === '攻撃パッケージを選択してください') {
+    if (!text || text.includes('選択') || text.includes('を選択')) {
         showToast('パッケージを選択してください', 'error');
         return;
     }
