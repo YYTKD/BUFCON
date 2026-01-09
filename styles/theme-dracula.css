@@ -38,7 +38,7 @@
     --surface-panel-alt: var(--color-bg-light);
     --surface-card: var(--color-floating);
     --surface-elevated: var(--color-bg-lighter);
-    --surface-header: var(--color-bg-darker);
+    --surface-header: var(--color-bg-dark);
     --surface-input: var(--color-bg-dark);
     --surface-selection: var(--color-selection);
     --surface-hover: rgba(248, 248, 242, 0.08);
@@ -86,9 +86,9 @@
     --shadow-soft: rgba(0, 0, 0, 0.2);
     --overlay-backdrop: rgba(0, 0, 0, 0.6);
 
-    --tooltip-bg: var(--color-bg-darker);
+    --tooltip-bg: var(--color-bg-light);
     --tooltip-text: var(--color-foreground);
-    --context-menu-bg: var(--color-bg-darker);
+    --context-menu-bg: var(--color-bg-light);
     --context-menu-hover: var(--color-bg-light);
     --selection-bg: var(--color-selection);
 

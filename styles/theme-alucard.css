@@ -36,7 +36,7 @@
     --surface-panel-alt: var(--color-bg-light);
     --surface-card: var(--color-floating);
     --surface-elevated: var(--color-bg-lighter);
-    --surface-header: var(--color-bg-darker);
+    --surface-header: var(--color-bg-dark);
     --surface-input: var(--color-bg-light);
     --surface-selection: var(--color-selection);
     --surface-hover: rgba(31, 31, 31, 0.08);
