@@ -19,15 +19,15 @@
 
 /*基本設定・デフォルト使用削除*/
 input {
-    border-color: var(--focus-ring);
+    border-color: var(--color-f-purple);
 }
         
 .form__input {
     padding: 6px 8px;
     border-radius: 4px;
-    border: 1px solid var(--input-border);
-    background: var(--surface-input);
-    color: var(--text-primary);
+    border: 1px solid var(--color-selection);
+    background: var(--color-bg-light);
+    color: var(--color-foreground);
     font-size: 14px;
     height: 40px;
     width: 100%;
@@ -37,24 +37,24 @@ input {
     width: 100%;
     min-height: 128px;
     padding: 8px;
-    border: 1px solid var(--input-border);
+    border: 1px solid var(--color-selection);
     border-radius: 4px;
     font-size: 12px;
     font-family: monospace;
     resize: vertical;
-    background: var(--surface-input);
-    color: var(--text-primary); 
+    background: var(--color-bg-light);
+    color: var(--color-foreground); 
 }
 
 .form__input::placeholder,
 .form__textarea--memo::placeholder {
-    color: var(--input-placeholder);
+    color: var(--color-current-line);
 }
 
 .form__input:focus,
 .form__textarea--memo:focus {
     outline: none;
-    border: 2px solid var(--focus-ring);
+    border: 2px solid var(--color-f-purple);
 }
 
 button {
@@ -77,35 +77,35 @@ details summary::marker {
 
 body {
     font-family: 'Kosugi Maru', system-ui, sans-serif;
-    background: var(--surface-page);
-    color: var(--text-primary);
+    background: var(--color-background);
+    color: var(--color-foreground);
     padding: 0;
     box-sizing: border-box !important;
 }
 
 a {
-    color: var(--link-color);
+    color: var(--color-f-cyan);
     text-decoration: underline;
     text-underline-offset: 2px;
 }
 
 a:hover {
-    color: var(--accent-secondary);
+    color: var(--color-pink);
 }
 
 ::selection {
-    background: var(--selection-bg);
-    color: var(--text-primary);
+    background: var(--color-selection);
+    color: var(--color-foreground);
 }
 
 :focus-visible {
-    outline: 2px solid var(--focus-ring);
+    outline: 2px solid var(--color-f-purple);
     outline-offset: 2px;
 }
 
 .context-menu {
     position: absolute;
-    background: var(--context-menu-bg);
+    background: var(--color-bg-light);
     box-shadow: var(--shadow);
     border-radius: 4px;
     padding: 4px 0;
@@ -123,17 +123,17 @@ a:hover {
     background: transparent;
     border: none;
     font-size: 14px;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     cursor: pointer;
 }
 
 .context-menu__item:hover {
-    background: var(--context-menu-hover);
+    background: var(--color-bg-light);
 }
 
 .context-menu__separator {
     height: 1px;
-    background: var(--border-default);
+    background: var(--color-selection);
     margin: 4px 0;
 }
 
@@ -160,7 +160,7 @@ input[type="number"]::-webkit-outer-spin-button {
 /* メインコンテナ */
 .app {
     padding: 8px;
-    background: var(--surface-page);
+    background: var(--color-background);
     overflow: hidden;
 }
 
@@ -183,9 +183,9 @@ input[type="number"]::-webkit-outer-spin-button {
 .button {
     display: flex;
     padding: 4px 8px;
-    background: var(--button-primary-bg);
-    color: var(--button-primary-text);
-    border: 1px solid var(--border-strong);
+    background: var(--color-purple);
+    color: var(--color-background);
+    border: 1px solid var(--color-current-line);
     outline-offset: -1px;
     border-radius: 4px;
     font-size: 16px;
@@ -219,7 +219,7 @@ input[type="number"]::-webkit-outer-spin-button {
     content: "";
     position: absolute;
     border: 10px solid transparent;
-    border-bottom-color: var(--tooltip-bg);
+    border-bottom-color: var(--color-bg-light);
     top: 8px;
     left: 24px;
     transform: rotate(-180deg);
@@ -228,8 +228,8 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .button--secondary { 
     display: flex; 
-    background: var(--button-secondary-bg); 
-    color: var(--button-secondary-text);
+    background: var(--color-bg-light); 
+    color: var(--color-foreground);
     align-items: center; 
     justify-content: center; 
     flex-wrap: wrap;
@@ -262,7 +262,7 @@ details[open] summary .material-symbols-rounded {
 .modal__divider {
     display: flex;
     align-self: center;
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--color-selection);
     width: calc(100% + 32px);
 }
 
@@ -275,8 +275,8 @@ dialog {
         position: fixed;
     max-width: 720px;
     width: -webkit-fill-available;
-    background: var(--surface-panel);
-    outline: 2px solid var(--border-strong);
+    background: var(--color-bg-dark);
+    outline: 2px solid var(--color-current-line);
     justify-self: center;
     align-self: flex-start;
     margin: 20px 8px;
@@ -292,7 +292,7 @@ dialog::-webkit-scrollbar {
 }
 
 dialog::backdrop {
-    background: var(--overlay-backdrop);
+    background: color-mix(in srgb, var(--color-bg-darker) 60%, transparent);
 }
 
 /* ========================================
@@ -303,8 +303,8 @@ dialog::backdrop {
 .tooltip {
     position: absolute;
     min-height: 32px;
-    background: var(--tooltip-bg);
-    color: var(--tooltip-text);
+    background: var(--color-bg-light);
+    color: var(--color-foreground);
     padding: 8px;
     border-radius: 4px;
     font-size: 12px;
@@ -322,7 +322,7 @@ dialog::backdrop {
     content: "";
     position: absolute;
     border: 10px solid transparent;
-    border-bottom-color: var(--tooltip-bg);
+    border-bottom-color: var(--color-bg-light);
     margin-top: 4px;
     transform: rotate(-180deg);
     transform-origin: bottom center;
@@ -365,10 +365,10 @@ dialog::backdrop {
     position: fixed;
     right: 20px;
     padding: 12px 20px;
-    background: var(--surface-card);
-    color: var(--text-primary);
+    background: var(--color-floating);
+    color: var(--color-foreground);
     border-radius: 6px;
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--color-selection);
     box-shadow: var(--shadow);
     z-index: 10000;
     animation: slideIn 0.3s ease-out;
@@ -377,21 +377,21 @@ dialog::backdrop {
 }
 
 .toast--error {
-    border-left: 4px solid var(--status-danger);
+    border-left: 4px solid var(--color-f-red);
 }
 
 .toast--success {
-    border-left: 4px solid var(--status-success);
+    border-left: 4px solid var(--color-f-green);
 }
 
 .toast--info {
-    border-left: 4px solid var(--status-info);
+    border-left: 4px solid var(--color-f-cyan);
 }
 
 /* 出力ボックス */
 .output {
-    background: var(--surface-card);
-    border: 1px solid var(--border-default);
+    background: var(--color-floating);
+    border: 1px solid var(--color-selection);
     border-radius: 4px;
     padding: 10px;
     position: relative;
@@ -400,7 +400,7 @@ dialog::backdrop {
 .output__label {
     font-size: 11px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--color-current-line);
     margin-bottom: 6px;
 }
 
@@ -427,7 +427,7 @@ dialog::backdrop {
     position: fixed;
     width: 100%;
     height: 40px;
-    background: var(--surface-header);
+    background: var(--color-bg-dark);
     z-index: 1000;
     box-shadow: var(--shadow);
 }
@@ -439,7 +439,7 @@ dialog::backdrop {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    color: var(--text-primary);
+    color: var(--color-foreground);
 }
 
 .site-header__title {
@@ -457,7 +457,7 @@ dialog::backdrop {
     min-width: 120px;
     height: stretch;
     justify-content: flex-end;
-    color: var(--text-primary);
+    color: var(--color-foreground);
 }
 
 .site-header__menu-item {
@@ -467,14 +467,14 @@ dialog::backdrop {
     justify-content: center;
     width: stretch;
     height: stretch;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     cursor: pointer;
     opacity: 1;
     transition: 0.2s ease;
 }
 
 .site-header__menu-item:hover {
-    background: var(--surface-hover);
+    background: color-mix(in srgb, var(--color-foreground) 8%, transparent);
 }
 
 .site-header__menu-item--settings {
@@ -490,7 +490,7 @@ dialog::backdrop {
 }
 
 .site-header__menu-item:hover .tooltip {
-    background: var(--surface-header);
+    background: var(--color-bg-dark);
     opacity: 1;
     bottom: calc(anchor(bottom) - 40px);
     transform: translateX(-20%);
@@ -509,8 +509,8 @@ dialog::backdrop {
     position: absolute;
     top: 100%;
     right: anchor(right);
-    background: var(--surface-header);
-    border: 1px solid var(--border-strong);
+    background: var(--color-bg-dark);
+    border: 1px solid var(--color-current-line);
     border-radius: 8px;
     box-shadow: var(--shadow);
     min-width: 180px;
@@ -533,7 +533,7 @@ dialog::backdrop {
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     background: transparent;
     border: none;
     font-size: 14px;
@@ -542,7 +542,7 @@ dialog::backdrop {
 }
 
 .site-header__dropdown-item:hover {
-    background: var(--surface-hover);
+    background: color-mix(in srgb, var(--color-foreground) 8%, transparent);
 }
 
 
@@ -562,15 +562,15 @@ dialog::backdrop {
 .section__header,
 .section__header--modal {
     display: flex;
-    background: var(--surface-card);
+    background: var(--color-floating);
     padding: 4px 8px;
     min-height: 32px;
     width: 100%;
     border-radius: 4px 4px 0 0;
     font-weight: 600;
     font-size: 18px;
-    outline: 2px solid var(--border-strong);
-    color: var(--text-primary);
+    outline: 2px solid var(--color-current-line);
+    color: var(--color-foreground);
     user-select: none;
     justify-content: flex-start;
     align-items: center;
@@ -579,7 +579,7 @@ dialog::backdrop {
 .section__header--modal {
     position: sticky;
     top: 0;
-    outline: 2px solid var(--border-strong);
+    outline: 2px solid var(--color-current-line);
     z-index: 20;
     anchor-name: --S-header;
 }
@@ -596,8 +596,8 @@ input[type="radio"] {
     gap: 8px;
     padding: 8px;
     border-radius: 0 0 4px 4px;
-    outline: 2px solid var(--border-strong);
-    background: var(--surface-panel);
+    outline: 2px solid var(--color-current-line);
+    background: var(--color-bg-dark);
     height: auto;
     width: 100%;
     transition:
@@ -626,7 +626,7 @@ dialog .modal__body {
 
 .modal__section--divider {
     padding-top: 12px;
-    border-top: 2px solid var(--border-strong);
+    border-top: 2px solid var(--color-current-line);
 }
 
 .modal__close {
@@ -643,9 +643,9 @@ dialog .modal__body {
 
 .tabs__label {
     display: flex;
-    background: var(--surface-card);
+    background: var(--color-floating);
     cursor: pointer;
-    color: var(--text-secondary);
+    color: var(--color-current-line);
     transition: all 0.1s ease-out; 
     order: -1;
     flex: 1;
@@ -658,8 +658,8 @@ dialog .modal__body {
 }
 
 .tabs__label:has(:checked) {
-    background: var(--surface-card);
-    color: var(--text-primary);
+    background: var(--color-floating);
+    color: var(--color-foreground);
     z-index: 10;
     transition: all 0.1s ease-out;
 }
@@ -716,7 +716,7 @@ dialog .modal__body {
 .form__grid input:focus, 
 .form__grid select:focus {
     outline: none;
-    border: 2px solid var(--focus-ring);
+    border: 2px solid var(--color-f-purple);
 }
 
 .form__grid input[type="color"] {
@@ -731,20 +731,20 @@ dialog .modal__body {
 }
 
 .drop-zone--active {
-    border: 3px dashed var(--accent-primary) !important;
-    background: var(--surface-selection) !important;
+    border: 3px dashed var(--color-purple) !important;
+    background: var(--color-selection) !important;
 }
 
 .form__label--btn {
-    background: var(--surface-elevated);
+    background: var(--color-bg-lighter);
     border-radius: 2px;
     padding:2px;
-    outline: 1px solid var(--border-strong);
+    outline: 1px solid var(--color-current-line);
 }
 
 .form__label--btn:has(input:checked) {
-    color: var(--text-primary);
-    outline: 2px solid var(--status-success);
+    color: var(--color-foreground);
+    outline: 2px solid var(--color-f-green);
 
 }
 
@@ -763,8 +763,8 @@ dialog .modal__body {
     cursor: pointer;
     align-content: center;
     justify-content: center;
-    background: var(--surface-panel);
-    outline: 2px solid var(--border-default);
+    background: var(--color-bg-dark);
+    outline: 2px solid var(--color-selection);
     aspect-ratio: 1 / 1;
 }
 
@@ -772,7 +772,7 @@ dialog .modal__body {
     text-align: center;
     font-size: 14px;
     font-weight: 800;
-    color: var(--text-secondary);
+    color: var(--color-current-line);
     margin: 0;
     cursor: pointer;
 }
@@ -784,12 +784,12 @@ dialog .modal__body {
 }
 
 .target-selector__option:has(input:checked) label {
-    color: var(--text-primary);
+    color: var(--color-foreground);
 }
 
 .target-selector__option:has(input:checked)  {
-    background: var(--surface-selection);
-    outline: 2px solid var(--border-strong);
+    background: var(--color-selection);
+    outline: 2px solid var(--color-current-line);
 }
 
 /* バフコントロール */
@@ -816,18 +816,18 @@ dialog .modal__body {
 }
 
 .button--turn {
-    background: var(--surface-card);
-    color: var(--text-primary);
+    background: var(--color-floating);
+    color: var(--color-foreground);
 }
 
 .button--turn:hover {
     background: var(--color-orange);
-    color: var(--text-on-warning);
+    color: var(--color-background);
 }
 
 #turnResetBtn:hover {
-    background: var(--button-danger-bg);
-    color: var(--button-danger-text);
+    background: var(--color-red);
+    color: var(--color-background);
 }
 
 .button--turn:hover .tooltip {
@@ -864,8 +864,8 @@ dialog .modal__body {
     border-radius: 12px;
     border: none;
     cursor: pointer;
-    background: var(--toggle-track);
-    box-shadow: inset 0 2px var(--shadow-soft);
+    background: var(--color-bg-light);
+    box-shadow: inset 0 2px color-mix(in srgb, var(--color-bg-darker) 20%, transparent);
     align-items: center;
 }
 
@@ -877,7 +877,7 @@ dialog .modal__body {
 }
 
 .toggle--active {
-    background: var(--toggle-track-active);
+    background: var(--color-selection);
     mix-blend-mode: luminosity;
 }
 
@@ -889,8 +889,8 @@ dialog .modal__body {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: var(--toggle-thumb);
-    box-shadow: inset 0 -1px var(--shadow-soft);
+    background: var(--color-foreground);
+    box-shadow: inset 0 -1px color-mix(in srgb, var(--color-bg-darker) 20%, transparent);
 }
 
 .toggle--active::after {
@@ -902,8 +902,8 @@ dialog .modal__body {
     position: absolute;
     top: 8px;
     right: 8px;
-    background: var(--button-primary-bg);
-    color: var(--button-primary-text);
+    background: var(--color-purple);
+    color: var(--color-background);
     border: none;
     border-radius: 4px;
     padding: 4px 10px;
@@ -916,8 +916,8 @@ dialog .modal__body {
 }
 
 .button--copy.button--copied {
-    background: var(--button-success-bg);
-    color: var(--button-success-text);
+    background: var(--color-green);
+    color: var(--color-background);
 }
 
 /* ========================================
@@ -932,9 +932,9 @@ dialog .modal__body {
     padding: 4px;
     height: 240px;
     min-height: 100px;
-    background: var(--surface-panel);
+    background: var(--color-bg-dark);
     border-radius: 4px;
-    outline: 1px solid var(--border-default);
+    outline: 1px solid var(--color-selection);
     resize: vertical;
     overflow: auto;
     -ms-overflow-style: none;
@@ -976,16 +976,16 @@ dialog .modal__body {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: var(--surface-card);
+    background: var(--color-floating);
     border: none;
-    color: var(--text-primary);
+    color: var(--color-foreground);
 }
         
 .list__index > span {
     position: absolute;
     z-index: 1;
     font-size: 32px;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     pointer-events: none;
 }
 
@@ -996,8 +996,8 @@ dialog .modal__body {
 }
 
 .list__index:hover > span {
-    background: var(--surface-hover-strong);
-    color: var(--text-primary);
+    background: color-mix(in srgb, var(--color-foreground) 16%, transparent);
+    color: var(--color-foreground);
 }
 
 
@@ -1012,7 +1012,7 @@ dialog .modal__body {
     content: "";
     position: absolute;
     border: 10px solid transparent;
-    border-bottom-color: var(--tooltip-bg);
+    border-bottom-color: var(--color-bg-light);
     top: 8px;
     right: 12px;
     transform: rotate(-180deg);
@@ -1031,8 +1031,8 @@ dialog .modal__body {
 
         .autocomplete {
             position: absolute;
-            background: var(--surface-card);
-            border: 1px solid var(--border-default);
+            background: var(--color-floating);
+            border: 1px solid var(--color-selection);
             border-radius: 4px;
             box-shadow: var(--shadow);
             z-index: 1150;
@@ -1059,7 +1059,7 @@ dialog .modal__body {
             padding: 8px 12px;
             cursor: pointer;
             transition: background-color 0.1s;
-            border-bottom: 1px solid var(--border-default);
+            border-bottom: 1px solid var(--color-selection);
             gap: 8px;
         }
 
@@ -1069,20 +1069,20 @@ dialog .modal__body {
 
 .autocomplete__item:hover,
 .autocomplete__item--selected {
-    background-color: var(--surface-elevated);
+    background-color: var(--color-bg-lighter);
 }
 
         .autocomplete__text {
             flex: 1;
             font-size: 13px;
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--color-foreground);
             word-break: break-all;
         }
 
         .autocomplete__category {
             font-size: 11px;
-            color: var(--text-secondary);
+            color: var(--color-current-line);
             white-space: nowrap;
             flex-shrink: 0;
         }
@@ -1092,11 +1092,11 @@ dialog .modal__body {
     display: flex;
     align-items: center;
     padding: 2px 4px;
-    background: var(--surface-elevated);
+    background: var(--color-bg-lighter);
     border-radius: 2px;
     font-size: 16px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     transition: all 0.1s;
     cursor: grab;
     position: relative;
@@ -1106,7 +1106,7 @@ dialog .modal__body {
 .list__category-header--dragging {
     opacity: 30% !important;
     background: none !important;
-    outline: 2px solid var(--accent-primary) !important;
+    outline: 2px solid var(--color-purple) !important;
     box-shadow: var(--shadow);
     cursor: grabbing;
 }
@@ -1124,7 +1124,7 @@ dialog .modal__body {
 .list__item {
     display: flex;
     padding: 4px 8px;
-    background: var(--surface-card);
+    background: var(--color-floating);
     border-radius: 2px;
     font-size: 14px;
     transition: all 0.1s;
@@ -1157,7 +1157,7 @@ dialog .modal__body {
 }
 
 .list__item--clickable:hover {
-    outline: 2px solid var(--accent-primary);
+    outline: 2px solid var(--color-purple);
 }
 
 .list__item:hover .tooltip {
@@ -1169,15 +1169,15 @@ dialog .modal__body {
 }
 
 .list__item--selected {
-    background: var(--surface-elevated);
-    outline: 2px solid var(--accent-primary);
+    background: var(--color-bg-lighter);
+    outline: 2px solid var(--color-purple);
 }
 
 /* ドラッグ機能 */
 .list__item--dragging {
     opacity: 30% !important;
     background: none !important;
-    outline: 1px solid var(--add-color) !important;
+    outline: 1px solid var(--color-f-green) !important;
     box-shadow: var(--shadow);
     cursor: grabbing;
 }
@@ -1190,7 +1190,7 @@ dialog .modal__body {
     right: 0;
     height: 2px;
     z-index: 50;
-    background: var(--status-danger);
+    background: var(--color-f-red);
 }
 
 .list__item--drag-over-bottom::after {
@@ -1201,18 +1201,18 @@ dialog .modal__body {
     right: 0;
     height: 2px;
     z-index: 50;
-    background: var(--status-danger);
+    background: var(--color-f-red);
 }
 
 .list__category-header--drag-over {
-    outline: 2px dashed var(--accent-primary);
-    background: var(--surface-selection);
+    outline: 2px dashed var(--color-purple);
+    background: var(--color-selection);
     border-radius: 4px;
 }
 
 .list__category-body--drag-over {
-    outline: 2px dashed var(--accent-primary);
-    background: var(--surface-selection);
+    outline: 2px dashed var(--color-purple);
+    background: var(--color-selection);
     border-radius: 4px;
 }
 
@@ -1250,8 +1250,8 @@ dialog .modal__body {
     justify-self: center;
     gap: 4px;
     font-size: 12px;
-    background: var(--surface-elevated);
-    color: var(--text-primary);
+    background: var(--color-bg-lighter);
+    color: var(--color-foreground);
     cursor: auto;
     width: calc(100% + 8px);
 }
@@ -1262,7 +1262,7 @@ dialog .modal__body {
     flex-wrap: wrap;
     gap: 1px;
     padding-bottom: 2px;
-    border-bottom: 1px solid var(--border-default);
+    border-bottom: 1px solid var(--color-selection);
 }
 
 .buff__details div:first-of-type p{
@@ -1285,7 +1285,7 @@ dialog .modal__body {
     white-space: pre-wrap;
     word-break: break-word;
     font-weight: 400;
-    color: var(--text-primary);
+    color: var(--color-foreground);
 
 }
 
@@ -1323,7 +1323,7 @@ dialog .modal__body {
 }
 
 .list__item-detail {
-    color: var(--text-secondary);
+    color: var(--color-current-line);
     font-size: 12px;
     font-weight: 600;
 }
@@ -1331,7 +1331,7 @@ dialog .modal__body {
 .list__item-detail-label {
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--color-current-line);
 }
 
 /* バフボタングループ */
@@ -1350,8 +1350,8 @@ dialog .modal__body {
     left: -12px;
     width: 24px;
     height: 24px;
-    background: var(--surface-panel);
-    color: var(--text-primary);
+    background: var(--color-bg-dark);
+    color: var(--color-foreground);
     border-radius: 50%;
 }
 
@@ -1372,7 +1372,7 @@ dialog .modal__body {
     position: fixed;
     right: calc(anchor(right) + 12px);
     top: calc(anchor(bottom) + 8px);
-    background: var(--surface-card);
+    background: var(--color-floating);
     height: 40px;
     width: 40px;
     z-index: 2;
@@ -1385,7 +1385,7 @@ dialog .modal__body {
 
 .form__help-toggle span {
     position:relative;
-    color: var(--text-primary);
+    color: var(--color-foreground);
 }
 
 .form__help-toggle input {
@@ -1393,19 +1393,19 @@ dialog .modal__body {
 }
         
 .form__help-toggle:has(input:checked) {
-    background: var(--surface-selection);
-    border: 1px solid var(--status-warning) !important;
-    color: var(--status-warning) !important;
-    box-shadow: inset 0 1px var(--shadow-soft) !important;
+    background: var(--color-selection);
+    border: 1px solid var(--color-f-orange) !important;
+    color: var(--color-f-orange) !important;
+    box-shadow: inset 0 1px color-mix(in srgb, var(--color-bg-darker) 20%, transparent) !important;
 }
         
 .form__note {
-    background: var(--surface-selection);
-    border: 1px solid var(--status-warning);
+    background: var(--color-selection);
+    border: 1px solid var(--color-f-orange);
     border-radius: 4px;
     padding: 8px;
     font-size: 12px;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     transform: scale(0);
     display: none;
     transition: transform 1s ease-out;
@@ -1420,7 +1420,7 @@ dialog .modal__body {
 /* 空メッセージ */
 .list__empty {
     text-align: center;
-    color: var(--text-secondary);
+    color: var(--color-current-line);
     font-size: 12px;
     padding: 12px;
 }
@@ -1429,7 +1429,7 @@ dialog .modal__body {
 .legal {
     margin: 12px;
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--color-current-line);
         cursor: pointer;
 }
 
@@ -1452,15 +1452,15 @@ dialog .modal__body {
 
 .u-hidden { display: none; }
 .harf-size { width: 50%;}
-.form__textarea--memo { width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; background: var(--surface-input); color: var(--text-primary); }
+.form__textarea--memo { width: 100%; padding: 8px; border: 1px solid var(--color-selection); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; background: var(--color-bg-light); color: var(--color-foreground); }
 .form__row { display: flex; gap: 6px;}
-.button--muted { background: var(--button-muted-bg); color: var(--button-muted-text); border: 1px solid var(--border-strong); }
-.button--info { background: var(--button-info-bg); color: var(--button-info-text); border: 1px solid var(--border-strong); }
-.button--danger { background: var(--button-danger-bg); width: 30%; color: var(--button-danger-text); border: 1px solid var(--border-strong); }
-.form__text { font-size: 11px; color: var(--text-primary); margin: 6px; }
-.form__label--small { font-size: 12px; font-weight: 600; color: var(--text-primary); display: block; margin: 8px 0 2px 2px;}
-.form__label--large { font-size: 16px; font-weight: 600; color: var(--text-secondary); display: flex; margin: 0 0 0 2px; gap: 8px; align-items: center; }
-.form__input--compact { width: 60px; padding: 4px 6px; border: 1px solid var(--input-border); border-radius: 4px; background: var(--surface-input); color: var(--text-primary); }
+.button--muted { background: var(--color-bg-light); color: var(--color-foreground); border: 1px solid var(--color-current-line); }
+.button--info { background: var(--color-cyan); color: var(--color-background); border: 1px solid var(--color-current-line); }
+.button--danger { background: var(--color-red); width: 30%; color: var(--color-background); border: 1px solid var(--color-current-line); }
+.form__text { font-size: 11px; color: var(--color-foreground); margin: 6px; }
+.form__label--small { font-size: 12px; font-weight: 600; color: var(--color-foreground); display: block; margin: 8px 0 2px 2px;}
+.form__label--large { font-size: 16px; font-weight: 600; color: var(--color-current-line); display: flex; margin: 0 0 0 2px; gap: 8px; align-items: center; }
+.form__input--compact { width: 60px; padding: 4px 6px; border: 1px solid var(--color-selection); border-radius: 4px; background: var(--color-bg-light); color: var(--color-foreground); }
 
 .form__label--row {
     display: flex;
