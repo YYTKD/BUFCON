@@ -255,7 +255,61 @@ function escapeHtml(text) {
  */
 function validateColor(color) {
     const hexPattern = /^#[0-9A-Fa-f]{6}$/;
-    return hexPattern.test(color) ? color : '#ff6b6b';
+    if (hexPattern.test(color)) return color;
+    return getThemeColorValue('--color-red', '#FF5555');
+}
+
+function getThemeColorValue(variable, fallback) {
+    const value = getComputedStyle(document.documentElement)
+        .getPropertyValue(variable)
+        .trim();
+    return value || fallback;
+}
+
+function getDefaultBuffColor() {
+    return getThemeColorValue('--color-purple', '#BD93F9');
+}
+
+function getSecondaryBuffColor() {
+    return getThemeColorValue('--color-orange', '#FFB86C');
+}
+
+// ========================================
+// テーマ管理
+// ========================================
+const THEME_STORAGE_KEY = 'theme';
+const THEME_OPTIONS = {
+    dracula: { label: 'Dracula', icon: 'dark_mode' },
+    alucard: { label: 'Alucard', icon: 'light_mode' }
+};
+
+function applyTheme(theme, persist = true) {
+    const normalized = theme === 'alucard' ? 'alucard' : 'dracula';
+    document.documentElement.setAttribute('data-theme', normalized);
+    updateThemeToggle(normalized);
+    if (persist) {
+        try {
+            localStorage.setItem(THEME_STORAGE_KEY, normalized);
+        } catch (e) {
+            console.error('テーマ設定の保存に失敗:', e);
+        }
+    }
+}
+
+function updateThemeToggle(theme) {
+    const toggle = document.getElementById('themeToggle');
+    if (!toggle) return;
+    const option = THEME_OPTIONS[theme] || THEME_OPTIONS.dracula;
+    const icon = toggle.querySelector('.material-symbols-rounded');
+    const text = toggle.querySelector('.site-header__dropdown-text');
+    if (icon) icon.textContent = option.icon;
+    if (text) text.textContent = `テーマ: ${option.label}`;
+    toggle.setAttribute('aria-pressed', String(theme === 'alucard'));
+}
+
+function initTheme() {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    applyTheme(stored || 'dracula', false);
 }
 
 /**
@@ -272,21 +326,8 @@ function showToast(message, type = 'info') {
     const top = activeModal ? '60px' : '80px';
 
     const toast = document.createElement('div');
-    toast.style.cssText = `
-        position: fixed;
-        top: ${top};
-        right: 20px;
-        padding: 12px 20px;
-        background: ${type === 'error' ? '#d9376e' : type === 'success' ? '#48c229' : '#5c59ff'};
-        color: white;
-        border-radius: 6px;
-        border: 2px solid var(--primary-color-1);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        z-index: 10000;
-        animation: slideIn 0.3s ease-out;
-        font-size: 14px;
-        max-width: 300px;
-    `;
+    toast.className = `toast toast--${type}`;
+    toast.style.top = top;
     toast.textContent = message;
 
     parent.appendChild(toast);
@@ -413,9 +454,11 @@ function loadData() {
 }
 
 function getDefaultBuffs() {
+    const primaryColor = getDefaultBuffColor();
+    const secondaryColor = getSecondaryBuffColor();
     return [
-        { name: 'キャッツアイ', memo: '命中UP', showSimpleMemo: true, effect: '+1', targets: ['judge:命中(武器A)　SAMPLE'], turn: '3', originalTurn: 3, color: '#F8F9FA', category: null, active: true },
-        { name: 'オーバーパワー', memo: 'ダメージUP', showSimpleMemo: true, effect: '+3', targets: ['attack:all-attack'], color: '#F7821B', category: null, active: true }
+        { name: 'キャッツアイ', memo: '命中UP', showSimpleMemo: true, effect: '+1', targets: ['judge:命中(武器A)　SAMPLE'], turn: '3', originalTurn: 3, color: primaryColor, category: null, active: true },
+        { name: 'オーバーパワー', memo: 'ダメージUP', showSimpleMemo: true, effect: '+3', targets: ['attack:all-attack'], color: secondaryColor, category: null, active: true }
     ];
 }
 
@@ -553,20 +596,14 @@ function initFileDropZone() {
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            dropZone.style.borderColor = '#4769b3';
-            dropZone.style.borderStyle = 'dashed';
-            dropZone.style.borderWidth = '3px';
-            dropZone.style.background = '#e7f3ff';
+            dropZone.classList.add('drop-zone--active');
         });
         
         // ドラッグが離れた時の処理
         dropZone.addEventListener('dragleave', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            dropZone.style.borderColor = '';
-            dropZone.style.borderStyle = '';
-            dropZone.style.borderWidth = '';
-            dropZone.style.background = '';
+            dropZone.classList.remove('drop-zone--active');
         });
         
         // ドロップ時の処理
@@ -575,10 +612,7 @@ function initFileDropZone() {
             e.stopPropagation();
             
             // スタイルを元に戻す
-            dropZone.style.borderColor = '';
-            dropZone.style.borderStyle = '';
-            dropZone.style.borderWidth = '';
-            dropZone.style.background = '';
+            dropZone.classList.remove('drop-zone--active');
             
             // ファイルを取得
             const files = e.dataTransfer.files;
@@ -1461,7 +1495,7 @@ function resetBuffForm() {
     document.getElementById('buffName').value = '';
     document.getElementById('buffEffect').value = '';
     document.getElementById('buffTurn').value = '';
-    document.getElementById('buffColor').value = '#F8F9FA';
+    document.getElementById('buffColor').value = getDefaultBuffColor();
     document.getElementById('buffCategorySelect').value = 'none';
     document.getElementById('buffMemo').value = '';
     document.getElementById('buffSimpleMemoToggle').checked = false;
@@ -1553,7 +1587,8 @@ function bulkAdd(type) {
                                 const colorPattern = /^#[0-9A-Fa-f]{6}$/;
                 const colorIndex = parts.findIndex((part, idx) => idx >= 2 && colorPattern.test(part));
                 const memoAfterColor = (colorIndex >= 0 && colorIndex + 1 < parts.length) ? (parts[colorIndex + 1] || '') : '';
-                const color = validateColor(colorIndex >= 0 ? (parts[colorIndex] || '#0079FF') : (parts[4] || '#0079FF'));
+                const defaultColor = getDefaultBuffColor();
+                const color = validateColor(colorIndex >= 0 ? (parts[colorIndex] || defaultColor) : (parts[4] || defaultColor));
 
                 const payloadEnd = colorIndex >= 0 ? colorIndex : parts.length;
                 const payload = parts.slice(2, payloadEnd);
@@ -2912,7 +2947,7 @@ function formatBuffForBulk(buff) {
         simpleMemo,
         buff.effect || '',
         turnText,
-        buff.color || '#0079FF'
+        buff.color || getDefaultBuffColor()
     ].join('|');
 }
 
@@ -2976,6 +3011,14 @@ function copyToClipboard(elementId, button) {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle?.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme') || 'dracula';
+        const next = current === 'dracula' ? 'alucard' : 'dracula';
+        applyTheme(next);
+    });
+
     setupSettingsMenu();
 
     document.querySelectorAll('.section__header').forEach(header => {

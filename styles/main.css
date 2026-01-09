@@ -9,18 +9,215 @@
 }
 
 /*グローバルカラーとサイズ */
-:root {
-    /* カラーパレット */
-    --primary-color-1: #0d0d0d;
-    --primary-color-2: #3d3d3d;
-    --primary-color-3: #9d9d9d;
-    --secondary-color-1: #f7f8fb;
-    --secondary-color-2: #c7c8cb;
-    --btn-color: #5c59ff;
-    --pickup-color: #ff8e3c;
-    --success-color: #48c229;
-    --danger-color: #d9376e;
-    --bg-color: #eff0f3;
+:root,
+[data-theme="dracula"] {
+    color-scheme: dark;
+    /* Dracula Classic palette */
+    --color-background: #282A36;
+    --color-current-line: #6272A4;
+    --color-selection: #44475A;
+    --color-foreground: #F8F8F2;
+    --color-red: #FF5555;
+    --color-orange: #FFB86C;
+    --color-yellow: #F1FA8C;
+    --color-green: #50FA7B;
+    --color-cyan: #8BE9FD;
+    --color-purple: #BD93F9;
+    --color-pink: #FF79C6;
+
+    /* Dracula UI palette */
+    --color-floating: #343746;
+    --color-bg-lighter: #424450;
+    --color-bg-light: #343746;
+    --color-bg-dark: #21222C;
+    --color-bg-darker: #191A21;
+
+    /* Functional colors */
+    --color-f-red: #DE5735;
+    --color-f-orange: #A39514;
+    --color-f-green: #089108;
+    --color-f-cyan: #0081D6;
+    --color-f-purple: #815CD6;
+
+    /* Role tokens */
+    --surface-page: var(--color-background);
+    --surface-panel: var(--color-bg-dark);
+    --surface-panel-alt: var(--color-bg-light);
+    --surface-card: var(--color-floating);
+    --surface-elevated: var(--color-bg-lighter);
+    --surface-header: var(--color-bg-darker);
+    --surface-input: var(--color-bg-dark);
+    --surface-selection: var(--color-selection);
+    --surface-hover: rgba(248, 248, 242, 0.08);
+    --surface-hover-strong: rgba(248, 248, 242, 0.16);
+
+    --text-primary: var(--color-foreground);
+    --text-secondary: var(--color-current-line);
+    --text-muted: var(--color-current-line);
+    --text-inverse: var(--color-background);
+    --text-on-accent: #282A36;
+    --text-on-info: #282A36;
+    --text-on-success: #282A36;
+    --text-on-warning: #282A36;
+    --text-on-danger: #282A36;
+
+    --border-default: var(--color-selection);
+    --border-strong: var(--color-current-line);
+    --border-subtle: var(--color-bg-lighter);
+    --border-accent: var(--color-f-purple);
+
+    --accent-primary: var(--color-purple);
+    --accent-secondary: var(--color-pink);
+    --link-color: var(--color-f-cyan);
+
+    --button-primary-bg: var(--color-purple);
+    --button-primary-text: var(--text-on-accent);
+    --button-secondary-bg: var(--color-bg-light);
+    --button-secondary-text: var(--color-foreground);
+    --button-muted-bg: var(--color-bg-light);
+    --button-muted-text: var(--color-foreground);
+    --button-danger-bg: var(--color-red);
+    --button-danger-text: var(--text-on-danger);
+    --button-info-bg: var(--color-cyan);
+    --button-info-text: var(--text-on-info);
+    --button-success-bg: var(--color-green);
+    --button-success-text: var(--text-on-success);
+
+    --status-success: var(--color-f-green);
+    --status-warning: var(--color-f-orange);
+    --status-danger: var(--color-f-red);
+    --status-info: var(--color-f-cyan);
+
+    --focus-ring: var(--color-f-purple);
+    --shadow-color: rgba(0, 0, 0, 0.35);
+    --shadow-soft: rgba(0, 0, 0, 0.2);
+    --overlay-backdrop: rgba(0, 0, 0, 0.6);
+
+    --tooltip-bg: var(--color-bg-darker);
+    --tooltip-text: var(--color-foreground);
+    --context-menu-bg: var(--color-bg-darker);
+    --context-menu-hover: var(--color-bg-light);
+    --selection-bg: var(--color-selection);
+
+    --input-border: var(--color-selection);
+    --input-placeholder: var(--color-current-line);
+    --toggle-track: var(--color-bg-light);
+    --toggle-thumb: var(--color-foreground);
+    --toggle-track-active: var(--color-selection);
+    --add-color: var(--color-f-green);
+}
+
+[data-theme="alucard"] {
+    color-scheme: light;
+    /* Alucard Classic palette */
+    --color-background: #FFFBEB;
+    --color-current-line: #6C664B;
+    --color-selection: #CFCFDE;
+    --color-foreground: #1F1F1F;
+    --color-red: #CB3A2A;
+    --color-orange: #A34D14;
+    --color-yellow: #846E15;
+    --color-green: #14710A;
+    --color-cyan: #036A96;
+    --color-purple: #644AC9;
+    --color-pink: #A3144D;
+
+    /* Alucard UI palette */
+    --color-floating: #EFEDDC;
+    --color-bg-lighter: #ECE9DF;
+    --color-bg-light: #DEDCCF;
+    --color-bg-dark: #CECCC0;
+    --color-bg-darker: #BCBAB3;
+
+    /* Functional colors */
+    --color-f-red: #DE5735;
+    --color-f-orange: #A39514;
+    --color-f-green: #089108;
+    --color-f-cyan: #0081D6;
+    --color-f-purple: #815CD6;
+
+    --surface-page: var(--color-background);
+    --surface-panel: var(--color-bg-dark);
+    --surface-panel-alt: var(--color-bg-light);
+    --surface-card: var(--color-floating);
+    --surface-elevated: var(--color-bg-lighter);
+    --surface-header: var(--color-bg-darker);
+    --surface-input: var(--color-bg-light);
+    --surface-selection: var(--color-selection);
+    --surface-hover: rgba(31, 31, 31, 0.08);
+    --surface-hover-strong: rgba(31, 31, 31, 0.16);
+
+    --text-primary: var(--color-foreground);
+    --text-secondary: var(--color-current-line);
+    --text-muted: var(--color-current-line);
+    --text-inverse: var(--color-background);
+    --text-on-accent: #FFFBEB;
+    --text-on-info: #FFFBEB;
+    --text-on-success: #FFFBEB;
+    --text-on-warning: #FFFBEB;
+    --text-on-danger: #FFFBEB;
+
+    --border-default: var(--color-selection);
+    --border-strong: var(--color-current-line);
+    --border-subtle: var(--color-bg-lighter);
+    --border-accent: var(--color-f-purple);
+
+    --accent-primary: var(--color-purple);
+    --accent-secondary: var(--color-pink);
+    --link-color: var(--color-f-cyan);
+
+    --button-primary-bg: var(--color-purple);
+    --button-primary-text: var(--text-on-accent);
+    --button-secondary-bg: var(--color-bg-light);
+    --button-secondary-text: var(--color-foreground);
+    --button-muted-bg: var(--color-bg-darker);
+    --button-muted-text: var(--color-foreground);
+    --button-danger-bg: var(--color-red);
+    --button-danger-text: var(--text-on-danger);
+    --button-info-bg: var(--color-cyan);
+    --button-info-text: var(--text-on-info);
+    --button-success-bg: var(--color-green);
+    --button-success-text: var(--text-on-success);
+
+    --status-success: var(--color-f-green);
+    --status-warning: var(--color-f-orange);
+    --status-danger: var(--color-f-red);
+    --status-info: var(--color-f-cyan);
+
+    --focus-ring: var(--color-f-purple);
+    --shadow-color: rgba(0, 0, 0, 0.2);
+    --shadow-soft: rgba(0, 0, 0, 0.12);
+    --overlay-backdrop: rgba(0, 0, 0, 0.35);
+
+    --tooltip-bg: var(--color-bg-darker);
+    --tooltip-text: var(--color-foreground);
+    --context-menu-bg: var(--color-bg-darker);
+    --context-menu-hover: var(--color-bg-light);
+    --selection-bg: var(--color-selection);
+
+    --input-border: var(--color-selection);
+    --input-placeholder: var(--color-current-line);
+    --toggle-track: var(--color-bg-light);
+    --toggle-thumb: var(--color-foreground);
+    --toggle-track-active: var(--color-selection);
+    --add-color: var(--color-f-green);
+}
+
+/* Legacy aliases */
+:root,
+[data-theme="dracula"],
+[data-theme="alucard"] {
+    --primary-color-1: var(--text-primary);
+    --primary-color-2: var(--text-secondary);
+    --primary-color-3: var(--border-default);
+    --secondary-color-1: var(--surface-panel-alt);
+    --secondary-color-2: var(--border-strong);
+    --btn-color: var(--accent-primary);
+    --pickup-color: var(--color-orange);
+    --success-color: var(--button-success-bg);
+    --danger-color: var(--status-danger);
+    --bg-color: var(--surface-page);
+    --text-color: var(--text-primary);
 }
 
 /*基本設定・デフォルト使用削除*/
@@ -31,11 +228,24 @@ input {
 .form__input {
     padding: 6px 8px;
     border-radius: 4px;
-    border: 1px solid var(--secondary-color-2);
-    background: white;
+    border: 1px solid var(--input-border);
+    background: var(--surface-input);
+    color: var(--text-primary);
     font-size: 14px;
     height: 40px;
     width: 100%;
+}
+
+.form__input::placeholder,
+.form__textarea--mono::placeholder {
+    color: var(--input-placeholder);
+}
+
+.form__input:focus,
+.form__textarea--mono:focus {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
+    border-color: var(--focus-ring);
 }
 
 button {
@@ -58,15 +268,36 @@ details summary::marker {
 
 body {
     font-family: 'Kosugi Maru', system-ui, sans-serif;
-    background: var(--bg-color);
+    background: var(--surface-page);
+    color: var(--text-primary);
     padding: 0;
     box-sizing: border-box !important;
 }
 
+a {
+    color: var(--link-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+a:hover {
+    color: var(--accent-secondary);
+}
+
+::selection {
+    background: var(--selection-bg);
+    color: var(--text-primary);
+}
+
+:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
+
 .context-menu {
     position: absolute;
-    background: rgba(13,13,13,0.9);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    background: var(--context-menu-bg);
+    box-shadow: 0 8px 24px var(--shadow-soft);
     border-radius: 10px;
     padding: 4px 0;
     z-index: 1200;
@@ -83,17 +314,17 @@ body {
     background: transparent;
     border: none;
     font-size: 14px;
-    color: var(--secondary-color-1);
+    color: var(--text-primary);
     cursor: pointer;
 }
 
 .context-menu__item:hover {
-    background: rgba(100,100,100,0.8);
+    background: var(--context-menu-hover);
 }
 
 .context-menu__separator {
     height: 1px;
-    background: var(--bg-color);
+    background: var(--border-default);
     margin: 4px 0;
 }
 
@@ -120,7 +351,7 @@ input[type="number"]::-webkit-outer-spin-button {
 /* メインコンテナ */
 .app {
     padding: 8px;
-    background: var(--bg-color);
+    background: var(--surface-page);
     overflow: hidden;
 }
 
@@ -143,9 +374,9 @@ input[type="number"]::-webkit-outer-spin-button {
 .button {
     display: flex;
     padding: 4px 8px;
-    background: var(--btn-color);
-    color: var(--secondary-color-1);
-    outline: 2px solid var(--primary-color-2);
+    background: var(--button-primary-bg);
+    color: var(--button-primary-text);
+    border: 1px solid var(--border-strong);
     outline-offset: -1px;
     border-radius: 4px;
     font-size: 16px;
@@ -155,6 +386,7 @@ input[type="number"]::-webkit-outer-spin-button {
     flex-shrink: 0;
     justify-content: center;
     align-items: center;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 .button.material-symbols-rounded {
@@ -163,7 +395,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .button:hover {
-    filter: brightness(120%);
+    filter: brightness(108%);
 }
 
 .button:hover .tooltip {
@@ -178,7 +410,7 @@ input[type="number"]::-webkit-outer-spin-button {
     content: "";
     position: absolute;
     border: 10px solid transparent;
-    border-bottom-color: rgba(0,0,0,0.8);
+    border-bottom-color: var(--tooltip-bg);
     top: 8px;
     left: 46px;
     transform: rotate(-180deg);
@@ -187,8 +419,8 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .button--secondary { 
     display: flex; 
-    background: var(--btn-color); 
-    color: var(--secondary-color-1);
+    background: var(--button-secondary-bg); 
+    color: var(--button-secondary-text);
     align-items: center; 
     justify-content: center; 
     flex-wrap: wrap;
@@ -221,7 +453,7 @@ details[open] summary .material-symbols-rounded {
 .modal__divider {
     display: flex;
     align-self: center;
-    border: 1px solid var(--primary-color-3);
+    border: 1px solid var(--border-default);
     width: calc(100% + 32px);
 }
 
@@ -234,8 +466,8 @@ dialog {
         position: fixed;
     max-width: 720px;
     width: -webkit-fill-available;
-    background: var(--bg-color);
-    outline: 2px solid var(--primary-color-2);
+    background: var(--surface-panel);
+    outline: 2px solid var(--border-strong);
     justify-self: center;
     align-self: flex-start;
     margin: 20px 8px;
@@ -251,7 +483,7 @@ dialog::-webkit-scrollbar {
 }
 
 dialog::backdrop {
-    background: rgba(0,0,0,0.5);
+    background: var(--overlay-backdrop);
 }
 
 /* ========================================
@@ -262,8 +494,8 @@ dialog::backdrop {
 .tooltip {
     position: absolute;
     min-height: 32px;
-    background: rgba(0,0,0,0.9);
-    color: var(--secondary-color-1);
+    background: var(--tooltip-bg);
+    color: var(--tooltip-text);
     padding: 8px;
     border-radius: 4px;
     font-size: 12px;
@@ -280,7 +512,7 @@ dialog::backdrop {
     content: "";
     position: absolute;
     border: 10px solid transparent;
-    border-bottom-color: rgba(0,0,0,0.8);
+    border-bottom-color: var(--tooltip-bg);
     margin-top: 4px;
     transform: rotate(-180deg);
     transform-origin: bottom center;
@@ -318,10 +550,38 @@ dialog::backdrop {
     --target: --addbuffbtn;
 }
 
+/* トースト */
+.toast {
+    position: fixed;
+    right: 20px;
+    padding: 12px 20px;
+    background: var(--surface-card);
+    color: var(--text-primary);
+    border-radius: 6px;
+    border: 1px solid var(--border-default);
+    box-shadow: 0 4px 12px var(--shadow-soft);
+    z-index: 10000;
+    animation: slideIn 0.3s ease-out;
+    font-size: 14px;
+    max-width: 300px;
+}
+
+.toast--error {
+    border-left: 4px solid var(--status-danger);
+}
+
+.toast--success {
+    border-left: 4px solid var(--status-success);
+}
+
+.toast--info {
+    border-left: 4px solid var(--status-info);
+}
+
 /* 出力ボックス */
 .output {
-    background: var(--secondary-color-1);
-    border: 1px solid var(--primary-color-3);
+    background: var(--surface-card);
+    border: 1px solid var(--border-default);
     border-radius: 4px;
     padding: 10px;
     position: relative;
@@ -330,7 +590,7 @@ dialog::backdrop {
 .output__label {
     font-size: 11px;
     font-weight: 600;
-    color: var(--primary-color-3);
+    color: var(--text-secondary);
     margin-bottom: 6px;
 }
 
@@ -357,7 +617,7 @@ dialog::backdrop {
     position: fixed;
     width: 100%;
     height: 40px;
-    background: var(--primary-color-1);
+    background: var(--surface-header);
     z-index: 1000;
 }
 
@@ -368,7 +628,7 @@ dialog::backdrop {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    color: var(--secondary-color-1);
+    color: var(--text-primary);
 }
 
 .site-header__title {
@@ -386,7 +646,7 @@ dialog::backdrop {
     min-width: 120px;
     height: stretch;
     justify-content: flex-end;
-    color: var(--secondary-color-1);
+    color: var(--text-primary);
 }
 
 .site-header__menu-item {
@@ -396,14 +656,14 @@ dialog::backdrop {
     justify-content: center;
     width: stretch;
     height: stretch;
-    color: var(--secondary-color-1);
+    color: var(--text-primary);
     cursor: pointer;
     opacity: 1;
     transition: 0.2s ease;
 }
 
 .site-header__menu-item:hover {
-    background: rgba(255,255,255,0.1);
+    background: var(--surface-hover);
 }
 
 .site-header__menu-item--settings {
@@ -419,7 +679,7 @@ dialog::backdrop {
 }
 
 .site-header__menu-item:hover .tooltip {
-    background: var(--primary-color-1);
+    background: var(--surface-header);
     opacity: 1;
     bottom: calc(anchor(bottom) - 40px);
     transform: translateX(-20%);
@@ -438,10 +698,10 @@ dialog::backdrop {
     position: absolute;
     top: 100%;
     right: anchor(right);
-    background: var(--primary-color-1);
-    border: 1px solid var(--primary-color-2);
+    background: var(--surface-header);
+    border: 1px solid var(--border-strong);
     border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 8px 24px var(--shadow-soft);
     min-width: 180px;
     padding: 6px 0;
     z-index: 1100;
@@ -462,7 +722,7 @@ dialog::backdrop {
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    color: var(--secondary-color-1);
+    color: var(--text-primary);
     background: transparent;
     border: none;
     font-size: 14px;
@@ -471,7 +731,7 @@ dialog::backdrop {
 }
 
 .site-header__dropdown-item:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--surface-hover);
 }
 
 
@@ -491,14 +751,14 @@ dialog::backdrop {
 .section__header,
 .section__header--modal {
     display: flex;
-    background: var(--secondary-color-1);
+    background: var(--surface-card);
     padding: 4px 8px;
     width: 100%;
     border-radius: 4px 4px 0 0;
     font-weight: 600;
     font-size: 18px;
-    outline: 2px solid var(--primary-color-2);
-    color: var(--primary-color-1);
+    outline: 2px solid var(--border-strong);
+    color: var(--text-primary);
     user-select: none;
     justify-content: flex-start;
     align-items: center;
@@ -507,7 +767,7 @@ dialog::backdrop {
 .section__header--modal {
     position: sticky;
     top: 0;
-    outline: 2px solid var(--primary-color-2);
+    outline: 2px solid var(--border-strong);
     z-index: 2;
     anchor-name: --S-header;
 }
@@ -524,8 +784,8 @@ input[type="radio"] {
     gap: 8px;
     padding: 8px;
     border-radius: 0 0 4px 4px;
-    outline: 2px solid var(--primary-color-2);
-    background: var(--bg-color);
+    outline: 2px solid var(--border-strong);
+    background: var(--surface-panel);
     height: auto;
     width: 100%;
     transition:
@@ -534,7 +794,7 @@ input[type="radio"] {
     overflow-y: visible;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    box-shadow: 0 4px 8px 2px var(--primary-color-3);
+    box-shadow: 0 4px 8px 2px var(--shadow-soft);
     z-index: 1;
 }
 
@@ -555,7 +815,7 @@ dialog .modal__body {
 
 .modal__section--divider {
     padding-top: 12px;
-    border-top: 2px solid var(--primary-color-1);
+    border-top: 2px solid var(--border-strong);
 }
 
 .modal__close {
@@ -572,9 +832,9 @@ dialog .modal__body {
 
 .tabs__label {
     display: flex;
-    background: var(--secondary-color-1);
+    background: var(--surface-card);
     cursor: pointer;
-    color: var(--primary-color-3);
+    color: var(--text-secondary);
     transition: all 0.1s ease-out; 
     order: -1;
     flex: 1;
@@ -587,8 +847,8 @@ dialog .modal__body {
 }
 
 .tabs__label:has(:checked) {
-    background: var(--secondary-color-1);
-    color: var(--primary-color-1);
+    background: var(--surface-card);
+    color: var(--text-primary);
     transition: all 0.1s ease-out;
 }
 
@@ -646,7 +906,8 @@ dialog .modal__body {
 .form__grid input:focus, 
 .form__grid select:focus {
     outline: none;
-    border-color: var(--pickup-color);
+    border-color: var(--focus-ring);
+    box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
 .form__grid input[type="color"] {
@@ -660,14 +921,19 @@ dialog .modal__body {
     display: none;
 }
 
+.drop-zone--active {
+    border: 3px dashed var(--accent-primary) !important;
+    background: var(--surface-selection) !important;
+}
+
 .form__label--btn {
-    background: var(--primary-color-3);
+    background: var(--surface-elevated);
     padding: 1px;
-    border: 2px solid var(--primary-color-1);
+    border: 2px solid var(--border-strong);
 }
 
 .form__label--btn:has(input:checked) {
-    color: var(--danger-color);
+    color: var(--status-danger);
 
 }
 
@@ -686,8 +952,8 @@ dialog .modal__body {
     cursor: pointer;
     align-content: center;
     justify-content: center;
-    background: var(--bg-color);
-    outline: 2px solid var(--primary-color-3);
+    background: var(--surface-panel);
+    outline: 2px solid var(--border-default);
     aspect-ratio: 1 / 1;
 }
 
@@ -695,7 +961,7 @@ dialog .modal__body {
     text-align: center;
     font-size: 14px;
     font-weight: 800;
-    color: var(--primary-color-3);
+    color: var(--text-secondary);
     margin: 0;
     cursor: pointer;
 }
@@ -707,12 +973,12 @@ dialog .modal__body {
 }
 
 .target-selector__option:has(input:checked) label {
-    color: var(--primary-color-1);
+    color: var(--text-primary);
 }
 
 .target-selector__option:has(input:checked)  {
-    background: var(--p);
-    outline: 2px solid var(--primary-color-1);
+    background: var(--surface-selection);
+    outline: 2px solid var(--border-strong);
 }
 
 /* バフコントロール */
@@ -739,16 +1005,18 @@ dialog .modal__body {
 }
 
 .button--turn {
-    background: var(--secondary-color-1);
-    color: var(--primary-color-1);
+    background: var(--surface-card);
+    color: var(--text-primary);
 }
 
 .button--turn:hover {
-    background: var(--pickup-color);
+    background: var(--color-orange);
+    color: var(--text-on-warning);
 }
 
 #turnResetBtn:hover {
-    background: var(--danger-color);
+    background: var(--button-danger-bg);
+    color: var(--button-danger-text);
 }
 
 .button--turn:hover .tooltip {
@@ -783,7 +1051,8 @@ dialog .modal__body {
     border-radius: 12px;
     border: none;
     cursor: pointer;
-    box-shadow: inset 0 2px rgba(0,0,2,0.1);
+    background: var(--toggle-track);
+    box-shadow: inset 0 2px var(--shadow-soft);
     align-items: center;
 }
 
@@ -795,7 +1064,7 @@ dialog .modal__body {
 }
 
 .toggle--active {
-    background: rgba(0,0,0,0.3);
+    background: var(--toggle-track-active);
     mix-blend-mode: luminosity;
 }
 
@@ -807,8 +1076,8 @@ dialog .modal__body {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: var(--secondary-color-1);
-    box-shadow: inset 0 -1px rgba(0,0,0.5,0.2);
+    background: var(--toggle-thumb);
+    box-shadow: inset 0 -1px var(--shadow-soft);
 }
 
 .toggle--active::after {
@@ -820,8 +1089,8 @@ dialog .modal__body {
     position: absolute;
     top: 8px;
     right: 8px;
-    background: var(--btn-color);
-    color: var(--secondary-color-1);
+    background: var(--button-primary-bg);
+    color: var(--button-primary-text);
     border: none;
     border-radius: 4px;
     padding: 4px 10px;
@@ -830,11 +1099,12 @@ dialog .modal__body {
 }
 
 .button--copy:hover {
-    filter: brightness(140%);
+    filter: brightness(110%);
 }
 
 .button--copy.button--copied {
-    background: var(--success-color);
+    background: var(--button-success-bg);
+    color: var(--button-success-text);
 }
 
 /* ========================================
@@ -849,9 +1119,9 @@ dialog .modal__body {
     padding: 4px;
     height: 240px;
     min-height: 100px;
-    background: rgba(0,0,0,0.1);;
+    background: var(--surface-panel);
     border-radius: 4px;
-    outline: 1px solid var(--primary-color-3);
+    outline: 1px solid var(--border-default);
     resize: vertical;
     overflow: auto;
     -ms-overflow-style: none;
@@ -893,16 +1163,16 @@ dialog .modal__body {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: var(--secondary-color-1);
+    background: var(--surface-card);
     border: none;
-    color: var(--primary-color-1);
+    color: var(--text-primary);
 }
         
 .list__index > span {
     position: absolute;
     z-index: 1;
     font-size: 32px;
-    color: var(--primary-color-1);
+    color: var(--text-primary);
     pointer-events: none;
 }
 
@@ -913,8 +1183,8 @@ dialog .modal__body {
 }
 
 .list__index:hover > span {
-    background: var(--primary-color-2);
-    color: var(--secondary-color-1);
+    background: var(--surface-hover-strong);
+    color: var(--text-primary);
 }
 
 
@@ -929,7 +1199,7 @@ dialog .modal__body {
     content: "";
     position: absolute;
     border: 10px solid transparent;
-    border-bottom-color: rgba(0,0,0,0.8);
+    border-bottom-color: var(--tooltip-bg);
     top: 8px;
     left: 46px;
     transform: rotate(-180deg);
@@ -948,10 +1218,10 @@ dialog .modal__body {
 
         .autocomplete {
             position: absolute;
-            background: var(--secondary-color-1);
-            border: 1px solid var(--primary-color-3);
+            background: var(--surface-card);
+            border: 1px solid var(--border-default);
             border-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px var(--shadow-soft);
             z-index: 1150;
             max-height: 200px;
             overflow-y: auto;
@@ -976,7 +1246,7 @@ dialog .modal__body {
             padding: 8px 12px;
             cursor: pointer;
             transition: background-color 0.1s;
-            border-bottom: 1px solid var(--bg-color);
+            border-bottom: 1px solid var(--border-default);
             gap: 8px;
         }
 
@@ -986,20 +1256,20 @@ dialog .modal__body {
 
 .autocomplete__item:hover,
 .autocomplete__item--selected {
-    background-color: var(--bg-color);
+    background-color: var(--surface-panel);
 }
 
         .autocomplete__text {
             flex: 1;
             font-size: 13px;
             font-weight: 600;
-            color: var(--primary-color-1);
+            color: var(--text-primary);
             word-break: break-all;
         }
 
         .autocomplete__category {
             font-size: 11px;
-            color: var(--primary-color-3);
+            color: var(--text-secondary);
             white-space: nowrap;
             flex-shrink: 0;
         }
@@ -1009,12 +1279,12 @@ dialog .modal__body {
     display: flex;
     align-items: center;
     padding: 2px 4px;
-    background: var(--secondary-color-1);
-    outline: 1px solid var(--primary-color-3);
+    background: var(--surface-card);
+    outline: 1px solid var(--border-default);
     border-radius: 2px;
     font-size: 16px;
     font-weight: 600;
-    color: var(--primary-color-2);
+    color: var(--text-secondary);
     transition: all 0.1s;
     cursor: grab;
     position: relative;
@@ -1023,8 +1293,8 @@ dialog .modal__body {
 .list__category-header--dragging {
     opacity: 30% !important;
     background: none !important;
-    outline: 2px solid var(--btn-color) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    outline: 2px solid var(--accent-primary) !important;
+    box-shadow: 0 4px 12px var(--shadow-color);
     cursor: grabbing;
 }
         
@@ -1042,7 +1312,7 @@ dialog .modal__body {
 .list__item {
     display: flex;
     padding: 4px 8px;
-    background: var(--secondary-color-1);
+    background: var(--surface-card);
     border-radius: 2px;
     font-size: 14px;
     transition: all 0.1s;
@@ -1075,7 +1345,7 @@ dialog .modal__body {
 }
 
 .list__item--clickable:hover {
-    outline: 2px solid var(--btn-color);
+    outline: 2px solid var(--accent-primary);
 }
 
 .list__item:hover .tooltip {
@@ -1087,9 +1357,9 @@ dialog .modal__body {
 }
 
 .list__item--selected {
-    background: var(--bg-color);
-    outline: 1px solid var(--btn-color);
-    box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
+    background: var(--surface-panel);
+    outline: 1px solid var(--accent-primary);
+    box-shadow: 0 0 0 2px var(--surface-hover-strong);
 }
 
 /* ドラッグ機能 */
@@ -1097,7 +1367,7 @@ dialog .modal__body {
     opacity: 30% !important;
     background: none !important;
     outline: 1px solid var(--add-color) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px var(--shadow-color);
     cursor: grabbing;
 }
 
@@ -1108,7 +1378,7 @@ dialog .modal__body {
     left: 0;
     right: 0;
     height: 2px;
-    background: var(--danger-color);
+    background: var(--status-danger);
 }
 
 .list__item--drag-over-bottom::after {
@@ -1118,18 +1388,18 @@ dialog .modal__body {
     left: 0;
     right: 0;
     height: 2px;
-    background: var(--danger-color);
+    background: var(--status-danger);
 }
 
 .list__category-header--drag-over {
-    outline: 2px dashed var(--btn-color);
-    background: #e7f3ff;
+    outline: 2px dashed var(--accent-primary);
+    background: var(--surface-selection);
     border-radius: 4px;
 }
 
 .list__category-body--drag-over {
-    outline: 2px dashed var(--btn-color);
-    background: #e7f3ff;
+    outline: 2px dashed var(--accent-primary);
+    background: var(--surface-selection);
     border-radius: 4px;
 }
 
@@ -1167,8 +1437,8 @@ dialog .modal__body {
     justify-self: center;
     gap: 4px;
     font-size: 12px;
-    background: rgba(255,255,255,0.8);
-    color: var(--primary-color-2);
+    background: var(--surface-elevated);
+    color: var(--text-secondary);
     cursor: auto;
     width: calc(100% + 8px);
 }
@@ -1179,7 +1449,7 @@ dialog .modal__body {
     flex-wrap: wrap;
     gap: 1px;
     padding-bottom: 2px;
-    border-bottom: 1px solid var(--primary-color-3);
+    border-bottom: 1px solid var(--border-default);
 }
 
 .buff__details div:first-of-type p{
@@ -1238,7 +1508,7 @@ dialog .modal__body {
 }
 
 .list__item-detail {
-    color: var(--primary-color-2);
+    color: var(--text-secondary);
     font-size: 12px;
     font-weight: 600;
 }
@@ -1246,7 +1516,7 @@ dialog .modal__body {
 .list__item-detail-label {
     font-size: 12px;
     font-weight: 600;
-    color: var(--primary-color-2);
+    color: var(--text-secondary);
 }
 
 /* バフボタングループ */
@@ -1265,8 +1535,8 @@ dialog .modal__body {
     left: -12px;
     width: 24px;
     height: 24px;
-    background: var(--bg-color);
-    color: var(--primary-color-1);
+    background: var(--surface-panel);
+    color: var(--text-primary);
     border-radius: 50%;
 }
 
@@ -1287,7 +1557,7 @@ dialog .modal__body {
     position: fixed;
     right: calc(anchor(right) + 12px);
     top: calc(anchor(bottom) + 8px);
-    background: var(--secondary-color-1);
+    background: var(--surface-card);
     height: 40px;
     width: 40px;
     z-index: 2;
@@ -1295,12 +1565,12 @@ dialog .modal__body {
 }
 
 .form__help-toggle:hover {
-    background: var(--pickup-color);
+    background: var(--color-orange);
 }
 
 .form__help-toggle span {
     position:relative;
-    color: var(--primary-color-1);
+    color: var(--text-primary);
 }
 
 .form__help-toggle input {
@@ -1308,19 +1578,19 @@ dialog .modal__body {
 }
         
 .form__help-toggle:has(input:checked) {
-    background: #fff3cd;
-    outline:inset 1px solid #ffc107 !important;
-    color: #ffc107 !important;
-    box-shadow: inset 0 1px rgba(0,0,0,0.2) !important;
+    background: var(--surface-selection);
+    outline: inset 1px solid var(--status-warning) !important;
+    color: var(--status-warning) !important;
+    box-shadow: inset 0 1px var(--shadow-soft) !important;
 }
         
 .form__note {
-    background: #fff3cd;
-    border: 1px solid #ffc107;
+    background: var(--surface-selection);
+    border: 1px solid var(--status-warning);
     border-radius: 4px;
     padding: 8px;
     font-size: 12px;
-    color: #856404;
+    color: var(--text-primary);
     display: none;
 }
 
@@ -1332,7 +1602,7 @@ dialog .modal__body {
 /* 空メッセージ */
 .list__empty {
     text-align: center;
-    color: var(--primary-color-2);
+    color: var(--text-secondary);
     font-size: 12px;
     padding: 12px;
 }
@@ -1341,7 +1611,7 @@ dialog .modal__body {
 .legal {
     margin: 12px;
     font-size: 12px;
-    color: var(--text-color);
+    color: var(--text-secondary);
         cursor: pointer;
 }
 
@@ -1363,15 +1633,15 @@ dialog .modal__body {
    ======================================== */
 
 .u-hidden { display: none; }
-.form__textarea--mono { width: 100%; padding: 8px; border: 1px solid var(--secondary-color-2); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; }
+.form__textarea--mono { width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; background: var(--surface-input); color: var(--text-primary); }
 .form__row { display: flex; gap: 6px; margin-top: 6px; }
-.button--muted { background: var(--primary-color-3); color: var(--secondary-color-1); outline: none;}
-.button--info { background: var(--primary-color-3); color: var(--secondary-color-1);}
-.button--danger { background: var(--danger-color); width: 30%; color: var(--secondary-color-1);}
-.form__text { font-size: 11px; color: var(--primary-color-1); margin-top: 6px; }
-.form__label--small { font-size: 12px; font-weight: 600; color: var(--primary-color-2); display: block; margin: 8px 0 2px 2px;}
-.form__label--large { font-size: 16px; font-weight: 600; color: var(--primary-color-2); display: flex; margin: 0 0 4px 2px; gap: 8px; align-items: center; }
-.form__input--compact { width: 60px; padding: 4px 6px; border: 1px solid var(--primary-color-1); border-radius: 4px; }
+.button--muted { background: var(--button-muted-bg); color: var(--button-muted-text); border: 1px solid var(--border-strong); }
+.button--info { background: var(--button-info-bg); color: var(--button-info-text); border: 1px solid var(--border-strong); }
+.button--danger { background: var(--button-danger-bg); width: 30%; color: var(--button-danger-text); border: 1px solid var(--border-strong); }
+.form__text { font-size: 11px; color: var(--text-primary); margin-top: 6px; }
+.form__label--small { font-size: 12px; font-weight: 600; color: var(--text-secondary); display: block; margin: 8px 0 2px 2px;}
+.form__label--large { font-size: 16px; font-weight: 600; color: var(--text-secondary); display: flex; margin: 0 0 4px 2px; gap: 8px; align-items: center; }
+.form__input--compact { width: 60px; padding: 4px 6px; border: 1px solid var(--input-border); border-radius: 4px; background: var(--surface-input); color: var(--text-primary); }
 
 .form__label--row {
     display: flex;
