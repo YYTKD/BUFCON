@@ -235,7 +235,7 @@ const buildOutput = (input) => {
   buffs.push(
     {
       name: '名前を入力',
-      memo: 'クリ値-n',
+      memo: '出目+n',
       showSimpleMemo: true,
       effect: '$+0',
       targets: ['attack-category:武器攻撃'],
@@ -249,7 +249,7 @@ const buildOutput = (input) => {
       name: '名前を入力',
       memo: '必殺効果',
       showSimpleMemo: true,
-      effect: '#+0',
+      effect: '#-0',
       targets: ['attack-category:武器攻撃'],
       turn: null,
       originalTurn: null,

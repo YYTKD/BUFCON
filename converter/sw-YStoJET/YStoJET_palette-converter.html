@@ -2,21 +2,24 @@
 <html lang="ja" data-theme="dracula">
 
 <head>
-  <link rel="icon" href="../assets/logos/jet_dice.png">
+  <link rel="icon" href="../../assets/logos/jet_dice.png">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="../styles/theme-dracula.css">
-  <link rel="stylesheet" href="../manual/manual.css">
-  <link rel="stylesheet" href="../manual/tools/converter.css">
-  <link rel="stylesheet" href="../sw-YStoJET/YStoJET_palette-converter.css">
+  <link rel="stylesheet" href="../../styles/theme-dracula.css">
+  <link rel="stylesheet" href="../../styles/main.css">
+  <link rel="stylesheet" href="YStoJET_palette-converter.css">
   <title>ゆとシート チャットパレット → JET-PALLET 変換ツール</title>
 </head>
 
 <body>
-  <header class="site-header">
-    <img class="site-header__logo" src="../assets/logos/logo.svg" alt="JET-PALLET" />
-    <span class="form__label--large">チャットパレット変換ツール</span>
-    <span class="form__label--small">ゆとシート → JET-PALLET</span>
+  <header class="site-header site-header--converter">
+    <div class="site-header__brand">
+      <img class="site-header__logo" src="../../assets/logos/logo.svg" alt="JET-PALLET" />
+      <div class="site-header__titles">
+        <span class="form__label--large">チャットパレット変換ツール</span>
+        <span class="form__label--small">ゆとシート → JET-PALLET</span>
+      </div>
+    </div>
   </header>
 
   <main class="converter">
@@ -28,7 +31,7 @@
     <section class="converter__panel">
       <div class="converter__header">
         <h2>入力</h2>
-        <label class="converter__file">
+        <label class="button converter__file">
           <span>ファイルを選択</span>
           <input type="file" id="paletteFile" accept=".txt" />
         </label>
@@ -37,10 +40,8 @@
     </section>
 
     <section class="converter__actions">
-      <button type="button" id="convertBtn">変換する</button>
-      <button type="button" id="copyBtn" class="secondary">コピー</button>
-      <button type="button" id="clearBtn" class="ghost">クリア</button>
-      <span id="statusMessage" aria-live="polite"></span>
+      <button type="button" id="convertBtn" class="button">変換する</button>
+      <button type="button" id="clearBtn" class="button button--ghost">クリア</button>
     </section>
 
     <section class="converter__panel">
@@ -49,9 +50,11 @@
       </div>
       <textarea id="jsonOutput" readonly placeholder="変換されたJSONがここに表示されます"></textarea>
     </section>
+    <button type="button" id="copyBtn" class="button button--secondary">コピー</button>
   </main>
-
-  <script src="YStoJET_palette-converter.js?v=1-1-0"></script>
+  <section class="converter__actions">
+    <script src="YStoJET_palette-converter.js?v=1-1-0"></script>
+  </section>
 </body>
 
 </html>
