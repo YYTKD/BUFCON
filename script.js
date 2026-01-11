@@ -597,8 +597,7 @@ function importData() {
         renderPackage('judge');
         renderPackage('attack');
         updateBuffTargetDropdown();
-        renderMacroList();
-        updateMacroCategorySelect();
+        renderMacroDictionary();
         saveData();
         
         document.getElementById('importText').value = '';
