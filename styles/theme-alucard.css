@@ -6,8 +6,8 @@
     color-scheme: light;
     /* Alucard Classic palette */
     --color-background: #FFFBEB;
-    --color-current-line: #6C664B;
     --color-selection: #CFCFDE;
+    --color-current-line: #6C664B;
     --color-foreground: #1F1F1F;
     --color-red: #CB3A2A;
     --color-orange: #A34D14;
@@ -18,7 +18,6 @@
     --color-pink: #A3144D;
 
     /* Alucard UI palette */
-    --color-floating: #EFEDDC;
     --color-bg-lighter: #ECE9DF;
     --color-bg-light: #DEDCCF;
     --color-bg-dark: #CECCC0;
@@ -31,69 +30,4 @@
     --color-f-cyan: #0081D6;
     --color-f-purple: #815CD6;
 
-    --surface-page: var(--color-background);
-    --surface-panel: var(--color-bg-dark);
-    --surface-panel-alt: var(--color-bg-light);
-    --surface-card: var(--color-floating);
-    --surface-elevated: var(--color-bg-lighter);
-    --surface-header: var(--color-bg-dark);
-    --surface-input: var(--color-bg-light);
-    --surface-selection: var(--color-selection);
-    --surface-hover: rgba(31, 31, 31, 0.08);
-    --surface-hover-strong: rgba(31, 31, 31, 0.16);
-
-    --text-primary: var(--color-foreground);
-    --text-secondary: var(--color-current-line);
-    --text-muted: var(--color-current-line);
-    --text-inverse: var(--color-background);
-    --text-on-accent: #FFFBEB;
-    --text-on-info: #FFFBEB;
-    --text-on-success: #FFFBEB;
-    --text-on-warning: #FFFBEB;
-    --text-on-danger: #FFFBEB;
-
-    --border-default: var(--color-selection);
-    --border-strong: var(--color-current-line);
-    --border-subtle: var(--color-bg-lighter);
-    --border-accent: var(--color-f-purple);
-
-    --accent-primary: var(--color-purple);
-    --accent-secondary: var(--color-pink);
-    --link-color: var(--color-f-cyan);
-
-    --button-primary-bg: var(--color-purple);
-    --button-primary-text: var(--text-on-accent);
-    --button-secondary-bg: var(--color-bg-light);
-    --button-secondary-text: var(--color-foreground);
-    --button-muted-bg: var(--color-bg-darker);
-    --button-muted-text: var(--color-foreground);
-    --button-danger-bg: var(--color-red);
-    --button-danger-text: var(--text-on-danger);
-    --button-info-bg: var(--color-cyan);
-    --button-info-text: var(--text-on-info);
-    --button-success-bg: var(--color-green);
-    --button-success-text: var(--text-on-success);
-
-    --status-success: var(--color-f-green);
-    --status-warning: var(--color-f-orange);
-    --status-danger: var(--color-f-red);
-    --status-info: var(--color-f-cyan);
-
-    --focus-ring: var(--color-f-purple);
-    --shadow-color: rgba(0, 0, 0, 0.2);
-    --shadow-soft: rgba(0, 0, 0, 0.12);
-    --overlay-backdrop: rgba(0, 0, 0, 0.35);
-
-    --tooltip-bg: var(--color-bg-darker);
-    --tooltip-text: var(--color-foreground);
-    --context-menu-bg: var(--color-bg-darker);
-    --context-menu-hover: var(--color-bg-light);
-    --selection-bg: var(--color-selection);
-
-    --input-border: var(--color-selection);
-    --input-placeholder: var(--color-current-line);
-    --toggle-track: var(--color-bg-light);
-    --toggle-thumb: var(--color-foreground);
-    --toggle-track-active: var(--color-selection);
-    --add-color: var(--color-f-green);
 }

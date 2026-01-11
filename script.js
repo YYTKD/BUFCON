@@ -294,6 +294,32 @@ function applyTheme(theme, persist = true) {
             console.error('テーマ設定の保存に失敗:', e);
         }
     }
+
+    updateColorDatalist();
+}
+
+function updateColorDatalist() {
+    const datalist = document.getElementById('buffColor-list');
+    if (!datalist) return;
+    
+    // 現在のテーマに応じたカラーを取得
+    const colors = [
+        getThemeColorValue('--color-cyan', '#8BE9FD'),
+        getThemeColorValue('--color-purple', '#BD93F9'),
+        getThemeColorValue('--color-pink', '#FF79C6'),
+        getThemeColorValue('--color-red', '#FF5555'),
+        getThemeColorValue('--color-orange', '#FFB86C'),
+        getThemeColorValue('--color-yellow', '#F1FA8C'),
+        getThemeColorValue('--color-green', '#50FA7B'),
+        getThemeColorValue('--color-foreground', '#F8F8F2'),
+        getThemeColorValue('--color-background', '#282A36'),
+        getThemeColorValue('--color-selection', '#44475A')
+    ];
+    
+    // datalistを更新
+    datalist.innerHTML = colors
+        .map(color => `<option value="${color}"></option>`)
+        .join('');
 }
 
 function updateThemeToggle(theme) {
@@ -458,7 +484,7 @@ function getDefaultBuffs() {
     const secondaryColor = getSecondaryBuffColor();
     return [
         { name: 'キャッツアイ', memo: '命中UP', showSimpleMemo: true, effect: '+1', targets: ['judge:命中(武器A)　SAMPLE'], turn: '3', originalTurn: 3, color: primaryColor, category: null, active: true },
-        { name: 'オーバーパワー', memo: 'ダメージUP', showSimpleMemo: true, effect: '+3', targets: ['attack:all-attack'], color: secondaryColor, category: null, active: true }
+        { name: 'オーバーパワー', memo: 'ダメージUP', showSimpleMemo: true, effect: '+3', targets: ['all-attack'], color: secondaryColor, category: null, active: true }
     ];
 }
 
@@ -928,7 +954,7 @@ function renderBuffItems(entries = []) {
             <details class="list__item buff draggable ${item.active ? 'buff--active' : ''}"
                      style="background-color: ${bgColor}; color: ${textColor};"
                      data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}">
-                <summary class="buff__summary" draggable="true">
+                <summary class="buff__summary">
                     <span class="list__item-meta">
                         <span class="list__item-title">${escapeHtml(item.name)}</span>
                         ${simpleMemo ? `<span class="list__item-meta-text">${escapeHtml(simpleMemo)}</span>` : ''}
@@ -938,7 +964,7 @@ function renderBuffItems(entries = []) {
                         <button class="toggle ${item.active ? 'toggle--active' : ''}" data-toggle="${index}" data-toggle-type="buff"></button>
                     </span>
                 </summary>
-                <div class="buff__details">
+                <div class="buff__details" draggable="false">
                     <div>
                         <p><strong>最大ターン：</strong>${escapeHtml(String(maxTurnDisplay))}</p>
                         <p><strong>効果先：</strong>${escapeHtml(targetsText)}</p>
@@ -1666,7 +1692,7 @@ function bulkAdd(type) {
             textId: 'bulkAddJudgeText',
             areaId: 'bulkAddJudgeArea',
             minParts: 2,
-            messageKey: '判定パッケージ',
+            messageKey: '判定ラベル',
             parser: (parts, index, category) => {
                 const name = parts[0];
                 const roll = parts[1];
@@ -1683,7 +1709,7 @@ function bulkAdd(type) {
             textId: 'bulkAddAttackText',
             areaId: 'bulkAddAttackArea',
             minParts: 2,
-            messageKey: '攻撃パッケージ',
+            messageKey: '攻撃ラベル',
             parser: (parts, index, category) => {
                 const name = parts[0];
                 const roll = parts[1];
@@ -2206,7 +2232,7 @@ function handleDragEnd(e) {
 }
 
 // ========================================
-// 判定・攻撃パッケージ管理
+// 判定・攻撃ラベル管理
 // ========================================
 
 function openJudgeModal(editIndex = null) {
@@ -2220,7 +2246,7 @@ function openJudgeModal(editIndex = null) {
     if (editIndex !== null) {
         // 編集モード
         state.editMode = { active: true, type: 'judge', index: editIndex };
-        modalTitle.textContent = '判定パッケージ編集';
+        modalTitle.textContent = '判定ラベル編集';
         addBtn.textContent = '更新';
         bulkAddSection.style.display = 'none';
         
@@ -2235,7 +2261,7 @@ function openJudgeModal(editIndex = null) {
     } else {
         // 追加モード
         state.editMode = { active: false, type: null, index: null };
-        modalTitle.textContent = '判定パッケージ追加';
+        modalTitle.textContent = '判定ラベル追加';
         addBtn.textContent = '追加';
         bulkAddSection.style.display = 'block';
         resetJudgeForm();
@@ -2264,7 +2290,7 @@ function openAttackModal(editIndex = null) {
     if (editIndex !== null) {
         // 編集モード
         state.editMode = { active: true, type: 'attack', index: editIndex };
-        modalTitle.textContent = '攻撃パッケージ編集';
+        modalTitle.textContent = '攻撃ラベル編集';
         addBtn.textContent = '更新';
         bulkAddSection.style.display = 'none';
         
@@ -2279,7 +2305,7 @@ function openAttackModal(editIndex = null) {
     } else {
         // 追加モード
         state.editMode = { active: false, type: null, index: null };
-        modalTitle.textContent = '攻撃パッケージ追加';
+        modalTitle.textContent = '攻撃ラベル追加';
         addBtn.textContent = '追加';
         bulkAddSection.style.display = 'block';
         resetAttackForm();
@@ -2390,11 +2416,11 @@ function renderPackage(type) {
     const typeConfig = {
         'judge': {
             listId: 'judgeList',
-            emptyMsg: '判定パッケージを追加してください'
+            emptyMsg: '判定ラベルを追加してください'
         },
         'attack': {
             listId: 'attackList',
-            emptyMsg: '攻撃パッケージを追加してください'
+            emptyMsg: '攻撃ラベルを追加してください'
         }
     };
 
@@ -2534,7 +2560,7 @@ function attachItemEvents(type) {
 function updatePackageOutput(type, selectedIndex = null) {
     const array = getCollection(type);
     const outputId = type === 'judge' ? 'judgeOutput' : 'attackOutput';
-    const emptyMsg = type === 'judge' ? '判定パッケージを選択してください' : '攻撃パッケージを選択してください';
+    const emptyMsg = type === 'judge' ? '判定ラベルを選択してください' : '攻撃ラベルを選択してください';
 
     if (!array) return;
 
@@ -3067,7 +3093,7 @@ function copyToClipboard(elementId, button) {
     const text = element.dataset.plainText || element.textContent;
     
     if (!text || text.includes('選択') || text.includes('を選択')) {
-        showToast('パッケージを選択してください', 'error');
+        showToast('ラベルを選択してください', 'error');
         return;
     }
     
@@ -3089,6 +3115,7 @@ function copyToClipboard(elementId, button) {
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
+    updateColorDatalist();
     const themeToggle = document.getElementById('themeToggle');
     themeToggle?.addEventListener('click', () => {
         const current = document.documentElement.getAttribute('data-theme') || 'dracula';
@@ -3173,6 +3200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userMacroClose')?.addEventListener('click', () => {
         document.getElementById('userMacroModal')?.close();
     });
+    
     
     document.querySelectorAll('.button--copy').forEach(btn => {
         btn.addEventListener('click', function() {

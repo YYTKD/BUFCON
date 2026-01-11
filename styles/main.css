@@ -1,4 +1,40 @@
 /* ========================================
+   ローカルフォント
+   ======================================== */
+
+/* Light (300) */
+@font-face {
+  font-family: 'M PLUS 1c';
+  src: url('../assets/fonts/rounded-mgenplus-1c-regular.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+/* Regular (400) */
+@font-face {
+  font-family: 'M PLUS 1c';
+  src: url('../assets/fonts/rounded-mgenplus-1c-medium.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+/* Medium (500) */
+@font-face {
+  font-family: 'M PLUS 1c';
+  src: url('../assets/fonts/rounded-mgenplus-1c-bold.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+/* Material Symbols Rounded */
+@font-face {
+    font-family: 'Material Symbols Rounded';
+    src: url('../assets/fonts/MaterialSymbolsRounded-VariableFont_FILL,GRAD,opsz,wght.ttf') format('truetype');
+    font-weight: 100 900;
+}
+
+
+/* ========================================
    app
    ======================================== */
 
@@ -19,15 +55,15 @@
 
 /*基本設定・デフォルト使用削除*/
 input {
-    border-color: var(--focus-ring);
+    border-color: var(--color-f-purple);
 }
-        
+
 .form__input {
     padding: 6px 8px;
     border-radius: 4px;
-    border: 1px solid var(--input-border);
-    background: var(--surface-input);
-    color: var(--text-primary);
+    border: 1px solid var(--color-selection);
+    background: var(--color-bg-dark);
+    color: var(--color-foreground);
     font-size: 14px;
     height: 40px;
     width: 100%;
@@ -37,24 +73,24 @@ input {
     width: 100%;
     min-height: 128px;
     padding: 8px;
-    border: 1px solid var(--input-border);
+    border: 1px solid var(--color-selection);
     border-radius: 4px;
     font-size: 12px;
     font-family: monospace;
     resize: vertical;
-    background: var(--surface-input);
-    color: var(--text-primary); 
+    background: var(--color-bg-dark);
+    color: var(--color-foreground);
 }
 
 .form__input::placeholder,
 .form__textarea--memo::placeholder {
-    color: var(--input-placeholder);
+    color: var(--color-current-line);
 }
 
 .form__input:focus,
 .form__textarea--memo:focus {
     outline: none;
-    border: 2px solid var(--focus-ring);
+    border: 2px solid var(--color-f-purple);
 }
 
 button {
@@ -71,41 +107,37 @@ details summary::marker {
     content: '';
 }
 
-.material-symbols-rounded {
-    user-select: none;
-}
-
 body {
-    font-family: 'Kosugi Maru', system-ui, sans-serif;
-    background: var(--surface-page);
-    color: var(--text-primary);
+    font-family: 'M PLUS 1c', system-ui, sans-serif;
+    background: var(--color-bg-darker);
+    color: var(--color-foreground);
     padding: 0;
     box-sizing: border-box !important;
 }
 
 a {
-    color: var(--link-color);
+    color: var(--color-f-cyan);
     text-decoration: underline;
     text-underline-offset: 2px;
 }
 
 a:hover {
-    color: var(--accent-secondary);
+    color: var(--color-pink);
 }
 
 ::selection {
-    background: var(--selection-bg);
-    color: var(--text-primary);
+    background: var(--color-selection);
+    color: var(--color-foreground);
 }
 
 :focus-visible {
-    outline: 2px solid var(--focus-ring);
+    outline: 2px solid var(--color-f-purple);
     outline-offset: 2px;
 }
 
 .context-menu {
     position: absolute;
-    background: var(--context-menu-bg);
+    background: var(--color-bg-light);
     box-shadow: var(--shadow);
     border-radius: 4px;
     padding: 4px 0;
@@ -123,34 +155,36 @@ a:hover {
     background: transparent;
     border: none;
     font-size: 14px;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     cursor: pointer;
 }
 
 .context-menu__item:hover {
-    background: var(--context-menu-hover);
+    background: var(--color-bg-light);
 }
 
 .context-menu__separator {
     height: 1px;
-    background: var(--border-default);
+    background: var(--color-selection);
     margin: 4px 0;
 }
 
 .material-symbols-rounded {
+    font-family: 'Material Symbols Rounded';
     font-size: 24px;
     font-weight: 400;
     flex-shrink: 0;
     align-items: center;
     justify-self: center;
     overflow: visible;
+    user-select: none;
 }
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
-    -moz-appearance:textfield;
+    -moz-appearance: textfield;
 }
 
 /* ========================================
@@ -160,7 +194,7 @@ input[type="number"]::-webkit-outer-spin-button {
 /* メインコンテナ */
 .app {
     padding: 8px;
-    background: var(--surface-page);
+    background: var(--color-bg-darker);
     overflow: hidden;
 }
 
@@ -168,8 +202,8 @@ input[type="number"]::-webkit-outer-spin-button {
 .app__content {
     display: flex;
     flex-wrap: wrap;
-    margin-top: 40px;
-    gap: 16px;
+    margin-top: 32px;
+    gap: 8px;
     max-width: calc(720px + 16px);
 }
 
@@ -183,68 +217,62 @@ input[type="number"]::-webkit-outer-spin-button {
 .button {
     display: flex;
     padding: 4px 8px;
-    background: var(--button-primary-bg);
-    color: var(--button-primary-text);
-    border: 1px solid var(--border-strong);
+    background: var(--color-purple);
+    color: var(--color-background);
+    border: 1px solid var(--color-current-line);
     outline-offset: -1px;
     border-radius: 4px;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
     flex-shrink: 0;
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-.button.material-symbols-rounded {
+.button.material-symbols-rounded,
+.button .material-symbols-rounded {
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 900;
+}
+
+.button:not(.material-symbols-rounded) {
+    font-family: 'M PLUS 1c';
 }
 
 .button:hover {
-    filter: brightness(108%);
+    filter: brightness(110%);
+    outline: 2px solid var(--color-pink);
 }
 
 .button:hover .tooltip {
-    bottom: 32px;
+    top: 32px;
     left: -40px;
     opacity: 1;
     font-weight: 400;
-    padding: 10px;
+    font-family: 'M PLUS 1c';
 }
 
-.button:hover .tooltip::before {
-    content: "";
-    position: absolute;
-    border: 10px solid transparent;
-    border-bottom-color: var(--tooltip-bg);
-    top: 8px;
-    left: 24px;
-    transform: rotate(-180deg);
-    transform-origin: bottom center;
-}
 
-.button--secondary { 
-    display: flex; 
-    background: var(--button-secondary-bg); 
-    color: var(--button-secondary-text);
-    align-items: center; 
-    justify-content: center; 
+.button--secondary {
+    display: flex;
+    background: var(--color-bg-light);
+    color: var(--color-foreground);
+    align-items: center;
+    justify-content: center;
     flex-wrap: wrap;
+    gap: 0.5em;
+}
+
+.button--secondary .material-symbols-rounded {
+    font-weight: 400;
 }
 
 .button--grow {
     flex: 1;
-}
-
-.button--half {
-    width: 50%;
-}
-
-.button--spaced {
-    margin: 8px 0;
 }
 
 /* プルダウン矢印 */
@@ -262,7 +290,7 @@ details[open] summary .material-symbols-rounded {
 .modal__divider {
     display: flex;
     align-self: center;
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--color-selection);
     width: calc(100% + 32px);
 }
 
@@ -272,11 +300,10 @@ details[open] summary .material-symbols-rounded {
 
 /* モーダル */
 dialog {
-        position: fixed;
+    position: fixed;
     max-width: 720px;
     width: -webkit-fill-available;
-    background: var(--surface-panel);
-    outline: 2px solid var(--border-strong);
+    outline: 1px solid var(--color-current-line);
     justify-self: center;
     align-self: flex-start;
     margin: 20px 8px;
@@ -292,7 +319,7 @@ dialog::-webkit-scrollbar {
 }
 
 dialog::backdrop {
-    background: var(--overlay-backdrop);
+    background: color-mix(in srgb, var(--color-bg-darker) 60%, transparent);
 }
 
 /* ========================================
@@ -303,11 +330,13 @@ dialog::backdrop {
 .tooltip {
     position: absolute;
     min-height: 32px;
-    background: var(--tooltip-bg);
-    color: var(--tooltip-text);
+    background: var(--color-bg-dark);
+    color: var(--color-foreground);
     padding: 8px;
     border-radius: 4px;
     font-size: 12px;
+    font-weight: 400;
+    width: max-content;
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
@@ -318,22 +347,16 @@ dialog::backdrop {
     position-anchor: var(--target);
 }
 
-.tooltip::before {
-    content: "";
-    position: absolute;
-    border: 10px solid transparent;
-    border-bottom-color: var(--tooltip-bg);
-    margin-top: 4px;
-    transform: rotate(-180deg);
-    transform-origin: bottom center;
-}
-
 .tooltip--settings {
     --target: --settings;
 }
 
 .tooltip--help {
     --target: --help;
+}
+
+.tooltip--color {
+    --target: --color;
 }
 
 .tooltip--feedback {
@@ -365,10 +388,10 @@ dialog::backdrop {
     position: fixed;
     right: 20px;
     padding: 12px 20px;
-    background: var(--surface-card);
-    color: var(--text-primary);
+    background: var(--color-bg-light);
+    color: var(--color-foreground);
     border-radius: 6px;
-    border: 1px solid var(--border-default);
+    border: 1px solid var(--color-selection);
     box-shadow: var(--shadow);
     z-index: 10000;
     animation: slideIn 0.3s ease-out;
@@ -377,21 +400,21 @@ dialog::backdrop {
 }
 
 .toast--error {
-    border-left: 4px solid var(--status-danger);
+    border-left: 4px solid var(--color-f-red);
 }
 
 .toast--success {
-    border-left: 4px solid var(--status-success);
+    border-left: 4px solid var(--color-f-green);
 }
 
 .toast--info {
-    border-left: 4px solid var(--status-info);
+    border-left: 4px solid var(--color-f-cyan);
 }
 
 /* 出力ボックス */
 .output {
-    background: var(--surface-card);
-    border: 1px solid var(--border-default);
+    background: var(--color-bg-dark);
+    border: 1px solid var(--color-selection);
     border-radius: 4px;
     padding: 10px;
     position: relative;
@@ -400,7 +423,7 @@ dialog::backdrop {
 .output__label {
     font-size: 11px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--color-current-line);
     margin-bottom: 6px;
 }
 
@@ -415,6 +438,14 @@ dialog::backdrop {
     min-height: 20px;
 }
 
+
+.output:hover .output__text,
+.output:hover .output__text span {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-color) !important;
+}
+
 /* ========================================
    header
    ======================================== */
@@ -426,27 +457,18 @@ dialog::backdrop {
     justify-content: space-between;
     position: fixed;
     width: 100%;
-    height: 40px;
-    background: var(--surface-header);
+    height: 36px;
+    background: var(--color-bg-dark);
     z-index: 1000;
     box-shadow: var(--shadow);
 }
 
 /* ロゴエリア */
 .site-header__logo {
-    margin-top: -4px;
-    display: flex;
-    flex-direction: column;
+    margin: 8px;
+    height: 24px;
     align-items: center;
     justify-content: flex-start;
-    color: var(--text-primary);
-}
-
-.site-header__title {
-    padding-left: 10px;
-    text-align: center;
-    font-size: 30px;
-    font-weight:800;
 }
 
 /* ヘッダーメニュー */
@@ -457,7 +479,7 @@ dialog::backdrop {
     min-width: 120px;
     height: stretch;
     justify-content: flex-end;
-    color: var(--text-primary);
+    color: var(--color-foreground);
 }
 
 .site-header__menu-item {
@@ -467,18 +489,22 @@ dialog::backdrop {
     justify-content: center;
     width: stretch;
     height: stretch;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     cursor: pointer;
     opacity: 1;
     transition: 0.2s ease;
 }
 
 .site-header__menu-item:hover {
-    background: var(--surface-hover);
+    background: var(--color-bg-light);
 }
 
 .site-header__menu-item--settings {
     anchor-name: --settings;
+}
+
+.site-header__menu-item--color {
+    anchor-name: --color;
 }
 
 .site-header__menu-item--help {
@@ -490,14 +516,10 @@ dialog::backdrop {
 }
 
 .site-header__menu-item:hover .tooltip {
-    background: var(--surface-header);
+    background: var(--color-bg-dark);
     opacity: 1;
     bottom: calc(anchor(bottom) - 40px);
     transform: translateX(-20%);
-}
-
-.site-header__menu-item:hover .tooltip::before {
-    display: none;
 }
 
 .site-header__menu-item span {
@@ -509,8 +531,7 @@ dialog::backdrop {
     position: absolute;
     top: 100%;
     right: anchor(right);
-    background: var(--surface-header);
-    border: 1px solid var(--border-strong);
+    background: var(--color-bg-dark);
     border-radius: 8px;
     box-shadow: var(--shadow);
     min-width: 180px;
@@ -533,7 +554,7 @@ dialog::backdrop {
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     background: transparent;
     border: none;
     font-size: 14px;
@@ -542,7 +563,7 @@ dialog::backdrop {
 }
 
 .site-header__dropdown-item:hover {
-    background: var(--surface-hover);
+    background: var(--color-bg-light);
 }
 
 
@@ -554,7 +575,6 @@ dialog::backdrop {
 .section {
     flex: 1 720px;
     max-width: 720px;
-    background: none;
 }
 
 /* セクションヘッダー */
@@ -562,27 +582,28 @@ dialog::backdrop {
 .section__header,
 .section__header--modal {
     display: flex;
-    background: var(--surface-card);
+    position: sticky;
+    top: 0;
+    background: var(--color-background);
+    border-bottom: 1px solid var(--color-current-line);
     padding: 4px 8px;
     min-height: 32px;
     width: 100%;
     border-radius: 4px 4px 0 0;
-    font-weight: 600;
+    font-weight: 500;
     font-size: 18px;
-    outline: 2px solid var(--border-strong);
-    color: var(--text-primary);
+    color: var(--color-foreground);
     user-select: none;
     justify-content: flex-start;
     align-items: center;
+    gap: 0.5em;
+    z-index: 20;
 }
 
 .section__header--modal {
-    position: sticky;
-    top: 0;
-    outline: 2px solid var(--border-strong);
-    z-index: 20;
     anchor-name: --S-header;
 }
+
 input[type="radio"] {
     display: none;
 }
@@ -596,8 +617,7 @@ input[type="radio"] {
     gap: 8px;
     padding: 8px;
     border-radius: 0 0 4px 4px;
-    outline: 2px solid var(--border-strong);
-    background: var(--surface-panel);
+    background: var(--color-background);
     height: auto;
     width: 100%;
     transition:
@@ -615,18 +635,22 @@ input[type="radio"] {
 }
 
 dialog .modal__body {
+    display: flex;
     width: 100%;
     padding: 16px;
     overflow-x: hidden;
+    gap: 16px;
 }
 
 .modal__section {
-    gap: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .modal__section--divider {
     padding-top: 12px;
-    border-top: 2px solid var(--border-strong);
+    border-top: 2px solid var(--color-current-line);
 }
 
 .modal__close {
@@ -643,12 +667,18 @@ dialog .modal__body {
 
 .tabs__label {
     display: flex;
-    background: var(--surface-card);
+    background: var(--color-bg-dark);
     cursor: pointer;
-    color: var(--text-secondary);
-    transition: all 0.1s ease-out; 
+    color: var(--color-current-line);
     order: -1;
     flex: 1;
+    z-index: 20;
+}
+
+.tabs__label:hover {
+    filter: brightness(150%);
+    outline: 2px solid var(--color-pink);
+    outline-offset: -2px;
 }
 
 .tabs__panel {
@@ -658,13 +688,17 @@ dialog .modal__body {
 }
 
 .tabs__label:has(:checked) {
-    background: var(--surface-card);
-    color: var(--text-primary);
-    z-index: 10;
-    transition: all 0.1s ease-out;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    outline: none;
 }
 
-.tabs__label:has(:checked) + .tabs__panel {
+.tabs__label:has(:checked):hover {
+    filter: none;
+    outline: none;
+}
+
+.tabs__label:has(:checked)+.tabs__panel {
     display: flex;
 }
 
@@ -676,8 +710,7 @@ dialog .modal__body {
 .form__group {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    margin-bottom: 8px;
+    gap: 2px;
     flex: 1;
 }
 
@@ -693,16 +726,18 @@ dialog .modal__body {
     flex-direction: column;
 }
 
-.form__grid > div {
+.form__grid>div {
+    display: flex;
     flex-direction: column;
-	width: calc(50% - 4px);
+    width: calc(50% - 4px);
+    gap: 8px;
 }
 
 .form__grid label {
     word-break: keep-all;
 }
 
-.form__row--split {
+.form__row {
     display: flex;
     flex-direction: row;
     gap: 8px;
@@ -713,10 +748,10 @@ dialog .modal__body {
     min-width: 64px;
 }
 
-.form__grid input:focus, 
+.form__grid input:focus,
 .form__grid select:focus {
     outline: none;
-    border: 2px solid var(--focus-ring);
+    border: 2px solid var(--color-f-purple);
 }
 
 .form__grid input[type="color"] {
@@ -731,21 +766,38 @@ dialog .modal__body {
 }
 
 .drop-zone--active {
-    border: 3px dashed var(--accent-primary) !important;
-    background: var(--surface-selection) !important;
+    border: 3px dashed var(--color-purple) !important;
+    background: var(--color-bg-light) !important;
+}
+
+.form__label {
+    user-select: none;
 }
 
 .form__label--btn {
-    background: var(--surface-elevated);
-    border-radius: 2px;
-    padding:2px;
-    outline: 1px solid var(--border-strong);
+    position: stiky;
+    bottom: 0px;
+    border-radius: 4px;
+    padding: 4px;
+    background: var(--color-bg-light);
+    border: 1px solid var(--color-current-line);
+    border-left: 6px solid var(--color-bg-lighter);
+    z-index: 10;
+}
+
+.form__label--btn span {
+    padding-left: 4px;
+    color: var(--color-current-line);
 }
 
 .form__label--btn:has(input:checked) {
-    color: var(--text-primary);
-    outline: 2px solid var(--status-success);
+    background: var(--color-bg-lighter);
+    border-left: 6px solid var(--color-green);
 
+    &,
+    span {
+        color: var(--color-foreground);
+    }
 }
 
 /* ラジオボタンオプション */
@@ -753,7 +805,7 @@ dialog .modal__body {
     display: flex;
     gap: 8px;
     align-items: center;
-    word-break :keep-all;
+    word-break: keep-all;
     user-select: none;
 }
 
@@ -761,35 +813,38 @@ dialog .modal__body {
     display: flex;
     gap: 4px;
     cursor: pointer;
-    align-content: center;
     justify-content: center;
-    background: var(--surface-panel);
-    outline: 2px solid var(--border-default);
-    aspect-ratio: 1 / 1;
+    align-items: center;
+    background: var(--color-bg-dark);
+    border: 1px solid var(--color-selection);
+    max-width: 32px;
+    max-height: 32px;
 }
 
-.target-selector__option label{
+.target-selector__option label {
     text-align: center;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--text-secondary);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--color-current-line);
     margin: 0;
     cursor: pointer;
 }
 
 .target-selector input[type="number"] {
+    margin-left: 8px;
     height: 32px;
     width: 48px;
     cursor: pointer;
+    background: var(--color-bg-dark);
 }
 
 .target-selector__option:has(input:checked) label {
-    color: var(--text-primary);
+    color: var(--color-foreground);
 }
 
-.target-selector__option:has(input:checked)  {
-    background: var(--surface-selection);
-    outline: 2px solid var(--border-strong);
+.target-selector__option:has(input:checked) {
+    background: var(--color-bg-light);
+    border: 2px solid var(--color-current-line);
 }
 
 /* バフコントロール */
@@ -799,10 +854,7 @@ dialog .modal__body {
     gap: 8px;
     flex-wrap: wrap;
     container-type: inline-size;
-}
-
-.control-bar--full {
-    width: 100%;
+    z-index: 10;
 }
 
 .control-bar__item {
@@ -816,28 +868,19 @@ dialog .modal__body {
 }
 
 .button--turn {
-    background: var(--surface-card);
-    color: var(--text-primary);
+    background: var(--color-bg-light);
+    color: var(--color-foreground);
 }
 
 .button--turn:hover {
     background: var(--color-orange);
-    color: var(--text-on-warning);
 }
 
 #turnResetBtn:hover {
-    background: var(--button-danger-bg);
-    color: var(--button-danger-text);
+    background: var(--color-red);
 }
 
 .button--turn:hover .tooltip {
-    opacity: 1;
-    left: 4px;
-    align-items: normal;
-}
-
-.button--turn:hover .tooltip::before {
-    top: 12px;
     left: 4px;
 }
 
@@ -864,20 +907,19 @@ dialog .modal__body {
     border-radius: 12px;
     border: none;
     cursor: pointer;
-    background: var(--toggle-track);
-    box-shadow: inset 0 2px var(--shadow-soft);
+    box-shadow: inset 0 2px color-mix(in srgb, var(--color-bg-darker) 20%, transparent);
     align-items: center;
 }
 
 @container (max-width: 140px) {
-  .toggle {
-    position: absolute;
-    align-self: center;
-  }
+    .toggle {
+        position: absolute;
+        align-self: center;
+    }
 }
 
 .toggle--active {
-    background: var(--toggle-track-active);
+    background: var(--color-selection);
     mix-blend-mode: luminosity;
 }
 
@@ -889,8 +931,8 @@ dialog .modal__body {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: var(--toggle-thumb);
-    box-shadow: inset 0 -1px var(--shadow-soft);
+    background: whitesmoke;
+    box-shadow: inset 0 -1px color-mix(in srgb, var(--color-bg-darker) 20%, transparent);
 }
 
 .toggle--active::after {
@@ -900,14 +942,17 @@ dialog .modal__body {
 /* コピーボタン */
 .button--copy {
     position: absolute;
-    top: 8px;
+    top: 12px;
     right: 8px;
-    background: var(--button-primary-bg);
-    color: var(--button-primary-text);
+    background: var(--color-purple);
+    max-height: 40px;
+    color: var(--color-background);
     border: none;
     border-radius: 4px;
     padding: 4px 10px;
-    font-size: 11px;
+    font-family: 'M PLUS 1c';
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
 }
 
@@ -916,8 +961,8 @@ dialog .modal__body {
 }
 
 .button--copy.button--copied {
-    background: var(--button-success-bg);
-    color: var(--button-success-text);
+    background: var(--color-green);
+    color: var(--color-background);
 }
 
 /* ========================================
@@ -930,11 +975,11 @@ dialog .modal__body {
     flex-direction: column;
     gap: 4px;
     padding: 4px;
-    height: 240px;
+    height: 320px;
     min-height: 100px;
-    background: var(--surface-panel);
+    background: var(--color-bg-dark);
     border-radius: 4px;
-    outline: 1px solid var(--border-default);
+    outline: 1px solid var(--color-selection);
     resize: vertical;
     overflow: auto;
     -ms-overflow-style: none;
@@ -970,147 +1015,133 @@ dialog .modal__body {
     margin-left: auto;
 }
 
-.list__index  select {
+.list__index select {
     width: 32px;
     height: 32px;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background: var(--surface-card);
-    border: none;
-    color: var(--text-primary);
+    background: var(--color-bg-light);
+    border: 1px solid var(--color-current-line);
+    color: var(--color-foreground);
 }
-        
-.list__index > span {
+
+.list__index>span {
     position: absolute;
     z-index: 1;
     font-size: 32px;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     pointer-events: none;
 }
 
-@container (259.8px < width < 300px) {
-  #judgeSection .list__index {
-    margin-left: auto;
-  }
+.list__index option {
+    font-family: 'M PLUS 1c';
+    font-weight: 500;
 }
 
-.list__index:hover > span {
-    background: var(--surface-hover-strong);
-    color: var(--text-primary);
+.list__index:hover {
+    background: color-mix(in srgb, var(--color-foreground) 16%, transparent);
 }
 
 
 
 .list__index:hover .tooltip {
-    bottom: 32px;
+    top: 32px;
     left: -64px;
     opacity: 1;
 }
 
-.list__index:hover .tooltip::before {
-    content: "";
-    position: absolute;
-    border: 10px solid transparent;
-    border-bottom-color: var(--tooltip-bg);
-    top: 8px;
-    right: 12px;
-    transform: rotate(-180deg);
-    transform-origin: bottom center;
-}
-
 /* オートコンプリート */
-#buffEffect, 
-#judgeRoll, 
-#attackRoll, 
-#bulkAddText, 
-#bulkAddJudgeText, 
+#buffEffect,
+#judgeRoll,
+#attackRoll,
+#bulkAddText,
+#bulkAddJudgeText,
 #bulkAddAttackText {
     anchor-name: --input;
 }
 
-        .autocomplete {
-            position: absolute;
-            background: var(--surface-card);
-            border: 1px solid var(--border-default);
-            border-radius: 4px;
-            box-shadow: var(--shadow);
-            z-index: 1150;
-            max-height: 200px;
-            overflow-y: auto;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            top: anchor(bottom);
-            position-anchor: --input;
-        }
+.autocomplete {
+    position: absolute;
+    background: var(--color-bg-dark);
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    z-index: 1150;
+    max-height: 200px;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    top: anchor(bottom);
+    position-anchor: --input;
+}
 
-        .autocomplete::-webkit-scrollbar {
-            display: none;
-        }
+.autocomplete::-webkit-scrollbar {
+    display: none;
+}
 
-        .autocomplete.u-hidden {
-            display: none;
-        }
+.autocomplete.u-hidden {
+    display: none;
+}
 
-        .autocomplete__item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: background-color 0.1s;
-            border-bottom: 1px solid var(--border-default);
-            gap: 8px;
-        }
+.autocomplete__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.1s;
+    border-bottom: 1px solid var(--color-selection);
+    gap: 8px;
+}
 
-        .autocomplete__item:last-child {
-            border-bottom: none;
-        }
+.autocomplete__item:last-child {
+    border-bottom: none;
+}
 
 .autocomplete__item:hover,
 .autocomplete__item--selected {
-    background-color: var(--surface-elevated);
+    background-color: var(--color-bg-light);
 }
 
-        .autocomplete__text {
-            flex: 1;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-            word-break: break-all;
-        }
+.autocomplete__text {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-foreground);
+    word-break: break-all;
+}
 
-        .autocomplete__category {
-            font-size: 11px;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
+.autocomplete__category {
+    font-size: 11px;
+    color: var(--color-current-line);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
 
 /* カテゴリ */
 .list__category-header {
     display: flex;
     align-items: center;
     padding: 2px 4px;
-    background: var(--surface-elevated);
+    background: var(--color-bg-light);
+    border-bottom: 1px solid var(--color-current-line);
     border-radius: 2px;
     font-size: 16px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     transition: all 0.1s;
     cursor: grab;
     position: relative;
-    box-shadow: var(--shadow);
 }
 
 .list__category-header--dragging {
     opacity: 30% !important;
     background: none !important;
-    outline: 2px solid var(--accent-primary) !important;
+    outline: 2px solid var(--color-purple) !important;
     box-shadow: var(--shadow);
     cursor: grabbing;
 }
-        
+
 .list__category-body {
     display: flex;
     flex-direction: column;
@@ -1124,21 +1155,29 @@ dialog .modal__body {
 .list__item {
     display: flex;
     padding: 4px 8px;
-    background: var(--surface-card);
+    background: var(--color-bg-light);
     border-radius: 2px;
     font-size: 14px;
-    transition: all 0.1s;
     position: relative;
     min-height: 24px;
 
-    font-family: Noto Sans JP;;
+    font-family: Noto Sans JP;
+    ;
+}
+
+#judgeSection .list__item-title,
+#attackSection .list__item-title,
+#userMacroModal .list__item-title {
+    opacity: 0.8;
+    font-weight: 600;
 }
 
 .list__item-meta {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: baseline;
     gap: 8px;
+    user-select: none;
 }
 
 /* アイテムインタラクション */
@@ -1146,39 +1185,21 @@ dialog .modal__body {
     cursor: pointer;
 }
 
-.list__item.material-symbols-rounded {
-    cursor: move;
-    font-size: 24px;
-    user-select: none;
-    flex-shrink: 0;
-    opacity: .4;
-    margin-left: -6px;
-    overflow: hidden;
-}
-
 .list__item--clickable:hover {
-    outline: 2px solid var(--accent-primary);
-}
-
-.list__item:hover .tooltip {
-    opacity: 1;
-    align-items: normal;
-    bottom: 100%;
-    left: 0px;
-    transform: translateX(-10px);
+    outline: 2px solid var(--color-purple);
 }
 
 .list__item--selected {
-    background: var(--surface-elevated);
-    outline: 2px solid var(--accent-primary);
+    background: var(--color-selection);
+    outline: 2px solid var(--color-purple);
 }
 
 /* ドラッグ機能 */
 .list__item--dragging {
+    color: var(--color-foreground) !important;
     opacity: 30% !important;
     background: none !important;
-    outline: 1px solid var(--add-color) !important;
-    box-shadow: var(--shadow);
+    outline: 2px solid var(--color-f-green);
     cursor: grabbing;
 }
 
@@ -1190,7 +1211,7 @@ dialog .modal__body {
     right: 0;
     height: 2px;
     z-index: 50;
-    background: var(--status-danger);
+    background: var(--color-f-red);
 }
 
 .list__item--drag-over-bottom::after {
@@ -1201,18 +1222,12 @@ dialog .modal__body {
     right: 0;
     height: 2px;
     z-index: 50;
-    background: var(--status-danger);
+    background: var(--color-f-red);
 }
 
 .list__category-header--drag-over {
-    outline: 2px dashed var(--accent-primary);
-    background: var(--surface-selection);
-    border-radius: 4px;
-}
-
-.list__category-body--drag-over {
-    outline: 2px dashed var(--accent-primary);
-    background: var(--surface-selection);
+    outline: 2px dashed var(--color-purple);
+    background: var(--color-selection);
     border-radius: 4px;
 }
 
@@ -1243,17 +1258,20 @@ dialog .modal__body {
 }
 
 .buff__details {
-    margin-top: 8px;
-    padding: 8px;
+    margin-top: 4px;
+    padding: 4px;
     display: flex;
     flex-direction: column;
     justify-self: center;
+    align-items: flex-start;
     gap: 4px;
     font-size: 12px;
-    background: var(--surface-elevated);
-    color: var(--text-primary);
+    border: 1px solid var(--color-bg-lighter);
+    border-radius: 2px;
+    background: var(--color-background);
+    color: var(--color-foreground);
     cursor: auto;
-    width: calc(100% + 8px);
+    width: calc(100% + 12px);
 }
 
 .buff__details div {
@@ -1262,10 +1280,9 @@ dialog .modal__body {
     flex-wrap: wrap;
     gap: 1px;
     padding-bottom: 2px;
-    border-bottom: 1px solid var(--border-default);
 }
 
-.buff__details div:first-of-type p{
+.buff__details div:first-of-type p {
     word-break: break-all;
     margin-right: 8px;
 }
@@ -1285,7 +1302,7 @@ dialog .modal__body {
     white-space: pre-wrap;
     word-break: break-word;
     font-weight: 400;
-    color: var(--text-primary);
+    color: var(--color-foreground);
 
 }
 
@@ -1303,8 +1320,8 @@ dialog .modal__body {
 /* アイテム内要素 */
 .list__item-title {
     font-size: 17px;
-    font-weight: 600;
-    margin-left: 16px;
+    font-weight: 800;
+    margin-left: 8px;
     margin-top: -3px;
 }
 
@@ -1323,15 +1340,15 @@ dialog .modal__body {
 }
 
 .list__item-detail {
-    color: var(--text-secondary);
     font-size: 12px;
     font-weight: 600;
+    color: var(--color-current-line);
 }
 
 .list__item-detail-label {
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--color-foreground);
 }
 
 /* バフボタングループ */
@@ -1350,8 +1367,8 @@ dialog .modal__body {
     left: -12px;
     width: 24px;
     height: 24px;
-    background: var(--surface-panel);
-    color: var(--text-primary);
+    background: var(--color-background);
+    color: var(--color-foreground);
     border-radius: 50%;
 }
 
@@ -1368,47 +1385,91 @@ dialog .modal__body {
    ======================================== */
 
 /* ヘルプ */
+.form__text {
+    font-size: 12px;
+    font-weight: 200;
+    color: var(--color-foreground);
+}
+
+.form__label--small {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-foreground);
+    display: block;
+}
+
+.form__label--large {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-current-line);
+    display: flex;
+    margin: 0 0 0 2px;
+    gap: 8px;
+    align-items: center;
+}
+
+.form__input--compact {
+    width: 60px;
+    padding: 4px 6px;
+    border: 1px solid var(--color-selection);
+    border-radius: 4px;
+    background: var(--color-bg-light);
+    color: var(--color-foreground);
+}
+
+
 .form__help-toggle {
     position: fixed;
     right: calc(anchor(right) + 12px);
     top: calc(anchor(bottom) + 8px);
-    background: var(--surface-card);
+    background: var(--color-bg-light);
     height: 40px;
     width: 40px;
-    z-index: 2;
+    z-index: 30;
     position-anchor: --S-header;
 }
 
+.form__help-toggle .material-symbols-rounded {
+    font-weight: 400;
+}
+
 .form__help-toggle:hover {
-    background: var(--color-orange);
+    background: var(--color-cyan);
 }
 
 .form__help-toggle span {
-    position:relative;
-    color: var(--text-primary);
+    position: relative;
+    color: var(--color-foreground);
 }
 
 .form__help-toggle input {
     display: none;
 }
-        
+
 .form__help-toggle:has(input:checked) {
-    background: var(--surface-selection);
-    border: 1px solid var(--status-warning) !important;
-    color: var(--status-warning) !important;
-    box-shadow: inset 0 1px var(--shadow-soft) !important;
+    background: var(--color-bg-light);
+    border: 1px solid var(--color-f-orange) !important;
+    color: var(--color-f-orange) !important;
+    box-shadow: inset 0 1px color-mix(in srgb, var(--color-bg-darker) 20%, transparent) !important;
 }
-        
+
 .form__note {
-    background: var(--surface-selection);
-    border: 1px solid var(--status-warning);
+    background: var(--color-selection);
+    border: 1px solid var(--color-f-orange);
     border-radius: 4px;
     padding: 8px;
     font-size: 12px;
-    color: var(--text-primary);
+    color: var(--color-foreground);
     transform: scale(0);
     display: none;
     transition: transform 1s ease-out;
+}
+
+.form__group button {
+    background: var(--color-selection);
+    color: var(--color-foreground);
+    height: 40px;
+    align-items: center;
 }
 
 .section__body:has(.form__help-toggle input:checked) .modal__section .form__note,
@@ -1420,7 +1481,7 @@ dialog .modal__body {
 /* 空メッセージ */
 .list__empty {
     text-align: center;
-    color: var(--text-secondary);
+    color: var(--color-current-line);
     font-size: 12px;
     padding: 12px;
 }
@@ -1429,8 +1490,8 @@ dialog .modal__body {
 .legal {
     margin: 12px;
     font-size: 12px;
-    color: var(--text-secondary);
-        cursor: pointer;
+    color: var(--color-current-line);
+    cursor: pointer;
 }
 
 .legal.summary {
@@ -1450,17 +1511,28 @@ dialog .modal__body {
    ユーティリティクラス
    ======================================== */
 
-.u-hidden { display: none; }
-.harf-size { width: 50%;}
-.form__textarea--memo { width: 100%; padding: 8px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; background: var(--surface-input); color: var(--text-primary); }
-.form__row { display: flex; gap: 6px;}
-.button--muted { background: var(--button-muted-bg); color: var(--button-muted-text); border: 1px solid var(--border-strong); }
-.button--info { background: var(--button-info-bg); color: var(--button-info-text); border: 1px solid var(--border-strong); }
-.button--danger { background: var(--button-danger-bg); width: 30%; color: var(--button-danger-text); border: 1px solid var(--border-strong); }
-.form__text { font-size: 11px; color: var(--text-primary); margin: 6px; }
-.form__label--small { font-size: 12px; font-weight: 600; color: var(--text-primary); display: block; margin: 8px 0 2px 2px;}
-.form__label--large { font-size: 16px; font-weight: 600; color: var(--text-secondary); display: flex; margin: 0 0 0 2px; gap: 8px; align-items: center; }
-.form__input--compact { width: 60px; padding: 4px 6px; border: 1px solid var(--input-border); border-radius: 4px; background: var(--surface-input); color: var(--text-primary); }
+.u-hidden {
+    display: none;
+}
+
+.half-size {
+    width: 50%;
+}
+
+.full-widh {
+    width: 100%;
+}
+
+.button--info {
+    background: var(--color-cyan);
+    color: var(--color-background);
+}
+
+.button--danger {
+    background: var(--color-red);
+    width: 30%;
+    color: var(--color-background);
+}
 
 .form__label--row {
     display: flex;
