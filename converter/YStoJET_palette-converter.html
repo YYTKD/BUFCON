@@ -43,6 +43,7 @@
     <section class="converter__actions">
       <button type="button" id="convertBtn" class="button">変換する</button>
       <button type="button" id="clearBtn" class="button button--ghost">クリア</button>
+      <span id="statusMessage" aria-live="polite"></span>
     </section>
 
     <section class="converter__panel">
@@ -51,7 +52,10 @@
       </div>
       <textarea id="jsonOutput" readonly placeholder="変換されたJSONがここに表示されます"></textarea>
     </section>
+     <section class="converter__actions"></section>
     <button type="button" id="copyBtn" class="button button--secondary">コピー</button>
+    <span id="statusMessage" aria-live="polite"></span>
+    </section>
   </main>
   <section class="converter__actions">
     <script src="YStoJET_palette-converter.js?v=1-1-0"></script>
