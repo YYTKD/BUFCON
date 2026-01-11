@@ -91,7 +91,7 @@ const createExpander = (assignments, dictionarySet) => {
 
   const expandExpression = (expression, stack = new Set()) => {
     if (!expression) return '';
-    return expression.replace(/([+\-])?\s*\{([^}]+)\}/g, (match, operator, variable) => {
+    return expression.replace(/(\$\+|[+\-#$])?\s*\{([^}]+)\}/g, (match, operator, variable) => {
       const trimmed = variable.trim();
       const expanded = expandVariable(trimmed, stack);
       if (specialVariables.has(trimmed)) {
