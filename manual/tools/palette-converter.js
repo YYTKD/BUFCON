@@ -268,7 +268,7 @@ const buildOutput = (input) => {
 
   return {
     buffs,
-    buffCategories: ['装備', '出目修正'],
+    buffCategories: ['出目修正','装備' ],
     judges,
     judgeCategories,
     attacks,
