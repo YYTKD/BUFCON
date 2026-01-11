@@ -91,7 +91,14 @@ const createExpander = (assignments, dictionarySet) => {
 
   const expandExpression = (expression, stack = new Set()) => {
     if (!expression) return '';
-    return expression.replace(/\{([^}]+)\}/g, (_, variable) => expandVariable(variable, stack));
+    return expression.replace(/([+\-])?\s*\{([^}]+)\}/g, (match, operator, variable) => {
+      const trimmed = variable.trim();
+      const expanded = expandVariable(trimmed, stack);
+      if (specialVariables.has(trimmed)) {
+        return expanded;
+      }
+      return `${operator || ''}${expanded}`;
+    });
   };
 
   return {
@@ -173,7 +180,7 @@ const buildOutput = (input) => {
 
       if (ability) {
         name = `${ability}判定`;
-        roll = `2d+{冒険者レベル}+(({${ability}}+//${ability}増強//)/6)`;
+        roll = `2d+{冒険者レベル}+(({${ability}}//${ability}増強//)/6)`;
         registerDictionary(`${ability}増強`);
       } else {
         roll = expandExpression(rollRaw);
