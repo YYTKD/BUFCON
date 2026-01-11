@@ -40,6 +40,7 @@
     <a class="fab" href="#top" aria-label="ページ上部へ">↑</a>
 
     <script src="manual/markdown.js"></script>
+    <script src="manual/content.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         const tocList = document.getElementById('tocList');
@@ -52,7 +53,7 @@
           let lastLi = null;
 
           headings.forEach((heading) => {
-          if (heading.level > 2) return;
+            if (heading.level > 2) return;
 
             const level = Math.min(Math.max(heading.level, 1), 2);
             const title = heading.title.trim();
@@ -249,13 +250,19 @@
           tocList.innerHTML = '';
         };
 
-        fetch('manual/content.md')
-          .then((response) => {
+        const loadManualContent = () => {
+          if (window.manualContent) {
+            return Promise.resolve(window.manualContent);
+          }
+          return fetch('manual/content.md').then((response) => {
             if (!response.ok) {
               throw new Error('manual/content.md not found');
             }
             return response.text();
-          })
+          });
+        };
+
+        loadManualContent()
           .then((markdown) => {
             const { html, headings } = parseMarkdown(markdown);
             article.innerHTML = html;
