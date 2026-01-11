@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="ja" data-theme="dracula">
+
+<head>
+  <link rel="icon" href="assets/logos/jet_dice.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles/theme-dracula.css">
+  <link rel="stylesheet" href="manual/manual.css">
+  <title>JET-PALLET ユーザーマニュアル 2.0.0</title>
+</head>
+
+<body>
+  <div class="content">
+    <header class="site-header">
+      <img class="site-header__logo" src="assets/logos/logo.svg" />
+      <span class="form__label--large">ユーザーマニュアル</span>
+      <span class="form__label--small">2.0.0</span>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="toc-head">
+          <h2>Contents</h2>
+        </div>
+        <nav class="toc" aria-label="目次">
+          <ul class="toc-list" id="tocList"></ul>
+        </nav>
+      </aside>
+
+      <main class="paper">
+        <header class="hero">
+          <h1>JET-PALLET ユーザーマニュアル v2.0.0</h1>
+        </header>
+
+        <article class="article" id="top"></article>
+      </main>
+    </div>
+
+    <a class="fab" href="#top" aria-label="ページ上部へ">↑</a>
+
+    <script src="manual/markdown.js"></script>
+    <script src="manual/content.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const tocList = document.getElementById('tocList');
+        const article = document.querySelector('article.article');
+        if (!tocList || !article) return;
+
+        const buildToc = (headings) => {
+          tocList.innerHTML = '';
+          const listStack = [tocList];
+          let lastLi = null;
+
+          headings.forEach((heading) => {
+            if (heading.level > 2) return;
+
+            const level = Math.min(Math.max(heading.level, 1), 2);
+            const title = heading.title.trim();
+            if (!title) return;
+
+            while (listStack.length < level) {
+              if (!lastLi) break;
+              const sublist = document.createElement('ul');
+              lastLi.appendChild(sublist);
+              listStack.push(sublist);
+            }
+            while (listStack.length > level) {
+              listStack.pop();
+            }
+
+            const li = document.createElement('li');
+            const link = document.createElement('a');
+            link.href = `#${heading.id}`;
+            link.textContent = title;
+            li.appendChild(link);
+            listStack[listStack.length - 1].appendChild(li);
+            lastLi = li;
+          });
+        };
+
+        const escapeHtml = (text) =>
+          text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+
+        const parseInline = (text) => {
+          const parts = text.split(/(`[^`]*`)/g);
+          return parts
+            .map((part) => {
+              if (part.startsWith('`') && part.endsWith('`')) {
+                return `<code>${escapeHtml(part.slice(1, -1))}</code>`;
+              }
+              let escaped = escapeHtml(part);
+              escaped = escaped.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+              escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+              escaped = escaped.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+              return escaped;
+            })
+            .join('');
+        };
+
+        const parseMarkdown = (markdown) => {
+          const lines = markdown.replace(/\r\n?/g, '\n').split('\n');
+          const headings = [];
+          const ensureId = window.markdownUtils?.createHeadingIdGenerator?.() ?? ((title) => title);
+          const listStack = [];
+          let html = '';
+          let paragraph = [];
+          let inCode = false;
+          let codeFence = '';
+          let codeLines = [];
+
+          const closeLists = (targetDepth = 0) => {
+            while (listStack.length > targetDepth) {
+              const current = listStack.pop();
+              if (current.openLi) {
+                html += '</li>';
+              }
+              html += `</${current.type}>`;
+            }
+          };
+
+          const flushParagraph = () => {
+            if (!paragraph.length) return;
+            const parts = paragraph.map((line) => {
+              if (line.endsWith('  ')) {
+                return `${parseInline(line.trimEnd())}<br />`;
+              }
+              return parseInline(line);
+            });
+            html += `<p>${parts.join(' ')}</p>`;
+            paragraph = [];
+          };
+
+          const openList = (type) => {
+            html += `<${type}>`;
+            listStack.push({ type, openLi: false });
+          };
+
+          const closeAllBlocks = () => {
+            flushParagraph();
+            closeLists();
+          };
+
+          lines.forEach((line) => {
+            if (inCode) {
+              if (line.startsWith(codeFence)) {
+                const code = escapeHtml(codeLines.join('\n'));
+                html += `<pre><code>${code}</code></pre>`;
+                inCode = false;
+                codeFence = '';
+                codeLines = [];
+                return;
+              }
+              codeLines.push(line);
+              return;
+            }
+
+            const fenceMatch = line.match(/^```/);
+            if (fenceMatch) {
+              closeAllBlocks();
+              inCode = true;
+              codeFence = fenceMatch[0];
+              codeLines = [];
+              return;
+            }
+
+            if (line.trim() === '') {
+              flushParagraph();
+              closeLists();
+              return;
+            }
+
+            const trimmed = line.trim();
+            if (trimmed.startsWith('<')) {
+              closeAllBlocks();
+              html += `${line}\n`;
+              return;
+            }
+
+            const hrMatch = trimmed.match(/^(-{3,}|\*{3,}|_{3,})$/);
+            if (hrMatch) {
+              closeAllBlocks();
+              html += '<hr />';
+              return;
+            }
+
+            const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+            if (headingMatch) {
+              closeAllBlocks();
+              const level = headingMatch[1].length;
+              const title = headingMatch[2].trim();
+              const id = ensureId(title);
+              const safeTitle = parseInline(title);
+              html += `<h${level} id="${id}">${safeTitle}</h${level}>`;
+              headings.push({ level, title, id });
+              return;
+            }
+
+            const listMatch = line.match(/^(\s*)([-*+]|\d+\.)\s+(.*)$/);
+            if (listMatch) {
+              flushParagraph();
+              const indent = Math.floor(listMatch[1].length / 2);
+              const marker = listMatch[2];
+              const content = listMatch[3];
+              const type = marker.endsWith('.') ? 'ol' : 'ul';
+
+              if (listStack.length < indent + 1) {
+                while (listStack.length < indent + 1) {
+                  openList(type);
+                }
+              } else if (listStack.length > indent + 1) {
+                closeLists(indent + 1);
+              }
+
+              const current = listStack[listStack.length - 1];
+              if (!current || current.type !== type) {
+                closeLists(listStack.length - 1);
+                openList(type);
+              } else if (current.openLi) {
+                html += '</li>';
+                current.openLi = false;
+              }
+
+              html += `<li>${parseInline(content)}`;
+              listStack[listStack.length - 1].openLi = true;
+              return;
+            }
+
+            paragraph.push(line);
+          });
+
+          if (inCode) {
+            const code = escapeHtml(codeLines.join('\n'));
+            html += `<pre><code>${code}</code></pre>`;
+          }
+
+          flushParagraph();
+          closeLists();
+
+          return { html, headings };
+        };
+
+        const renderFallback = (message) => {
+          article.innerHTML = `<p>${message}</p>`;
+          tocList.innerHTML = '';
+        };
+
+        const loadManualContent = () => {
+          if (window.manualContent) {
+            return Promise.resolve(window.manualContent);
+          }
+          return fetch('manual/content.md').then((response) => {
+            if (!response.ok) {
+              throw new Error('manual/content.md not found');
+            }
+            return response.text();
+          });
+        };
+
+        loadManualContent()
+          .then((markdown) => {
+            const { html, headings } = parseMarkdown(markdown);
+            article.innerHTML = html;
+            buildToc(headings);
+          })
+          .catch((error) => {
+            console.error(error);
+            renderFallback('マニュアルの読み込みに失敗しました。');
+          });
+      });
+
+      // Smooth scroll for internal anchors
+      document.addEventListener('click', (e) => {
+        const a = e.target.closest('a[href^="#"]');
+        if (!a) return;
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if (!el) return;
+        e.preventDefault();
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', '#' + id);
+      });
+    </script>
+  </div>
+</body>
+
+</html>

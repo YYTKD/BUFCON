@@ -1,1170 +1,617 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="dracula">
+
 <head>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,300,0..1,-50..200" />
+    <link rel="icon" href="assets/logos/jet_dice.png">
+    <link rel="stylesheet" href="assets/fonts/KosugiMaru-Regular.ttf" />
+    <link rel="stylesheet" href="assets/fonts/MaterialSymbolsRounded-VariableFont_FILL,GRAD,opsz,wght.ttf" />
+    <link rel="stylesheet" href="styles/theme-dracula.css">
+    <link rel="stylesheet" href="styles/theme-alucard.css">
+    <link rel="stylesheet" href="styles/main.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BUFCON</title>
-    <style>
+    <title>JET-PALLET</title>
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/*グローバルカラーとサイズ */
-:root {
-    /* カラーパレット */
-    --primary-color: #2d2d2e;
-    --add-color: #4769b3;
-    --add-hover: #3B5796;
-    --secondary-color: #689F38;
-    --danger-color: #ff6b6b;
-    --bg-light: #0e438c;
-    --bg-gray: #f0f0f0;
-    --optional-color: #eba40a;
-    
-    /* ボーダーカラー */
-    --border-color: #00000033;
-    --border-color-light: #ddd;
-    --border-color-dark: #d1d1d1;
-    
-    /* テキストカラー */
-    --text-color: #333;
-    --text-secondary: #666;
-    --text-muted: #999;
-    
-    /* サイズ定義 */
-    --border-radius: 4px;
-    --border-radius-lg: 6px;
-    --border-radius-xl: 8px;
-    --spacing-xs: 4px;
-    --spacing-sm: 6px;
-    --spacing-md: 8px;
-    --spacing-m: 12px;
-    --spacing-L: 16px;
-    
-    /* フォントサイズ */
-    --font-size-xs: 11px;
-    --font-size-sm: 12px;
-    --font-size-base: 13px;
-    --font-size-md: 14px;
-    --font-size-lg: 16px;
-    --font-size-xl: 18px;
-    --font-size-xxl: 30px;
-}
-
-/*基本設定・デフォルト使用削除*/
-
-button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    outline: none;
-    padding: 0;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-}
-
-details summary::marker {
-    content: '';
-}
-
-body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: var(--border-color-light);
-    padding: 0;
-    box-sizing: border-box !important;
-}
-
-p {
-  margin-left: 3em;
-  text-indent: -3em;
-}
-
-/* モーダル */
-.modal {
-    position: fixed;
-    border: 0;
-    width: calc(100% - 16px);
-    max-width: 600px;
-    background: var(--bg-gray);
-    justify-self: center;
-    align-self: flex-start;
-    margin-top: 120px;
-}
-
-.modal::backdrop {
-    background: rgba(0,0,0,0.5);
-}
-
-/* ========================================
-   レイアウト・コンテナ
-   ======================================== */
-
-/* メインコンテナ */
-.container {
-    padding: 8px;
-    background: var(--bg-gray);
-    overflow: hidden;
-}
-
-/* コンテンツエリア */
-.content {
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 60px;
-    gap: var(--spacing-sm);
-}
-
-/* ========================================
-   共通パーツ
-   ========================================*/
-
-details .arrow {
-    transition: transform 0.3s ease-out;
-}
-
-details[open] summary .arrow {
-    transform: rotate(-90deg);
-}
-
-/* ========================================
-   ヘッダー関連
-   ======================================== */
-
-/* 固定ヘッダー */
-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: fixed;
-    width: 100%;
-    height: 60px;
-    background: var(--primary-color);
-    z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-/* ロゴエリア */
-.logo {
-    margin-top: -8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    color: whitesmoke;
-}
-
-.title {
-    padding-left: 10px;
-    text-align: center;
-    font-size: var(--font-size-xxl);
-    font-weight: 800;
-}
-
-.subtitle {
-    margin-top: -7px;
-    margin-left: -4px;
-    text-align: center;
-    font-size: var(--font-size-xs);
-    font-weight: 600;
-}
-
-/* ヘッダーメニュー */
-.header-menu {
-    display: flex;
-    width: 50%;
-    max-width: 300px;
-    min-width: 120px;
-    justify-content: flex-end;
-    color: whitesmoke;
-}
-
-.header-menu-item {
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: stretch;
-    height: 60px;
-    border-left: 2px solid rgba(245,245,245,0.3);
-    color: whitesmoke;
-    cursor: pointer;
-    opacity: 1;
-    transition: 0.2s ease;
-}
-
-.header-menu-item:hover {
-    background: rgba(255,255,255,0.1);
-}
-
-.header-menu-item:hover .tooltip {
-    background: var(--primary-color);
-    opacity: 1;
-    bottom: calc(anchor(bottom) - 40px);
-    transform: translateX(-20%);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-.header-menu-item:hover .tooltip::before {
-    display: none;
-}
-
-.header-menu-item span {
-    font-size: 32px;
-    opacity: 0.8;
-}
-
-
-/* ========================================
-   セクション関連
-   ======================================== */
-
-/* セクション本体 */
-.section {
-    flex: 1 720px;
-    max-width: 720px;
-    background: none;
-}
-
-@media screen and (min-width:720px) {
-    .content {
-        flex-wrap: nowrap;
-    }
-    .section {
-        flex: 1 300px;
-    }
-}
-
-/* セクションヘッダー */
-.section-header, .section-header-m {
-    background: var(--bg-light);
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: var(--border-radius-lg);
-    font-weight: 600;
-    font-size: var(--font-size-m);
-    color: #fff;
-    cursor: pointer;
-    user-select: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.section-header-m {
-    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-}
-
-.section[open] > summary  {
-    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
-}
-
-.section-header:hover {
-    filter: saturate(500%);
-    filter: brightness(90%);
-}
-
-.section-header-title {
-    margin-right: auto;
-    margin-left: var(--spacing-xs);
-}
-
-/* セクションボディ */
-.section-body {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 12px;
-    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-    border: 1px solid var(--border-color);
-    background: var(--bg-gray);
-    height: auto;
-    transition:
-        max-height 0.2s ease-out,
-        padding 0.2s;
-    overflow: auto;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-.section-body::-webkit-scrollbar {
-    display: none;
-}
-
-/* ========================================
-   フォーム・入力要素
-   ======================================== */
-
-/* 入力フォーム */
-.add-area {
-    display: flex;
-    gap: 6px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--border-color-dark);
-}
-
-.add-area-inputs {
-    display: flex;
-    flex: 1;
-    justify-content: flex-start;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.add-area-inputs > * {
-    flex-direction: column;
-    flex: 1 96px;
-}
-
-input[type="text"], 
-select {
-    padding: 6px 8px;
-    border: 1px solid var(--border-color-dark);
-    border-radius: 4px;
-    font-size: 13px;
-    height: 40px;
-    width: 100%;
-}
-
-.add-area input:focus, 
-.add-area select:focus {
-    outline: none;
-    border-color: var(--add-color);
-}
-
-.add-area input[type="number"] {
-    padding: none;
-    width: 60%;
-    cursor: pointer;
-}
-
-.add-area input[type="color"] {
-    padding: none;
-    width: 100%;
-    cursor: pointer;
-}
-
-/* ファイルドロップ領域 */
-
-/* ラジオボタンオプション */
-.target-options {
-    display: flex;
-    gap: 12px;
-    margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-ms);
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.radio-option {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.radio-option input {
-    cursor: pointer;
-}
-
-.radio-option label {
-    font-size: 13px;
-    cursor: pointer;
-}
-
-/* ========================================
-   ボタン
-   ======================================== */
-
-/* 追加ボタン */
-.add-btn {
-    padding: 4px 8px;
-    background: var(--add-color);
-    color: whitesmoke;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
-    align-self: stretch;
-    flex-shrink: 0;
-    box-shadow: inset 0 -1px rgba(0,0,0,0.1);
-}
-
-.add-btn:hover {
-    filter: saturate(500%);
-    filter: brightness(90%);
-}
-
-.secondary-btn { 
-    display: flex; 
-    background: var(--add-color); 
-    align-items: center; 
-    justify-content: center; 
-    gap: var(--spacing-xs);
-    flex-wrap: wrap;
-}
-
-
-/* バフコントロール（ターン進行エリア） */
-.buff-control {
-    display: flex;
-    justify-content: flex-start;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--border-color-dark);
-}
-
-.turn-btn {
-    display: flex;
-    padding: 8px 24px;
-    align-content: center;
-    background: var(--optional-color);
-    color: whitesmoke;
-    border: none;
-    border-radius: 4px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 1px rgba(0,0,0,0.3);
-}
-
-.turn-btn:hover {
-    filter: saturate(500%);
-    filter: brightness(90%);
-}
-
-/* トグルボタン（ON/OFF切り替え） */
-.toggle-btn {
-    display: flex;
-    width: 48px;
-    height: 24px;
-    border-radius: 12px;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s;
-    flex-shrink: 0;
-    box-shadow: inset 0 2px rgba(0,0,2,0.1);
-    align-items: center;
-}
-
-.toggle-btn.active {
-    background: rgba(0,0,0,0.3);
-    mix-blend-mode: luminosity;
-}
-
-.toggle-btn::after {
-    display: flex;
-    content: '';
-    position: relative;
-    left: 3px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: whitesmoke;
-    box-shadow: inset 0 -1px rgba(0,0,0.5,0.2);
-}
-
-.toggle-btn.active::after {
-    transform: translateX(24px);
-}
-
-/* 削除ボタン */
-.remove-btn {
-    background: rgba(0,0,0,0.1);
-    color: inherit;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 8px;
-    cursor: pointer;
-    font-size: 12px;
-    flex-shrink: 0;
-    transition: background 0.2s;
-}
-
-.remove-btn:hover {
-    background: rgba(0,0,0,0.2);
-}
-
-/* コピーボタン */
-.copy-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: var(--add-color);
-    color: whitesmoke;
-    border: none;
-    border-radius: 4px;
-    padding: 4px 10px;
-    font-size: 11px;
-    cursor: pointer;
-}
-
-.copy-btn:hover {
-    background: var(--add-hover);
-}
-
-.copy-btn.copied {
-    background: var(--secondary-color);
-}
-
-/* ========================================
-   リスト・アイテム表示
-   ======================================== */
-
-/* アイテムリスト */
-.item-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    overflow: visible;
-}
-
-/* アイテム基本スタイル */
-.item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 10px;
-    background: #f8f9fa;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: all 0.2s;
-    position: relative;
-    box-shadow: 0 1px rgba(0,0,0,0.3);
-}
-
-.item-param {
-    display: flex;
-    flex-wrap: wrap;
-    width: 100%;
-}
-
-/* アイテムインタラクション */
-.item.clickable {
-    cursor: pointer;
-}
-
-.item.material-symbols-rounded {
-    cursor: move;
-    font-size: 24px;
-    user-select: none;
-    flex-shrink: 0;
-    opacity: .4;
-    margin-left: -6px;
-    overflow: hidden;
-}
-
-.item.clickable:hover {
-    background: #e7f3ff;
-    outline: 1px solid var(--add-color);
-}
-
-.item:hover .tooltip {
-    opacity: 1;
-    align-items: normal;
-    bottom: 100%;
-    left: 100px;
-    transform: translateX(50px);
-}
-
-.item.selected {
-    background: #e7f3ff;
-    outline: 1px solid var(--add-color);
-    box-shadow: 0 0 0 2px rgba(102,126,234,0.2);
-}
-
-/* ドラッグ機能 */
-.item.dragging {
-    opacity: 30% !important;
-    background: none !important;
-    outline: 1px solid var(--add-color) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    cursor: grabbing;
-}
-
-.item.drag-over-top::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--add-color);
-}
-
-.item.drag-over-bottom::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--add-color);
-}
-
-/* バフアイテム */
-.buff-item {
-    position: relative;
-    cursor: grab;
-}
-
-.buff-item:not(.active) {
-    opacity: 0.4;
-    filter: grayscale(50%);
-}
-
-.buff-item.active {
-    opacity: 1;
-    filter: none;
-}
-
-
-
-.buff-item.dragging .tooltip {
-    display: none !important;
-    cursor: grabbing;
-}
-
-/* アイテム内要素 */
-.item-name {
-    font-size: 15px;
-    font-weight: 600;
-    margin-right: 8px;
-    margin-top: -3px;
-}
-
-.item-description {
-    font-size: 12px;
-    opacity: 0.9;
-    margin-right: 8px;
-}
-
-.item-effect {
-    color: inherit;
-    font-size: 12px;
-    font-weight: 600;
-    margin-right: auto;
-}
-
-.item-detail {
-    color: var(--add-color);
-    font-size: 12px;
-    font-weight: 600;
-}
-
-/* バフボタングループ */
-.buff-btn {
-    display: flex;
-    justify-content: flex-end;
-    margin-left: auto;
-    gap: inherit;
-}
-
-/* ターンバッジ */
-.turn-badge {
-    display: flex;
-    position: absolute;
-    align-items: baseline;
-    top: -6px;
-    left: -6px;
-    width: 24px;
-    height: 24px;
-    background: whitesmoke;
-    color: var(--text-color);
-    border-radius: 50%;
-}
-
-.turn-badge span {
-    height: 24px;
-    margin: 10% auto 10%;
-    text-align: right;
-    font-size: 14px;
-    font-weight: 800;
-}
-
-/* ステータスタグ */
-.stat-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: var(--spacing-sm);
-}
-
-.stat-tag {
-    background: #e7f3ff;
-    color: var(--add-color);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.stat-tag.button {
-    background: none;
-    border: none;
-    color: var(--add-color);
-    cursor: pointer;
-    font-size: 14px;
-    padding: 0;
-    line-height: 1;
-}
-
-/* ========================================
-   情報表示・フィードバック
-   ======================================== */
-
-/* ツールチップ */
-.tooltip {
-    position: absolute;
-    background: rgba(0,0,0,0.8);
-    color: whitesmoke;
-    padding: 6px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    margin: 5px 0;
-    z-index: 1000;
-    position-anchor: var(--target);
-}
-
-.tooltip::before {
-    content: "";
-    position: absolute;
-    border: 10px solid transparent;
-    border-bottom-color: rgba(0,0,0,0.8);
-    top: 8px;
-    left: 10px;
-    transform: rotate(-180deg);
-    transform-origin: bottom center;
-}
-
-/* 出力ボックス */
-.output-box {
-    background: #f8f9fa;
-    border: 1px solid var(--add-color);
-    border-radius: 4px;
-    padding: 10px;
-    margin-top: 12px;
-    position: relative;
-}
-
-.output-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--add-color);
-    margin-bottom: 6px;
-}
-
-.output-text {
-    font-family: 'Courier New', monospace;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-color);
-    word-break: break-all;
-    user-select: all;
-    padding-right: 70px;
-    min-height: 20px;
-}
-
-/* 注意書き */
-.note {
-    background: #fff3cd;
-    border: 1px solid #ffc107;
-    border-radius: 4px;
-    padding: 8px;
-    font-size: 12px;
-    color: #856404;
-}
-
-/* 空メッセージ */
-.empty-message {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 12px;
-    padding: 12px;
-}
-
-/* コピーライト */
-.copyright {
-    margin: 12px;
-    font-size: var(--font-size-sm);
-    color: var(--text-color);
-}
-
-.copyright.summary {
-    justify-self: center;
-}
-
-.copyright summary::before {
-    content: '▼';
-    font-size: 10px;
-    transform: rotate(-90deg);
-    transition: transform .25s;
-}
-
-.copyright summary:hover {
-    color: var(--add-hover);
-    cursor: pointer;
-}
-
-
-/* ========================================
-   ユーティリティクラス
-   ======================================== */
-
-.full-width { width: 100%; }
-.line-udr { padding-bottom: 12px; margin-bottom: 12px; border-bottom: 2px solid var(--border-color-dark);}
-.hidden { display: none; }
-.m-8 { margin: 8px 0; }
-.m-4 { margin: 4px 4; }
-.mb-12 { margin-bottom: 12px; }
-.pt-12 { padding-top: 12px; }
-.bt-top { border-top: 2px solid var(--border-color-dark); }
-.textarea-mono { width: 100%; padding: 8px; border: 1px solid var(--border-color-light); border-radius: 4px; font-size: 12px; font-family: monospace; resize: vertical; }
-.row-controls { display: flex; gap: 6px; margin-top: 6px; }
-.flex-1 { flex: 1; }
-.fd-cl { flex-direction: column; }
-.jc-end { justify-content: flex-end; }
-.btn--muted { background: var(--text-muted); }
-.btn--info { background: var(--secondary-color); }
-.btn--danger { background: var(--danger-color); width: 30%; }
-.small-text { font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
-.label-s { font-size: 12px; font-weight: 600; color: #555; display: block; margin: 0 0 4px 2px;}
-.label-L { font-size: 16px; font-weight: 600; color: #555; display: flex; margin: 0 0 4px 2px; gap: 8px;}
-.input-compact { width: 60px; padding: 4px 6px; border: 1px solid var(--border-color-light); border-radius: 4px; }
-
-</style>
 </head>
+
 <body>
-<!--ヘッダー-->
-    <header>
-        <div class="logo">
-            <div class="title">BUFCON</div>
-            <div class="subtitle">TRPG戦闘サポートツール</div>
-        </div>
-        <div class="header-menu">
-            <button class="header-menu-item" style="anchor-name: --save" command="show-modal" commandfor="DataOption">
-                <div class="tooltip" style="--target: --save">セーブ・ロード</div>
-                <span class="material-symbols-rounded">save</span>
-            </button>
-            <a class="header-menu-item" style="anchor-name: --help" href="https://unexpected-avatar-e3c.notion.site/BUFCON-2d1c2563a7d8804b97f9e64754356198" target="_blank" rel="noopener noreferrer">
-                <div class="tooltip" style="--target: --help">使い方</div>
+    <!--ヘッダー-->
+    <header class="site-header">
+        <img class="site-header__logo" src="assets/logos/logo.svg" />
+        <div class="site-header__menu">
+            <a type="button" class="site-header__menu-item site-header__menu-item--settings" id="settingsToggle"
+                aria-haspopup="true" aria-expanded="false">
+                <div class="tooltip tooltip--settings">設定</div>
+                <span class="material-symbols-rounded">settings</span>
+            </a>
+            <div class="site-header__dropdown site-header__dropdown--settings u-hidden" id="settingsDropdown">
+                <button class="site-header__dropdown-item" data-target="DataOption">
+                    <span class="material-symbols-rounded">checkbook</span>
+                    <span>データ管理</span>
+                </button>
+                <button class="site-header__dropdown-item" data-target="userMacroModal">
+                    <span class="material-symbols-rounded">bookmarks</span>
+                    <span>ユーザー辞書</span>
+                </button>
+            </div>
+            <a type="button" class="site-header__menu-item site-header__menu-item--color" id="themeToggle">
+                <div class="tooltip tooltip--color">カラーテーマ</div>
+                <span class="material-symbols-rounded" aria-hidden="true">dark_mode</span>
+            </a>
+            <a class="site-header__menu-item site-header__menu-item--help"
+                href="ユーザーマニュアル.html" target="_blank"
+                rel="noopener noreferrer">
+                <div class="tooltip tooltip--help">使い方</div>
                 <span class="material-symbols-rounded">help</span>
             </a>
-            <a class="header-menu-item" style="anchor-name: --feedback" href="https://forms.gle/Z5YU8JaAVVUmWMaZ7" target="_blank" rel="noopener noreferrer">
-                <div class="tooltip" style="--target: --feedback">感想投稿フォーム</div>
+            <a class="site-header__menu-item site-header__menu-item--feedback"
+                href="https://forms.gle/Z5YU8JaAVVUmWMaZ7" target="_blank" rel="noopener noreferrer">
+                <div class="tooltip tooltip--feedback">感想投稿フォーム</div>
                 <span class="material-symbols-rounded">feedback</span>
             </a>
         </div>
     </header>
 
-<div class="container">
+    <div class="app">
 
-<div class="content">
-<!--データ管理　モーダル-->
-            <dialog class="section modal" id="DataOption" closedby="any">
-                    <div class="section-header-m">
-                        <span class="material-symbols-rounded">checkbook</span>
-                        <span class="section-header-title">データ管理</span>
+        <div class="app__content">
+            <!--データ管理　モーダル-->
+            <dialog class="modal section" id="DataOption" closedby="any">
+                <div class="section__header section__header--modal">
+                    <span class="material-symbols-rounded">checkbook</span>
+                    <span class="modal__title">データ管理</span>
+                    <button class="material-symbols-rounded button button--danger modal__close" command="close"
+                        commandfor="DataOption">
+                        close
+                    </button>
+                </div>
+                <div class="modal__body">
+                    <div class="form__group form__group--spaced">
+                        <label class="form__label form__label--small">クリップボードから貼り付けて読み込み:</label>
+                        <textarea id="importText" placeholder='.txtまたは.jsonファイルを直接ドロップしても読み込めます'
+                            class="form__textarea form__textarea--memo form__textarea--import-lg"></textarea>
                     </div>
-                    <div class="section-body">
-                        <div class="mb-12">
-                            <label class="label-s">クリップボードから貼り付けて読み込み:</label>
-                                <textarea id="importText" placeholder='.txtまたは.jsonファイルを直接ドロップしても読み込めます' class="textarea-mono" style="height:120px; flex: 3;"></textarea>
+                    <div class="form__group form__group--spaced">
+                        <button class="button button--secondary button--grow" id="importConfirm">
+                            <span class="material-symbols-rounded">download</span>
+                            <span>このデータを読み込み</span>
+                        </button>
+                    </div>
+                    <div class="form__group form__group--spaced">
+                        <button class="button button--secondary button--info button--grow" id="exportToClipboard">
+                            <span class="material-symbols-rounded">save</span>
+                            <span>現在の設定を</span><span>クリップボードにコピー</span>
+                        </button>
+                    </div>
+                    <div class="modal__divider"></div>
+                    <div class="modal__section">
+                        <button class="button button--secondary button--danger" id="resetBtn">
+                            <span class="material-symbols-rounded">delete_forever</span>
+                            <span>すべて初期化</span>
+                        </button>
+                    </div>
+                </div>
+            </dialog>
+            <!-- ユーザー辞書 モーダル -->
+            <dialog class="modal" id="userMacroModal" closedby="any">
+                <div class="section__header section__header--modal">
+                    <span class="material-symbols-rounded">bookmarks</span>
+                    <span class="modal__title">ユーザー辞書</span>
+                    <button class="material-symbols-rounded button button--danger modal__close" command="close"
+                        commandfor="userMacroModal">
+                        close
+                    </button>
+                </div>
+                <div class="modal__body">
+                    <div class="modal__section">
+                        <!-- 登録フォーム -->
+                        <div class="form__label form__label--large">
+                            <span class="material-symbols-rounded">add_box</span>
+                            <span>新規登録・編集</span>
+                            <label class="button form__help-toggle">
+                                <input type="checkbox" />
+                                <span class="material-symbols-rounded">help</span>
+                            </label>
                         </div>
-                        <div class="mb-12" style="display: flex; gap: 12px;">
-                            <button class="add-btn secondary-btn flex-1" id="importConfirm">
+                        <div class="form__grid">
+                            <div>
+                                <div class="form__group">
+                                    <label for="macroText" class="form__label form__label--small">文字列</label>
+                                    <input type="text" id="macroText" placeholder="例：//筋力修正//" autocomplete="off"
+                                        class="form__input">
+                                </div>
+                                <div class="form__group">
+                                    <label for="macroCategory" class="form__label form__label--small">カテゴリー</label>
+                                    <input type="text" id="macroCategory" placeholder="例：代入記法" autocomplete="off"
+                                        class="form__input">
+                                    <div class="form__note">
+                                        オートコンプリート機能では、記号（;:!?'"(){}\[\]&lt;&gt;|\\/+*-）は無視して検索されます。</div>
+                                </div>
+                                <button type="button" class="button" id="macroAddBtn">登録</button>
+                                <button type="button" class="button button--secondary button--grow" id="macroCancelBtn"
+                                    style="display: none;">キャンセル</button>
+                            </div>
+                        </div>
+                        <div id="macroDuplicateWarning" class="form__text"
+                            style="color: var(--color-f-orange); display: none;">
+                            この文字列は既に登録されています
+                        </div>
+                    </div>
+                    <div class="modal__divider"></div>
+                    <!-- 一覧表示 -->
+                    <div class="modal__section">
+                        <div class="form__label form__label--large">
+                            <span class="material-symbols-rounded">list</span>
+                            <span>登録済み辞書</span>
+                        </div>
+                        <div class="control-bar control-bar--spaced">
+                            <label
+                                class="control-bar__item list__index list__index--macro-bookmark list__index--aligned-end">
+                                <div class="tooltip tooltip--macro-bookmark">カテゴリへ移動</div>
+                                <span class="material-symbols-rounded">bookmark</span>
+                                <select class="button" id="macroItemIndex"></select>
+                            </label>
+                        </div>
+                        <div id="macroDictionaryList" class="list">
+                            <div class="list__empty">辞書が登録されていません</div>
+                        </div>
+                    </div>
+                    <div class="modal__divider"></div>
+                    <!-- 出力・読込 -->
+                    <div class="modal__section">
+                        <div class="form__label form__label--large">
+                            <span class="material-symbols-rounded">save_alt</span>
+                            <span>データ管理</span>
+                        </div>
+                        <div class="form__group form__group--spaced">
+                            <label class="form__label form__label--small">ユーザー辞書を貼り付けて読み込み</label>
+                            <textarea id="macroImportText" placeholder=".txtまたは.jsonファイルを直接ドロップしても読み込めます"
+                                class="form__textarea form__textarea--memo form__textarea--import-md"></textarea>
+                        </div>
+                        <div class="form__group form__group--spaced">
+                            <button class="button button--secondary button--grow" id="macroImportBtn">
                                 <span class="material-symbols-rounded">download</span>
                                 <span>このデータを読み込み</span>
                             </button>
-                            <button class="add-btn secondary-btn btn--info flex-1" id="exportToClipboard">
-                                <span class="material-symbols-rounded">content_copy</span>
-                                <span>現在の設定を</span><span>クリップボードにコピー</span>
-                            </button>
-                        </div>
-                        <div class="pt-12 bt-top">
-                            <button class="add-btn secondary-btn btn--danger" id="resetBtn">
-                                <span class="material-symbols-rounded">delete_forever</span>
-                                <span>すべて</span><span>初期化</span>
+                            <button class="button button--secondary button--info button--grow" id="macroExportBtn">
+                                <span class="material-symbols-rounded">upload</span>
+                                <span>ユーザー辞書を</span><span>クリップボードにコピー</span>
                             </button>
                         </div>
                     </div>
-            </dialog>
-<!--ステータス-->     
-            <details class="section">
-                <summary class="section-header">
-                    <span class="material-symbols-rounded">analytics</span>
-                    <span class="section-header-title">ステータス</span>
-                    <span class="arrow">▼</span>
-                </summary>
-                <div class="section-body">
-                    <div class="add-area">
-                                <div style="width: 100%;">
-                                    <label class="label-s">ステータス名 (,区切りで複数追加可)</label>
-                                    <input type="text" id="statName" placeholder="変数名（筋力、STR、冒険者レベルなど）">
-                                </div>
-                            <button class="add-btn" id="addStatBtn">✚</button>
-                    </div>
-                    <div class="stat-tags" id="statList">
-                        <div class="empty-message">ステータスを追加してください</div>
+                    <div class="modal__divider"></div>
+                    <div class="modal__section">
+                        <button class="button button--secondary button--danger button--spaced" id="resetDictionaryBtn">
+                            <span class="material-symbols-rounded">delete_forever</span>
+                            <span>辞書を初期化</span>
+                        </button>
                     </div>
                 </div>
-            </details>
-<!--バフ/デバフ-->
-            <details class="section">
-                <summary class="section-header">
+            </dialog>
+            <!--バフ/デバフ-->
+            <div class="section">
+                <div class="section__header">
                     <span class="material-symbols-rounded">azm</span>
-                    <span class="section-header-title">バフ/デバフ</span>
-                    <span class="arrow">▼</span>
-                </summary>
-                <div class="section-body">
-                    <button class="add-btn" command="show-modal" commandfor="buffaddmodal">
-                        バフを追加
-                    </button>
-                    <div class="buff-control" full-width>
-                            <button class="turn-btn" id="turnProgressBtn">
-                                <span class="material-symbols-rounded">skip_next</span>
-                                ターン経過</button>
-                    </div>
-                    <div class="item-list" id="buffList">
-                        <div class="empty-message">バフを追加してください</div>
-                    </div>
+                    <span class="section__title">バフ/デバフ</span>
                 </div>
-            </details>
-<!--バフ/デバフ モーダル-->
-        <dialog class="section modal" id="buffaddmodal" closedby="any">
-            <div class="section-header-m">
-                <span class="section-header-title">バフ追加</span>
-            </div>
-            <div class="section-body">
-                <div class="note">効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。</div>
-                <div class="add-area">
-                    <div class="add-area-inputs">
-                        <div>
-                            <label for="buffName" class="label-s">バフ名</label>
-                            <input type="text" id="buffName" placeholder="名前">
-                        </div>
-                        <div>
-                            <label for="buffTargetSelect" class="label-s">効果先を選択</label>
-                            <select id="buffTargetSelect" multiple size="1"></select>
-                        </div>
-                        <div>
-                            <label for="buffDescription" class="label-s">効果</label>
-                            <input type="text" id="buffDescription" placeholder="説明">
-                        </div>
-                        <div>
-                            <label for="buffEffect" class="label-s">コマンド</label>
-                            <input type="text" id="buffEffect" placeholder="例：+2,-1d6">
-                        </div>
-                        <div>
-                            <label for="buffTurn" class="label-s">ターン</label>
-                            <input type="number" id="buffTurn" placeholder="数値">
-                        </div>
-                        <div>
-                            <label for="buffColor" class="label-s">ラベルの色を選択</label>
-                            <input type="color" id="buffColor" value="#0079FF" list="buffColor-list">
-                            <datalist id="buffColor-list">
-                                <option value="#0079FF"></option>
-                                <option value="#953D96"></option>
-                                <option value="#F64E9D"></option>
-                                <option value="#DF383E"></option>
-                                <option value="#F7821B"></option>
-                                <option value="#FEC626"></option>
-                                <option value="#62BA46"></option>
-                                <option value="#F8F9FA"></option>
-                                <option value="#141414"></option>
-                                <option value="#595959"></option>
-                            </datalist>
-                        </div>
+                <div class="section__body">
+                    <div class="control-bar full-width">
+                        <button class="control-bar__item button button--turn" style="anchor-name: --getTurn;"
+                            id="turnProgressBtn">
+                            <div class="tooltip" style="--target: --getTurn">すべてのアクティブなターンを１減らす</div>
+                            <span class="material-symbols-rounded">skip_next</span>
+                        </button>
+                        <button class="control-bar__item button button--turn button--anchor-turn-reset"
+                            id="turnResetBtn">
+                            <div class="tooltip tooltip--turn-reset">すべてのターンをリセット</div>
+                            <span class="material-symbols-rounded">replay</span>
+                        </button>
+                        <button class="control-bar__item control-bar__item--end button button--popup"
+                            style="anchor-name: --addbuffbtn;" onclick="openBuffModal()">
+                            <div class="tooltip" style="--target: --addbuffbtn;">バフ/デバフを追加</div>
+                            <span class="material-symbols-rounded">add_2</span>
+                        </button>
+                        <label class="control-bar__item list__index list__index--bookmark">
+                            <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
+                            <span class="material-symbols-rounded">bookmark</span>
+                            <select class="button" id="buffItemIndex">
+                            </select>
+                        </label>
                     </div>
-                    <button class="add-btn" id="addBuffBtn">✚</button>
-                </div>
-                <div class="m-8">
-                    <div class="label-L">
-                        <span class="material-symbols-rounded">clear_all</span>
-                        <span>一括追加</span>
-                    </div>
-                    <div class="add-area fd-cl" id="bulkAddArea">
-                        <textarea id="bulkAddText" placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5" class="textarea-mono" style="height:100px;"></textarea>
-                        <div>
-                        <div class="row-controls">
-                            <button class="add-btn flex-1" id="bulkAddConfirm">追加を実行</button>
-                        </div>
-                        <p class="small-text">形式：バフ名|効果先1,効果先2|説明|効果|ターン|カラーコード<br>バフ名と効果先以外は省略可</p>
-                        </div>
+                    <div class="list" id="buffList">
+                        <div class="list__empty">バフを追加してください</div>
                     </div>
                 </div>
             </div>
-        </dialog>
-<!--判定-->
-            <details class="section">
-                <summary class="section-header">
-                    <span class="material-symbols-rounded">ifl</span>
-                    <span class="section-header-title">判定</span>
-                    <span class="arrow">▼</span>
-                </summary>
-                <div class="section-body">
-                    <button class="add-btn" command="show-modal" commandfor="judgeaddmodal">
-                        判定パッケージを追加
+            <!--バフ/デバフ モーダル-->
+            <dialog class="modal" id="buffaddmodal" closedby="any">
+                <div class="section__header section__header--modal">
+                    <span class="modal__title">バフラベル追加</span>
+                    <button class="material-symbols-rounded button button--danger modal__close" command="close"
+                        commandfor="buffaddmodal">
+                        close
                     </button>
-                    <div class="m-8">
-                                <div class="item-list" id="judgeList">
-                                    <div class="empty-message">判定パッケージを追加してください</div>
-                                </div>
-                        <div class="target-options">
-                            <span class="label-s">目標値：</span>
-                            <div class="radio-option">
-                                <input type="radio" name="targetType" id="targetNone" value="none" checked>
-                                <label for="targetNone" class="label-s">なし</label>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="targetType" id="targetGte" value="gte">
-                                <label for="targetGte" class="label-s">>=</label>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="targetType" id="targetLte" value="lte">
-                                <label for="targetLte" class="label-s">=&lt;</label>
-                            </div>
-                            <input type="number" id="targetValue" placeholder="値" class="input-compact">
-                        </div>
-                        <div class="output-box">
-                            <div class="output-label">コピペ用コマンド</div>
-                            <div class="output-text" id="judgeOutput">判定を選択してください</div>
-                            <button class="copy-btn" data-target="judgeOutput">コピー</button>
-                        </div>
-                    </div>
                 </div>
-            </details>
-
-<!--判定　モーダル-->
-            <dialog class="section modal" id="judgeaddmodal" closedby="any">
-                    <div class="section-header-m">
-                        <span class="section-header-title">判定パッケージ追加</span>
-                    </div>
-                    <div class="section-body">
-                        <div class="add-area">
-                            <div class="add-area-inputs">
-                                <div>
-                                    <label for="judgeName" class="label-s">判定名</label>
-                                    <input type="text" id="judgeName" placeholder="例：命中、回避">
-                                </div>
-                                <div>
-                                    <label for="judgeRoll" class="label-s">判定ロール</label>
-                                    <input type="text" id="judgeRoll" placeholder="例：1d20,2d6">
-                                </div>
-                                <div>
-                                    <label for="judgeStat" class="label-s">参照ステータス</label>
-                                    <select id="judgeStat" multiple size="1">
-                                        <option>なし</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <button class="add-btn" id="addJudgeBtn">✚</button>
+                <div class="modal__body">
+                    <div class="modal__section">
+                        <div class="form__label form__label--large">
+                            <span class="material-symbols-rounded">add_box</span>
+                            <span>個別追加</span>
+                            <label class="button form__help-toggle">
+                                <input type="checkbox" />
+                                <span class="material-symbols-rounded">help</span>
+                            </label>
                         </div>
-                        <div class="m-8">
-                            <div class="label-L">
-                                <span class="material-symbols-rounded">clear_all</span>
-                                <span>一括追加</span>
-                            </div>
-                            <div class="add-area fd-cl" id="bulkAddJudgeArea">
-                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1|器用度&#10;回避判定|1d20|DEX" class="textarea-mono" style="height:80px;"></textarea>
-                                <div>    
-                                    <div class="row-controls">
-                                        <button class="add-btn flex-1" id="bulkAddJudgeConfirm">追加を実行</button>
-
+                        <div class="form__grid">
+                            <div>
+                                <div class="form__group">
+                                    <label for="buffName" class="form__label form__label--small">バフ名</label>
+                                    <input type="text" id="buffName" placeholder="名前" class="form__input">
+                                </div>
+                                <div class="form__group">
+                                    <label for="buffTargetSelect" class="form__label form__label--small">効果先を選択</label>
+                                    <select id="buffTargetSelect" multiple size="1" class="form__input"></select>
+                                </div>
+                                <div class="form__note">
+                                    カテゴリを選択した場合、そのカテゴリに含まれるすべてのラベルに適用します。<br>効果先を選択しない場合、「効果先：なし」として登録されます。
+                                </div>
+                                <div class="form__group">
+                                    <label for="buffEffect" class="form__label form__label--small">コマンド</label>
+                                    <div class="form__row">
+                                        <input type="text" id="buffEffect" placeholder="例：+2,-1d6,//ダイスボーナス=+1"
+                                            class="form__input">
+                                        <button class="button" onclick="insertText('//NAME=')">//=</button>
                                     </div>
-                                    <p class="small-text">形式：判定名|判定ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-            </dialog>
-
-<!--攻撃-->           
-            <details class="section">
-                <summary class="section-header">
-                    <span class="material-symbols-rounded">swords</span>
-                    <span class="section-header-title">攻撃</span>
-                    <span class="arrow">▼</span>
-                </summary>
-                <div class="section-body">
-                    <button class="add-btn" command="show-modal" commandfor="attackaddmodal">
-                        攻撃パッケージを追加
-                    </button>
-                    <div class="item-list" id="attackList">
-                        <div class="empty-message">攻撃パッケージを追加してください</div>
-                    </div>
-                    <div class="output-box">
-                        <div class="output-label">コピペ用コマンド</div>
-                        <div class="output-text" id="attackOutput">攻撃を選択してください</div>
-                        <button class="copy-btn" data-target="attackOutput">コピー</button>
-                    </div>
-                </div>
-            </details>
-<!--攻撃　モーダル-->
-            <dialog class="section modal" id="attackaddmodal" closedby="any">
-                    <div class="section-header-m">
-                        <span class="section-header-title">攻撃パッケージ追加</span>
-                    </div>
-                    <div class="section-body">
-                                        <div class="add-area">
-                            <div class="add-area-inputs">
-                                <div>
-                                    <label for="attackName" class="label-s">攻撃名</label>
-                                    <input type="text" id="attackName" placeholder="例：ソード(1H)">
+                                <div class="form__note">
+                                    効果にコマンドを入力する場合は+/-などの演算子も含めて入力してください。<br>バフはONになっているものを上から順に反映します。
                                 </div>
-                                <div>
-                                    <label for="judgeStat" class="label-s">攻撃ロール</label>
-                                    <input type="text" id="attackRoll" placeholder="例: 2d6,K20@10">
+                                <div class="form__note">
+                                    代入記法：<br>//NAME=コマンド　*NAMEは任意の文字列<br>という記述で、判定や攻撃の基本ロール内にある//NAME//にコマンドが代入されます。これにより、判定や計算式の任意の位置にバフの効果を挿入することができます。<br>同じ変数を指定したバフが複数あるときは、バフの並び順にしたがって全て代入されます。
                                 </div>
-                                <div>
-                                    <label for="judgeStat" class="label-s">参照ステータス</label>
-                                    <select id="attackStat" multiple size="1">
+                                <div class="form__note">
+                                    代入記法は「,」で区切ることで、一つのバフから複数の場所へ代入を指示することができます。<br>通常の記法とも併用できます。<br>例：//ダイスボーナス=+1,//ダイスの種類=20,-2
+                                </div>
+                                <div class="form__group">
+                                    <label for="buffTurn" class="form__label form__label--small">ターン</label>
+                                    <input type="number" id="buffTurn" placeholder="数値" class="form__input">
+                                    <div class="form__note">効果時間がターンで決められている場合、効果の続くターン数を指定します。</div>
+                                </div>
+                                <div class="form__group">
+                                    <label for="buffColor" class="form__label form__label--small">ラベルの色を選択</label>
+                                    <input type="color" id="buffColor" value="#0079FF" list="buffColor-list"
+                                        class="form__input">
+                                    <datalist id="buffColor-list">
+                                    </datalist>
+                                    <div class="form__note">その他からより詳細に色を指定できます。</div>
+                                </div>
+                                <div class="form__group">
+                                    <label for="buffCategorySelect"
+                                        class="form__label form__label--small">カテゴリを選択</label>
+                                    <select id="buffCategorySelect" size="1" class="form__input">
                                         <option value="none">なし</option>
                                     </select>
                                 </div>
+                                <div class="form__note">カテゴリを指定すると、そのカテゴリに入った状態で登録されます。</div>
                             </div>
-                            <button class="add-btn" id="addAttackBtn">✚</button>
+                            <div>
+                                <div class="form__group">
+                                    <div class="memo__header">
+                                        <label class="form__label form__label--small" for="buffMemo">メモ欄</label>
+                                    </div>
+                                    <textarea id="buffMemo"
+                                        class="form__textarea form__textarea--memo form__textarea--memo-buff"
+                                        placeholder="簡易メモにはメモの1行目を使用します。"></textarea>
+                                    <label class="form__label form__label--small form__label--row form__label--btn">
+                                        <input type="checkbox" id="buffSimpleMemoToggle">
+                                        <span>簡易メモを表示</span>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="m-8">
-                            <div class="label-L">
-                                <span class="material-symbols-rounded">clear_all</span>
-                                <span>一括追加</span>
+                        <div type="button" class="button" id="addBuffBtn">追加</div>
+                    </div>
+                    <div class="modal__divider"></div>
+                    <div class="modal__section">
+                        <div class="form__group">
+                            <label for="buffCategoryInput" class="form__label form__label--small">新規カテゴリ追加</label>
+                            <div class="form__group form__group--stacked">
+                                <input type="text" id="buffCategoryInput" placeholder="例：魔法、装備" aria-label="バフカテゴリの新規追加"
+                                    class="form__input">
                             </div>
-                            <div class="add-area fd-cl" id="bulkAddAttackArea">
-                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10|筋力B&#10;ファイアボール|1d6+3|INT" class="textarea-mono" style="height:80px;"></textarea>
-                                <div>
-                                    <div class="row-controls">
-                                        <button class="add-btn flex-1" id="bulkAddAttackConfirm">追加を実行</button>
+                        </div>
+                        <div class="form__note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
+                        <span type="button" class="button half-size" id="addBuffCategoryBtn" title="カテゴリを追加">追加</span>
+                    </div>
+                    <div class="modal__divider"></div>
+                    <div class="modal__section">
+                        <div class="form__label form__label--large">
+                            <span class="material-symbols-rounded">clear_all</span>
+                            <span>一括追加</span>
+                        </div>
+                        <div class="form__group">
+                            <span class="form__text">形式：バフ名|効果先1,効果先2|簡易メモ|コマンド|ターン|カラーコード|メモ<br>
+                                カテゴリ：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>
+                                <span style="text-indent: 5; padding-left: 5em;">間の行はそのカテゴリに入った状態で登録されます。</span><br>
+                                <span
+                                    style="text-indent: 5; padding-left: 5em;">存在していないカテゴリの場合、カテゴリも同時に登録されます。</span></span>
+                            <div class="form__grid form__grid--stacked modal__section" id="bulkAddArea">
+                                <textarea id="bulkAddText"
+                                    placeholder="例：マッスルベアー|すべての攻撃|筋力Bアップ|+2|3|#DF383E&#10;バーサク|すべての判定,武器A|命中・ダメUP|+1d6|5"
+                                    class="form__textarea form__textarea--memo"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <span type="button" class="button button--grow" id="bulkAddConfirm">追加を実行</span>
+                </div>
+            </dialog>
+            <!--タブ-->
+            <div class="tabs section">
+                <label class="tabs__label section__header"><input class="tabs__input" type="radio" name="TAB" checked>
+                    <span class="material-symbols-rounded">ifl</span>
+                    <span class="section__title">判定</span>
+                </label>
+                <!--判定-->
+                <div class="tabs__panel section__body" id="judgeSection">
+                    <div class="control-bar full-width">
+                        <div class="target-selector">
+                            <span class="form__label form__label--small">目標値：</span>
+                            <label class="target-selector__option button">
+                                <input type="radio" name="targetType" id="targetNone" value="none" checked>
+                                <label for="targetNone" class="form__label form__label--small">＼</label>
+                            </label>
+                            <label class="target-selector__option button">
+                                <input type="radio" name="targetType" id="targetGte" value="gte">
+                                <label for="targetGte" class="form__label form__label--small">≧</label>
+                            </label>
+                            <label class="target-selector__option button">
+                                <input type="radio" name="targetType" id="targetLte" value="lte">
+                                <label for="targetLte" class="form__label form__label--small">≦</label>
+                            </label>
+                            <input type="number" id="targetValue" placeholder="値"
+                                class="form__input form__input--compact">
+                        </div>
+                        <button class="control-bar__item control-bar__item--end button button--popup"
+                            style="anchor-name: --addbuffbtn;" onclick="openJudgeModal()">
+                            <div class="tooltip" style="--target: --addbuffbtn;">判定を追加</div>
+                            <span class="material-symbols-rounded">add_2</span>
+                        </button>
+                        <label class="control-bar__item list__index list__index--bookmark">
+                            <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
+                            <span class="material-symbols-rounded">bookmark</span>
+                            <select class="button" id="judgeItemIndex"></select>
+                        </label>
+                    </div>
+
+                    <div class="list" id="judgeList">
+                        <div class="list__empty">判定ラベルを追加してください</div>
+                    </div>
+                    <div class="output">
+                        <div class="output__label">コピペ用コマンド</div>
+                        <div class="output__text" id="judgeOutput">判定を選択してください</div>
+                        <button class="button button--copy" data-target="judgeOutput">コピー</button>
+                    </div>
+                </div>
+                <!--タブ-->
+                <label class="tabs__label section__header"><input class="tabs__input" type="radio" name="TAB">
+                    <span class="material-symbols-rounded">swords</span>
+                    <span class="section__title">攻撃</span>
+                </label>
+                <!--攻撃-->
+                <div class="tabs__panel section__body" id="attackSection">
+                    <div class="control-bar full-width">
+                        <button class="control-bar__item control-bar__item--end material-symbols-rounded button"
+                            style="anchor-name: --addbuffbtn;" onclick="openAttackModal()">
+                            add_2<div class="tooltip" style="--target: --addbuffbtn;">攻撃を追加</div>
+                        </button>
+                        <label class="control-bar__item list__index list__index--bookmark">
+                            <div class="tooltip tooltip--bookmark">カテゴリへ移動</div>
+                            <span class="material-symbols-rounded">bookmark</span>
+                            <select class="button" id="attackItemIndex"></select>
+                        </label>
+                    </div>
+                    <div class="list" id="attackList">
+                        <div class="list__empty">攻撃ラベルを追加してください</div>
+                    </div>
+                    <div class="output">
+                        <div class="output__label">コピペ用コマンド</div>
+                        <div class="output__text" id="attackOutput">攻撃を選択してください</div>
+                        <button class="button button--copy" data-target="attackOutput">コピー</button>
+                    </div>
+                </div>
+            </div>
+            <!--判定　モーダル-->
+            <dialog class="modal" id="judgeaddmodal" closedby="any">
+                <div class="section__header section__header--modal">
+                    <span class="modal__title">判定ラベル追加</span>
+                    <button class="material-symbols-rounded button button--danger modal__close" command="close"
+                        commandfor="judgeaddmodal">
+                        close
+                    </button>
+                </div>
+                <div class="modal__body">
+                    <div class="modal__section">
+                        <div class="form__label form__label--large">
+                            <span class="material-symbols-rounded">add_box</span>
+                            <span>個別追加</span>
+                            <label class="button form__help-toggle">
+                                <input type="checkbox" />
+                                <span class="material-symbols-rounded">help</span>
+                            </label>
+                        </div>
+                        <div class="form__grid">
+                            <div>
+                                <div class="form__group">
+                                    <label for="judgeName" class="form__label form__label--small">判定名</label>
+                                    <input type="text" id="judgeName" placeholder="例：命中、回避" class="form__input">
+                                </div>
+                                <div class="form__group">
+                                    <label for="judgeRoll" class="form__label form__label--small">判定ロール</label>
+                                    <div class="form__row ">
+                                        <input type="text" id="judgeRoll" placeholder="例：1d20,2d6" class="form__input">
                                     </div>
                                 </div>
-                                <p class="small-text">形式：攻撃名|攻撃ロール|ステータス名,ステータス名<br>※ステータス名は省略可</p>
+                                <div class="form__note">判定の基本となるダイスロールを記入します。システムごとの独自のコマンドも入力できます。</div>
+                                <div class="form__note">
+                                    代入記法：<br>//NAME//　*NAMEは任意の文字列<br>という記述で、//NAME//を指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。
+                                </div>
+                                <div class="form__group">
+                                    <label for="judgeCategorySelect"
+                                        class="form__label form__label--small">カテゴリを選択</label>
+                                    <select id="judgeCategorySelect" size="1" class="form__input">
+                                        <option value="none">なし</option>
+                                    </select>
+                                </div>
+                                <div class="form__note">バフの効果先がカテゴリを指定している場合、カテゴリ内のすべての判定に適用されます。</div>
                             </div>
                         </div>
+                        <div type="button" class="button" id="addJudgeBtn">追加</div>
+                    </div>
+                    <div class="modal__divider"></div>
+                    <div class="modal__section">
+                        <div class="form__group">
+                            <label for="judgeCategoryInput" class="form__label form__label--small">新規カテゴリ追加</label>
+                            <div class="form__group form__group--stacked">
+                                <input type="text" id="judgeCategoryInput" placeholder="例：戦闘、探索"
+                                    aria-label="判定カテゴリの新規追加" class="form__input">
+                            </div>
+                        </div>
+                        <div class="form__note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
+                        <span type="button" class="button half-size" id="addJudgeCategoryBtn" title="カテゴリを追加">追加</span>
+                    </div>
+                    <div class="modal__divider"></div>
+                    <div class="modal__section">
+                        <div class="form__label form__label--large">
+                            <span class="material-symbols-rounded">clear_all</span>
+                            <span>一括追加</span>
+                        </div>
+                        <div class="form__group">
+                            <span class="form__text">形式：判定名|判定ロール<br>
+                                カテゴリ：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br><span
+                                    style="text-indent: 5; padding-left: 5em;">間の行はそのカテゴリに入った状態で登録されます。</span><br><span
+                                    style="text-indent: 5; padding-left: 5em;">存在していないカテゴリの場合、カテゴリも同時に登録されます。</span></span>
+                            <div id="bulkAddJudgeArea">
+                                <textarea id="bulkAddJudgeText" placeholder="例: 命中判定|2d6+1&#10;回避判定|1d20"
+                                    class="form__textarea form__textarea--memo"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <span type="button" class="button button--grow" id="bulkAddJudgeConfirm">追加を実行</span>
+                </div>
             </dialog>
-</div>
-    <details class="copyright">
-        <summary>Copyright</summary>
-            <div class="copyright"> (c) 2025 竹田ユウヤ/n
 
-        本ソフトウェアおよび関連する文書のファイル（以下「ソフトウェア」）の複製を取得した全ての人物に対し、以下の条件に従うことを前提に、ソフトウェアを無制限に扱うことを無償で許可します。これには、ソフトウェアの複製を使用、複製、改変、結合、公開、頒布、再許諾、および/または販売する権利、およびソフトウェアを提供する人物に同様の行為を許可する権利が含まれますが、これらに限定されません。<br>
-        上記の著作権表示および本許諾表示を、ソフトウェアの全ての複製または実質的な部分に記載するものとします。<br>
-        ソフトウェアは「現状有姿」で提供され、商品性、特定目的への適合性、および権利の非侵害性に関する保証を含むがこれらに限定されず、明示的であるか黙示的であるかを問わず、いかなる種類の保証も行われません。著作者または著作権者は、契約、不法行為、またはその他の行為であるかを問わず、ソフトウェアまたはソフトウェアの使用もしくはその他に取り扱いに起因または関連して生じるいかなる請求、損害賠償、その他の責任について、一切の責任を負いません。<br>
-        <br>
-        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:<br>
-        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.<br>
-        THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</div>
+            <!--攻撃　モーダル-->
+            <dialog class="modal" id="attackaddmodal" closedby="any">
+                <div class="section__header section__header--modal">
+                    <span class="modal__title">攻撃ラベル追加</span>
+                    <button class="material-symbols-rounded button button--danger modal__close" command="close"
+                        commandfor="attackaddmodal">
+                        close
+                    </button>
+                </div>
+                <div class="modal__body">
+                    <div class="modal__section">
+                        <div class="form__label form__label--large">
+                            <span class="material-symbols-rounded">add_box</span>
+                            <span>個別追加</span>
+                            <label class="button form__help-toggle">
+                                <input type="checkbox" />
+                                <span class="material-symbols-rounded">help</span>
+                            </label>
+                        </div>
+                        <div class="form__grid">
+                            <div>
+                                <div class="form__group">
+                                    <label for="attackName" class="form__label form__label--small">攻撃名</label>
+                                    <input type="text" id="attackName" placeholder="例：ソード(1H)" class="form__input">
+                                </div>
+                                <div class="form__group">
+                                    <label for="attackRoll" class="form__label form__label--small">攻撃ロール</label>
+                                    <div class="form__row ">
+                                        <input type="text" id="attackRoll" placeholder="例: 2d6,K20@10"
+                                            class="form__input">
+                                    </div>
+                                </div>
+                                <div class="form__note">攻撃の基本となるダイスロールや固定値を記入できます。
+                                </div>
+                                <div class="form__note">
+                                    代入記法：<br>//NAME　*NAMEは任意の文字列<br>という記述で、//NAMEを指定したバフからコマンドが代入されます。<br>バフが発動していない等でなにも代入されない場合は、ないものとして扱われます。
+                                </div>
+                                <div class="form__group">
+                                    <label for="attackCategorySelect"
+                                        class="form__label form__label--small">カテゴリを選択</label>
+                                    <select id="attackCategorySelect" size="1" class="form__input">
+                                        <option value="none">なし</option>
+                                    </select>
+                                </div>
+                                <div class="form__note">バフの効果先がカテゴリを指定している場合、カテゴリ内のすべての攻撃に適用されます。</div>
+                            </div>
+                        </div>
+                        <div type="button" class="button" id="addAttackBtn">追加</div>
+                    </div>
+                    <div class="modal__divider"></div>
+                    <div class="modal__section">
+                        <div class="form__group">
+                            <label for="attackCategoryInput" class="form__label form__label--small">新規カテゴリ追加</label>
+                            <div class="form__group form__group--stacked">
+                                <input type="text" id="attackCategoryInput" placeholder="例：近接、魔法"
+                                    aria-label="攻撃カテゴリの新規追加" class="form__input">
+                            </div>
+                        </div>
+                        <div class="form__note">「␣（空白）」「、」「,」で区切って複数追加できます</div>
+                        <span type="button" n class="button half-size" id="addAttackCategoryBtn"
+                            title="カテゴリを追加">追加</span>
+                    </div>
+                    <div class="modal__divider"></div>
+                    <div class="modal__section">
+                        <div class="form__label form__label--large">
+                            <span class="material-symbols-rounded">clear_all</span>
+                            <span>一括追加</span>
+                        </div>
+                        <div class="form__group">
+                            <span class="form__text">形式：攻撃名|攻撃ロール<br>
+                                カテゴリ記法：&lt;カテゴリ名&gt;でカテゴリを開始、&lt;/カテゴリ名&gt;で終了。<br>
+                                <span style="text-indent: 5; padding-left: 5em;">間の行はそのカテゴリに入った状態で登録されます。</span><br>
+                                <span
+                                    style="text-indent: 5; padding-left: 5em;">存在していないカテゴリの場合、カテゴリも同時に登録されます。</span></span>
+                            <div class="form__grid form__grid--stacked modal__section" id="bulkAddAttackArea">
+                                <textarea id="bulkAddAttackText" placeholder="例: バスタードソード|K17@10&#10;ファイアボール|1d6+3"
+                                    class="form__textarea form__textarea--memo"></textarea>
+                            </div>
+                        </div>
+                        <span type="button" class="button button--grow" id="bulkAddAttackConfirm">追加を実行</span>
+                    </div>
+                </div>
+            </dialog>
+            <!--タブ閉じ-->
+        </div>
+    </div>
+    <details class="legal">
+        <summary>Copyright</summary>
+        <div class="legal"> (c) 2025 竹田ユウヤ<br>
+            <br>
+            本ソフトウェアおよび関連する文書のファイル（以下「ソフトウェア」）の複製を取得した全ての人物に対し、以下の条件に従うことを前提に、ソフトウェアを無制限に扱うことを無償で許可します。これには、ソフトウェアの複製を使用、複製、改変、結合、公開、頒布、再許諾、および/または販売する権利、およびソフトウェアを提供する人物に同様の行為を許可する権利が含まれますが、これらに限定されません。<br>
+            上記の著作権表示および本許諾表示を、ソフトウェアの全ての複製または実質的な部分に記載するものとします。<br>
+            ソフトウェアは「現状有姿」で提供され、商品性、特定目的への適合性、および権利の非侵害性に関する保証を含むがこれらに限定されず、明示的であるか黙示的であるかを問わず、いかなる種類の保証も行われません。著作者または著作権者は、契約、不法行為、またはその他の行為であるかを問わず、ソフトウェアまたはソフトウェアの使用もしくはその他に取り扱いに起因または関連して生じるいかなる請求、損害賠償、その他の責任について、一切の責任を負いません。<br>
+            <br>
+            Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+            documentation files (the “Software”), to deal in the Software without restriction, including without
+            limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+            the Software, and to permit persons to whom the Software is furnished to do so, subject to the following
+            conditions:<br>
+            The above legal notice and this permission notice shall be included in all copies or substantial portions of
+            the Software.<br>
+            THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+            LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO
+            EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+            AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+            OR OTHER DEALINGS IN THE SOFTWARE.
+        </div>
     </details>
 
     <script src="script.js"></script>
 
-</div>
+    </div>
 </body>
+
 </html>

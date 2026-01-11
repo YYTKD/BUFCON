@@ -1,0 +1,34 @@
+/* ========================================
+   theme: dracula
+   ======================================== */
+
+:root,
+[data-theme="dracula"] {
+    color-scheme: dark;
+    /* Dracula Classic palette */
+    --color-background: #282A36;
+    --color-selection: #44475A;
+    --color-current-line: #6272A4;
+    --color-foreground: #F8F8F2;
+    --color-red: #FF5555;
+    --color-orange: #FFB86C;
+    --color-yellow: #F1FA8C;
+    --color-green: #50FA7B;
+    --color-cyan: #8BE9FD;
+    --color-purple: #BD93F9;
+    --color-pink: #FF79C6;
+
+    /* Dracula UI palette */
+    --color-bg-lighter: #424450;
+    --color-bg-light: #343746;
+    --color-bg-dark: #21222C;
+    --color-bg-darker: #191A21;
+
+    /* Functional colors */
+    --color-f-red: #DE5735;
+    --color-f-orange: #A39514;
+    --color-f-green: #089108;
+    --color-f-cyan: #0081D6;
+    --color-f-purple: #815CD6;
+
+}

@@ -1,0 +1,33 @@
+/* ========================================
+   theme: alucard
+   ======================================== */
+
+[data-theme="alucard"] {
+    color-scheme: light;
+    /* Alucard Classic palette */
+    --color-background: #FFFBEB;
+    --color-selection: #CFCFDE;
+    --color-current-line: #6C664B;
+    --color-foreground: #1F1F1F;
+    --color-red: #CB3A2A;
+    --color-orange: #A34D14;
+    --color-yellow: #846E15;
+    --color-green: #14710A;
+    --color-cyan: #036A96;
+    --color-purple: #644AC9;
+    --color-pink: #A3144D;
+
+    /* Alucard UI palette */
+    --color-bg-lighter: #ECE9DF;
+    --color-bg-light: #DEDCCF;
+    --color-bg-dark: #CECCC0;
+    --color-bg-darker: #BCBAB3;
+
+    /* Functional colors */
+    --color-f-red: #DE5735;
+    --color-f-orange: #A39514;
+    --color-f-green: #089108;
+    --color-f-cyan: #0081D6;
+    --color-f-purple: #815CD6;
+
+}
