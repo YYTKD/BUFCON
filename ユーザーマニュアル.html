@@ -437,23 +437,12 @@
 
   <a class="fab" href="#top" aria-label="ページ上部へ">↑</a>
 
+  <script src="manual/markdown.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const tocList = document.getElementById('tocList');
       const article = document.querySelector('article.article');
       if (!tocList || !article) return;
-
-      const slugify = (text) => {
-        const normalized = text
-          .trim()
-          .toLowerCase()
-          .normalize('NFKD')
-          .replace(/\s+/g, '-')
-          .replace(/[^\w\u00A0-\uFFFF-]/g, '')
-          .replace(/-+/g, '-')
-          .replace(/^-|-$/g, '');
-        return normalized || 'section';
-      };
 
       const buildToc = (headings) => {
         tocList.innerHTML = '';
@@ -512,7 +501,7 @@
       const parseMarkdown = (markdown) => {
         const lines = markdown.replace(/\r\n?/g, '\n').split('\n');
         const headings = [];
-        const usedIds = new Set();
+        const ensureId = window.markdownUtils?.createHeadingIdGenerator?.() ?? ((title) => title);
         const listStack = [];
         let html = '';
         let paragraph = [];
@@ -550,18 +539,6 @@
         const closeAllBlocks = () => {
           flushParagraph();
           closeLists();
-        };
-
-        const ensureId = (title) => {
-          const base = slugify(title);
-          let candidate = base;
-          let counter = 2;
-          while (usedIds.has(candidate)) {
-            candidate = `${base}-${counter}`;
-            counter += 1;
-          }
-          usedIds.add(candidate);
-          return candidate;
         };
 
         lines.forEach((line) => {
