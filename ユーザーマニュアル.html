@@ -1,34 +1,29 @@
 <!doctype html>
-<html lang="ja">
+<html lang="ja" data-theme="dracula">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>JET-PALLET ユーザーマニュアル</title>
+  <link rel="stylesheet" href="styles/theme-dracula.css">
   <style>
     :root {
-      --bg: #282a36;
-      --paper: #2f3142;
-      --ink: #f8f8f2;
-      --muted: #9aa2d7;
-      --brand: #bd93f9;
-      --brand-2: #ff79c6;
-      --line: rgba(248, 248, 242, .12);
-      --shadow: 0 10px 24px rgba(0, 0, 0, .35);
       --radius: 14px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --line: color-mix(in srgb, var(--color-foreground) 12%, transparent);
+      --shadow: 0 10px 24px color-mix(in srgb, var(--color-bg-darker) 70%, transparent);
     }
 
     html,
     body {
-      background: radial-gradient(1200px 600px at 50% 0%, rgba(189, 147, 249, .18), transparent 60%), var(--bg);
-      color: var(--ink);
+      background: radial-gradient(1200px 600px at 50% 0%, color-mix(in srgb, var(--color-purple) 18%, transparent), transparent 60%), var(--color-background);
+      color: var(--color-foreground);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
       line-height: 1.75;
     }
 
     a {
-      color: #8be9fd;
+      color: var(--color-cyan);
       text-decoration: none;
     }
 
@@ -36,16 +31,16 @@
       text-decoration: underline;
     }
 
-    .topbar {
+    .site-header {
       position: sticky;
       top: 0;
       z-index: 999;
       backdrop-filter: blur(10px);
-      background: rgba(40, 42, 54, .85);
+      background: color-mix(in srgb, var(--color-background) 85%, transparent);
       border-bottom: 1px solid var(--line);
     }
 
-    .topbar-inner {
+    .site-header__inner {
       max-width: 1200px;
       margin: 0 auto;
       padding: 12px 16px;
@@ -54,7 +49,7 @@
       gap: 12px;
     }
 
-    .brand {
+    .site-header__logo {
       display: flex;
       align-items: center;
       gap: 10px;
@@ -62,21 +57,21 @@
       letter-spacing: .02em;
     }
 
-    .brand-badge {
+    .site-header__logo-badge {
       width: 34px;
       height: 34px;
       border-radius: 10px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      box-shadow: inset 0 0 0 1px rgba(248, 248, 242, .25);
+      background: linear-gradient(135deg, var(--color-purple), var(--color-pink));
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-foreground) 25%, transparent);
     }
 
-    .brand-title {
+    .site-header__logo-title {
       font-size: 15px;
     }
 
-    .brand-sub {
+    .site-header__logo-sub {
       font-size: 12px;
-      color: var(--muted);
+      color: var(--color-current-line);
       font-weight: 600;
     }
 
@@ -93,7 +88,7 @@
       position: sticky;
       top: 72px;
       align-self: start;
-      background: rgba(47, 49, 66, .9);
+      background: color-mix(in srgb, var(--color-bg-light) 90%, transparent);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -103,7 +98,7 @@
     .sidebar .toc-head {
       padding: 14px 14px 10px;
       border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(189, 147, 249, .18), transparent);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--color-purple) 18%, transparent), transparent);
     }
 
     .sidebar .toc-head h2 {
@@ -111,7 +106,7 @@
       font-size: 13px;
       letter-spacing: .08em;
       text-transform: uppercase;
-      color: #f8f8f2;
+      color: var(--color-foreground);
     }
 
     .sidebar .toc {
@@ -135,13 +130,13 @@
       display: block;
       padding: 7px 8px;
       border-radius: 10px;
-      color: #f8f8f2;
+      color: var(--color-foreground);
       border: 1px solid transparent;
     }
 
     .toc-list a:hover {
-      background: rgba(189, 147, 249, .16);
-      border-color: rgba(189, 147, 249, .3);
+      background: color-mix(in srgb, var(--color-purple) 16%, transparent);
+      border-color: color-mix(in srgb, var(--color-purple) 30%, transparent);
       text-decoration: none;
     }
 
@@ -149,11 +144,11 @@
       list-style: none;
       margin: 6px 0 8px 12px;
       padding: 0;
-      border-left: 1px dashed rgba(189, 147, 249, .45);
+      border-left: 1px dashed color-mix(in srgb, var(--color-purple) 45%, transparent);
     }
 
     .paper {
-      background: var(--paper);
+      background: var(--color-bg-light);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -164,8 +159,8 @@
       padding: 22px 22px 18px;
       border-bottom: 1px solid var(--line);
       background:
-        linear-gradient(135deg, rgba(189, 147, 249, .22), transparent 55%),
-        linear-gradient(0deg, rgba(255, 121, 198, .18), transparent 60%);
+        linear-gradient(135deg, color-mix(in srgb, var(--color-purple) 22%, transparent), transparent 55%),
+        linear-gradient(0deg, color-mix(in srgb, var(--color-pink) 18%, transparent), transparent 60%);
     }
 
     .hero h1 {
@@ -179,7 +174,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      color: var(--muted);
+      color: var(--color-current-line);
       font-size: 13px;
     }
 
@@ -189,8 +184,8 @@
       gap: 8px;
       padding: 6px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(189, 147, 249, .35);
-      background: rgba(189, 147, 249, .16);
+      border: 1px solid color-mix(in srgb, var(--color-purple) 35%, transparent);
+      background: color-mix(in srgb, var(--color-purple) 16%, transparent);
     }
 
     .article {
@@ -206,7 +201,7 @@
     h2 {
       margin: 28px 0 10px;
       padding-left: 12px;
-      border-left: 5px solid rgba(255, 121, 198, .8);
+      border-left: 5px solid color-mix(in srgb, var(--color-pink) 80%, transparent);
       font-size: 20px;
     }
 
@@ -214,13 +209,13 @@
       margin: 18px 0 8px;
       font-size: 16px;
       padding-left: 10px;
-      border-left: 4px solid rgba(189, 147, 249, .6);
+      border-left: 4px solid color-mix(in srgb, var(--color-purple) 60%, transparent);
     }
 
     h4 {
       margin: 16px 0 8px;
       font-size: 14px;
-      color: #f8f8f2;
+      color: var(--color-foreground);
     }
 
     p {
@@ -240,8 +235,8 @@
     blockquote {
       margin: 14px 0;
       padding: 12px 14px;
-      border-left: 5px solid rgba(255, 184, 108, .7);
-      background: rgba(255, 184, 108, .12);
+      border-left: 5px solid color-mix(in srgb, var(--color-orange) 70%, transparent);
+      background: color-mix(in srgb, var(--color-orange) 12%, transparent);
       border-radius: 12px;
     }
 
@@ -250,16 +245,16 @@
       font-size: 0.95em;
       padding: 0.1em 0.35em;
       border-radius: 8px;
-      background: rgba(248, 248, 242, .12);
+      background: color-mix(in srgb, var(--color-foreground) 12%, transparent);
     }
 
     pre {
-      background: #1f2230;
-      color: #f8f8f2;
+      background: var(--color-bg-dark);
+      color: var(--color-foreground);
       padding: 14px 14px;
       border-radius: 14px;
       overflow: auto;
-      border: 1px solid rgba(248, 248, 242, .12);
+      border: 1px solid var(--line);
     }
 
     pre code {
@@ -285,7 +280,7 @@
     }
 
     th {
-      background: rgba(189, 147, 249, .18);
+      background: color-mix(in srgb, var(--color-purple) 18%, transparent);
       text-align: left;
     }
 
@@ -298,14 +293,14 @@
       border: 1px solid var(--line);
       border-radius: 12px;
       overflow: hidden;
-      background: rgba(0, 0, 0, .15);
+      background: color-mix(in srgb, var(--color-background) 85%, transparent);
     }
 
     summary {
       cursor: pointer;
       padding: 12px 14px;
       font-weight: 700;
-      background: rgba(189, 147, 249, .2);
+      background: color-mix(in srgb, var(--color-purple) 20%, transparent);
     }
 
     details[open] summary {
@@ -321,7 +316,7 @@
       border-radius: 14px;
       border: 1px solid var(--line);
       overflow: hidden;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
+      box-shadow: 0 6px 18px color-mix(in srgb, var(--color-bg-darker) 30%, transparent);
     }
 
     .admonition-title {
@@ -334,32 +329,32 @@
 
     .admonition-body {
       padding: 10px 12px;
-      background: rgba(47, 49, 66, .9);
+      background: color-mix(in srgb, var(--color-bg-light) 90%, transparent);
     }
 
     .admonition.note .admonition-title {
-      background: rgba(139, 233, 253, .18);
+      background: color-mix(in srgb, var(--color-cyan) 18%, transparent);
     }
 
     .admonition.tip .admonition-title {
-      background: rgba(80, 250, 123, .18);
+      background: color-mix(in srgb, var(--color-green) 18%, transparent);
     }
 
     .admonition.warning .admonition-title {
-      background: rgba(255, 184, 108, .22);
+      background: color-mix(in srgb, var(--color-orange) 22%, transparent);
     }
 
     kbd {
       font-family: var(--mono);
       padding: 2px 6px;
       border-radius: 8px;
-      border: 1px solid rgba(248, 248, 242, .2);
-      background: rgba(68, 71, 90, .85);
-      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .35);
+      border: 1px solid color-mix(in srgb, var(--color-foreground) 20%, transparent);
+      background: color-mix(in srgb, var(--color-selection) 85%, transparent);
+      box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--color-bg-darker) 35%, transparent);
     }
 
     .footer {
-      color: var(--muted);
+      color: var(--color-current-line);
       font-size: 12px;
       margin-top: 16px;
       padding-top: 12px;
@@ -373,16 +368,16 @@
       width: 44px;
       height: 44px;
       border-radius: 999px;
-      border: 1px solid rgba(189, 147, 249, .45);
-      background: rgba(47, 49, 66, .9);
+      border: 1px solid color-mix(in srgb, var(--color-purple) 45%, transparent);
+      background: color-mix(in srgb, var(--color-bg-light) 90%, transparent);
       box-shadow: var(--shadow);
       display: grid;
       place-items: center;
-      color: #f8f8f2;
+      color: var(--color-foreground);
     }
 
     .fab:hover {
-      background: rgba(189, 147, 249, .2);
+      background: color-mix(in srgb, var(--color-purple) 20%, transparent);
       text-decoration: none;
     }
 
@@ -400,13 +395,13 @@
 </head>
 
 <body>
-  <div class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">
-        <div class="brand-badge" aria-hidden="true"></div>
+  <div class="site-header">
+    <div class="site-header__inner">
+      <div class="site-header__logo">
+        <div class="site-header__logo-badge" aria-hidden="true"></div>
         <div>
-          <div class="brand-title">JET-PALLET ユーザーマニュアル</div>
-          <div class="brand-sub">読みやすいHTML版（ローカル閲覧用）</div>
+          <div class="site-header__logo-title">JET-PALLET ユーザーマニュアル</div>
+          <div class="site-header__logo-sub">読みやすいHTML版（ローカル閲覧用）</div>
         </div>
       </div>
     </div>
