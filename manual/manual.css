@@ -46,7 +46,6 @@
  .site-header {
      display: flex;
      align-items: center;
-     justify-content: space-between;
      position: fixed;
      top: 0;
      width: 100%;
@@ -54,6 +53,7 @@
      background: var(--color-bg-dark);
      z-index: 1000;
      box-shadow: var(--shadow);
+     gap: 8px;
  }
 
  /* ロゴエリア */
@@ -63,6 +63,19 @@
      align-items: center;
      justify-content: flex-start;
  }
+
+ .form__label--small {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-current-line);
+}
+
+.form__label--large {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-current-line);
+    display: flex;
+}
 
  .layout {
      max-width: 1200px;
