@@ -556,7 +556,8 @@ function exportData() {
         judges: state.judges,
         judgeCategories: state.judgeCategories,
         attacks: state.attacks,
-        attackCategories: state.attackCategories
+        attackCategories: state.attackCategories,
+        userDictionary: macroState.dictionary
     };
     const json = JSON.stringify(data, null, 2);
     
@@ -587,6 +588,7 @@ function importData() {
         state.judgeCategories = data.judgeCategories || [];
         state.attacks = data.attacks || [];
         state.attackCategories = data.attackCategories || [];
+        macroState.dictionary = data.userDictionary || macroState.dictionary || [];
 
         updateBuffCategorySelect();
         updateJudgeCategorySelect();
@@ -595,6 +597,8 @@ function importData() {
         renderPackage('judge');
         renderPackage('attack');
         updateBuffTargetDropdown();
+        renderMacroList();
+        updateMacroCategorySelect();
         saveData();
         
         document.getElementById('importText').value = '';
