@@ -58,24 +58,24 @@
 
  /* ロゴエリア */
  .site-header__logo {
-     margin: 8px;
+     margin: 12px 8px 8px;
      height: 24px;
      align-items: center;
      justify-content: flex-start;
  }
 
  .form__label--small {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--color-current-line);
-}
+     font-size: 13px;
+     font-weight: 500;
+     color: var(--color-current-line);
+ }
 
-.form__label--large {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--color-current-line);
-    display: flex;
-}
+ .form__label--large {
+     font-size: 16px;
+     font-weight: 600;
+     color: var(--color-current-line);
+     display: flex;
+ }
 
  .layout {
      max-width: 1200px;
@@ -341,9 +341,9 @@
  }
 
  .admonition-body p {
-    font-size: 14px;
-    margin: 0;
-    line-height: 1.4em;
+     font-size: 14px;
+     margin: 0;
+     line-height: 1.4em;
  }
 
  .admonition.note .admonition-title {

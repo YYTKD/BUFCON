@@ -1,0 +1,122 @@
+.converter {
+  max-width: 1000px;
+  margin: 72px auto 48px;
+  padding: 0 16px 32px;
+  display: grid;
+  gap: 20px;
+}
+
+.converter__intro {
+  background: var(--color-bg-light);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+}
+
+.converter__intro h1 {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.converter__intro p {
+  color: var(--color-current-line);
+  line-height: 1.6;
+}
+
+.converter__panel {
+  background: var(--color-bg-light);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  box-shadow: var(--shadow);
+}
+
+.converter__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.converter__header h2 {
+  font-size: 16px;
+}
+
+.converter__file {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-current-line);
+  border: 1px dashed var(--line);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--color-bg-dark);
+}
+
+.converter__file input {
+  display: none;
+}
+
+textarea {
+  width: 100%;
+  min-height: 220px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--color-background);
+  color: var(--color-foreground);
+  padding: 12px;
+  font-family: "Noto Sans JP", system-ui, sans-serif;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.converter__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.converter__actions button {
+  border: 1px solid var(--line);
+  background: var(--color-purple);
+  color: var(--color-foreground);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.converter__actions button.secondary {
+  background: color-mix(in srgb, var(--color-cyan) 35%, var(--color-background));
+}
+
+.converter__actions button.ghost {
+  background: transparent;
+  border-style: dashed;
+}
+
+.converter__actions button:hover {
+  filter: brightness(1.08);
+}
+
+#statusMessage {
+  font-size: 13px;
+  color: var(--color-current-line);
+}
+
+@media (max-width: 720px) {
+  .converter__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .converter__actions button {
+    width: 100%;
+  }
+}
