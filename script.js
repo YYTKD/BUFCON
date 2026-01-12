@@ -21,11 +21,17 @@ const state = {
     }
 };
 
+const TYPE_CONFIG = {
+    buff: { collection: 'buffs', categories: 'buffCategories' },
+    judge: { collection: 'judges', categories: 'judgeCategories' },
+    attack: { collection: 'attacks', categories: 'attackCategories' }
+};
+
 function getCollection(type) {
-    if (type === 'buff') return state.buffs;
-    if (type === 'judge') return state.judges;
-    if (type === 'attack') return state.attacks;
     if (type === 'macro') return macroState.dictionary;
+    const config = TYPE_CONFIG[type];
+    if (!config) return null;
+    return state[config.collection];
     return null;
 }
 
@@ -111,26 +117,36 @@ function showContextMenu(x, y, actions = []) {
     menu.style.visibility = 'visible';
 }
 
+const ITEM_CONTEXT_ACTION_BUILDERS = {
+    buff: (index) => ([
+        { label: '編集', onClick: () => openBuffModal(index) },
+        { label: 'テキストをコピー', onClick: () => copyItemData('buff', index) },
+        { label: '削除', onClick: () => removeBuff(index) }
+    ]),
+    judge: (index) => ([
+        { label: '編集', onClick: () => openJudgeModal(index) },
+        { label: 'テキストをコピー', onClick: () => copyItemData('judge', index) },
+        { label: '削除', onClick: () => removeJudge(index) }
+    ]),
+    attack: (index) => ([
+        { label: '編集', onClick: () => openAttackModal(index) },
+        { label: 'テキストをコピー', onClick: () => copyItemData('attack', index) },
+        { label: '削除', onClick: () => removeAttack(index) }
+    ]),
+    macro: (index) => ([
+        { label: '編集', onClick: () => startMacroEdit(index) },
+        { label: '削除', onClick: () => deleteMacro(index) }
+    ])
+};
+
+function getItemContextActions(type, index) {
+    const builder = ITEM_CONTEXT_ACTION_BUILDERS[type];
+    return builder ? builder(index) : [];
+}
+
 function openItemContextMenu(event, type, index) {
     event.preventDefault();
-    const actions = [];
-
-    if (type === 'buff') {
-        actions.push({ label: '編集', onClick: () => openBuffModal(index) });
-        actions.push({ label: 'テキストをコピー', onClick: () => copyItemData('buff', index) });
-        actions.push({ label: '削除', onClick: () => removeBuff(index) });
-    } else if (type === 'judge') {
-        actions.push({ label: '編集', onClick: () => openJudgeModal(index) });
-        actions.push({ label: 'テキストをコピー', onClick: () => copyItemData('judge', index) });
-        actions.push({ label: '削除', onClick: () => removeJudge(index) });
-    } else if (type === 'attack') {
-        actions.push({ label: '編集', onClick: () => openAttackModal(index) });
-        actions.push({ label: 'テキストをコピー', onClick: () => copyItemData('attack', index) });
-        actions.push({ label: '削除', onClick: () => removeAttack(index) });
-    } else if (type === 'macro') {
-        actions.push({ label: '編集', onClick: () => startMacroEdit(index) });
-        actions.push({ label: '削除', onClick: () => deleteMacro(index) });
-    }
+    const actions = getItemContextActions(type, index);
 
     hideContextMenu();
     showContextMenu(event.pageX, event.pageY, actions);
@@ -209,9 +225,6 @@ function setupSettingsMenu() {
 }
 
 function getCategories(type) {
-    if (type === 'buff') return state.buffCategories;
-    if (type === 'judge') return state.judgeCategories;
-    if (type === 'attack') return state.attackCategories;
     if (type === 'macro') {
         const categories = [];
         macroState.dictionary.forEach(item => {
@@ -222,7 +235,9 @@ function getCategories(type) {
         });
         return categories;
     }
-    return null;
+    const config = TYPE_CONFIG[type];
+    if (!config) return null;
+    return state[config.categories];
 }
 
 // ========================================
@@ -996,40 +1011,40 @@ function renderPackageItems(type, entries = []) {
     `).join('');
 }
 
-function updateBuffCategorySelect() {
-    const select = document.getElementById('buffCategorySelect');
-    if (!select) return;
+const CATEGORY_SELECT_CONFIG = {
+    buff: { selectId: 'buffCategorySelect', categories: 'buffCategories' },
+    judge: { selectId: 'judgeCategorySelect', categories: 'judgeCategories' },
+    attack: { selectId: 'attackCategorySelect', categories: 'attackCategories' }
+};
 
+function buildCategorySelectOptions(categories = []) {
     const options = ['<option value="none">なし</option>'];
-    state.buffCategories.forEach(name => {
+    categories.forEach(name => {
         options.push(`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`);
     });
+    return options.join('');
+}
 
-    select.innerHTML = options.join('');
+function updateCategorySelect(type) {
+    const config = CATEGORY_SELECT_CONFIG[type];
+    if (!config) return;
+
+    const select = document.getElementById(config.selectId);
+    if (!select) return;
+
+    select.innerHTML = buildCategorySelectOptions(state[config.categories]);
+}
+
+function updateBuffCategorySelect() {
+    updateCategorySelect('buff');
 }
 
 function updateJudgeCategorySelect() {
-    const select = document.getElementById('judgeCategorySelect');
-    if (!select) return;
-
-    const options = ['<option value="none">なし</option>'];
-    state.judgeCategories.forEach(name => {
-        options.push(`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`);
-    });
-
-    select.innerHTML = options.join('');
+    updateCategorySelect('judge');
 }
 
 function updateAttackCategorySelect() {
-    const select = document.getElementById('attackCategorySelect');
-    if (!select) return;
-
-    const options = ['<option value="none">なし</option>'];
-    state.attackCategories.forEach(name => {
-        options.push(`<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`);
-    });
-
-    select.innerHTML = options.join('');
+    updateCategorySelect('attack');
 }
 
 
