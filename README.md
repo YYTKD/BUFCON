@@ -2,11 +2,7 @@
 
 TRPGオンラインセッションで発生するバフや状態を管理し、BCDice対応コマンドを生成できる支援ツールです。
 
-### [JET-PALLET（試験版）](https://yytkd.github.io/BUFCON/)
-
-## エンジン設計メモ
-
-- `script.js` からの抽出候補とAPI案: [manual/engine.md](manual/engine.md)
+### [JET-PALLET（試験版）](https://yytkd.github.io/JET-PALLET/)
 
 # ツールの動作について
 
@@ -31,3 +27,21 @@ TRPGオンラインセッションで発生するバフや状態を管理し、B
 htmlとjavascriptだけで動作するので、ローカルに保存しておけばネット接続が無くても使えます。  
 ご意見、ご要望、バグ報告などありましたらお知らせいただけると幸いです。  
 **[JTE-PALLET試用フィードバックフォーム](https://forms.gle/Z5YU8JaAVVUmWMaZ7)**
+
+
+
+## エンジン設計メモ
+
+- `script.js` からの抽出候補とAPI案: [manual/engine.md](manual/engine.md)
+
+## エンジン配布方針（案）
+
+- 配布形態: **ESM 単一ファイル `dist/engine.js`** を公式配布物とする（バンドル済み）。  
+  - 利用者は `<script type="module">` から直接 import できる形を想定。
+  - 将来的に型定義やサブモジュールを追加する場合は、`dist/` に併置して拡張。
+
+## 互換性ポリシー（破壊的変更）
+
+- エンジン API は **Semantic Versioning (MAJOR.MINOR.PATCH)** を採用予定。
+- 破壊的変更は **MAJOR** を更新し、README/マニュアルで告知する。
+- **MINOR** は後方互換の機能追加、**PATCH** は互換性を保つ修正を対象とする。
