@@ -971,7 +971,7 @@ function renderBuffItems(entries = []) {
         return `
             <details class="list__item buff draggable ${item.active ? 'buff--active' : ''}"
                      style="background-color: ${bgColor}; color: ${textColor};"
-                     data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')} "draggable="true">
+                     data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}" draggable="true">
                 <summary class="buff__summary" draggable="false">
                     <span class="list__item-meta">
                         <span class="list__item-title">${escapeHtml(item.name)}</span>
