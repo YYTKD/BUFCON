@@ -898,7 +898,7 @@ function scrollToCategory(type, category) {
     const list = document.getElementById(config.listId);
     if (!list) return;
 
-    const blocks = Array.from(list.querySelectorAll('.category'));
+    const blocks = Array.from(list.querySelectorAll('.list__category'));
     const targetBlock = blocks.find(block => (block.getAttribute('data-category') || 'none') === category);
 
     if (!targetBlock) return;
