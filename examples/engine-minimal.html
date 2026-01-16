@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>JET-PALLET Engine Minimal Example</title>
+</head>
+<body>
+  <h1>JET-PALLET Engine Minimal Example</h1>
+  <pre id="output">Loading...</pre>
+
+  <!-- Adjust the path if you move this file. -->
+  <script src="../core/engine/store.js"></script>
+  <script>
+    const store = JetPaletteEngine.createStore();
+
+    // 1) 判定ラベルを追加
+    const judgeIndex = store.addItem('judge', {
+      name: '命中(ロングソード)',
+      roll: '1d20'
+    });
+
+    // 2) バフを追加（対象は「すべての判定」）
+    store.addItem('buff', {
+      name: 'フォーカス',
+      effect: '+2',
+      targets: ['all-judge'],
+      color: '#56ccf2',
+      memo: '判定+2',
+      showSimpleMemo: true,
+      active: true
+    });
+
+    // 3) コマンド生成
+    const command = store.generateCommands('judge', judgeIndex, {
+      targetType: 'gte',
+      targetValue: '12'
+    });
+
+    const output = document.getElementById('output');
+    output.textContent = command ? command.text : 'Command generation failed.';
+  </script>
+</body>
+</html>
