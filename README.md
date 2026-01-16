@@ -33,6 +33,7 @@ htmlとjavascriptだけで動作するので、ローカルに保存しておけ
 ## エンジン設計メモ
 
 - `script.js` からの抽出候補とAPI案: [manual/engine.md](manual/engine.md)
+- エンジンの使い方（実装済みAPI）: [manual/engine.md#エンジンの使い方](manual/engine.md#エンジンの使い方)
 
 ## エンジン配布方針（案）
 
