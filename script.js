@@ -21,6 +21,8 @@ const state = {
     }
 };
 
+let store = null;
+
 const TYPE_CONFIG = {
     buff: { collection: 'buffs', categories: 'buffCategories' },
     judge: { collection: 'judges', categories: 'judgeCategories' },
@@ -289,6 +291,11 @@ function getSecondaryBuffColor() {
     return getThemeColorValue('--color-orange', '#FFB86C');
 }
 
+store = JetPaletteEngine.createStore(state, {
+    validateColor,
+    getDefaultBuffColor
+});
+
 // ========================================
 // テーマ管理
 // ========================================
@@ -440,49 +447,40 @@ function loadUIState() {
 // データ管理
 // ========================================
 
-function normalizeBuff(buff) {
-    const memoText = typeof buff.memo === 'string'
-        ? buff.memo
-        : (typeof buff.description === 'string' ? buff.description : '');
-    const showSimpleMemo = typeof buff.showSimpleMemo === 'boolean'
-        ? buff.showSimpleMemo
-        : Boolean(buff.description);
-
-    const { description, ...rest } = buff;
-    return {
-        ...rest,
-        memo: memoText,
-        showSimpleMemo
-    };
-}
-
-function normalizeBuffs(buffs = []) {
-    if (!Array.isArray(buffs)) return [];
-    return buffs.map(normalizeBuff);
-}
-
 function loadData() {
     try {
         const saved = localStorage.getItem('trpgData');
         if (saved) {
             const data = JSON.parse(saved);
-            state.buffs = normalizeBuffs(Array.isArray(data.buffs) ? data.buffs : getDefaultBuffs());
-            state.buffCategories = Array.isArray(data.buffCategories) ? data.buffCategories : [];
-            state.judges = Array.isArray(data.judges) ? data.judges : getDefaultJudges();
-            state.judgeCategories = Array.isArray(data.judgeCategories) ? data.judgeCategories : [];
-            state.attacks = Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks();
-            state.attackCategories = Array.isArray(data.attackCategories) ? data.attackCategories : [];
+            store.setState({
+                buffs: Array.isArray(data.buffs) ? data.buffs : getDefaultBuffs(),
+                buffCategories: Array.isArray(data.buffCategories) ? data.buffCategories : [],
+                judges: Array.isArray(data.judges) ? data.judges : getDefaultJudges(),
+                judgeCategories: Array.isArray(data.judgeCategories) ? data.judgeCategories : [],
+                attacks: Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks(),
+                attackCategories: Array.isArray(data.attackCategories) ? data.attackCategories : []
+            });
         } else {
-            state.buffs = normalizeBuffs(getDefaultBuffs());
-            state.judges = getDefaultJudges();
-            state.attacks = getDefaultAttacks();
+            store.setState({
+                buffs: getDefaultBuffs(),
+                judges: getDefaultJudges(),
+                attacks: getDefaultAttacks(),
+                buffCategories: [],
+                judgeCategories: [],
+                attackCategories: []
+            });
         }
     } catch (e) {
         console.error('データの読み込みに失敗:', e);
         showToast('データの読み込みに失敗しました', 'error');
-        state.buffs = normalizeBuffs(getDefaultBuffs());
-        state.judges = getDefaultJudges();
-        state.attacks = getDefaultAttacks();
+        store.setState({
+            buffs: getDefaultBuffs(),
+            judges: getDefaultJudges(),
+            attacks: getDefaultAttacks(),
+            buffCategories: [],
+            judgeCategories: [],
+            attackCategories: []
+        });
     }
 
     updateBuffCategorySelect();
@@ -518,17 +516,18 @@ function getDefaultAttacks() {
 }
 
 function saveData() {
-    const data = {
-        buffs: state.buffs,
-        buffCategories: state.buffCategories,
-        judges: state.judges,
-        judgeCategories: state.judgeCategories,
-        attacks: state.attacks,
-        attackCategories: state.attackCategories
+    const data = store.getState();
+    const payload = {
+        buffs: data.buffs,
+        buffCategories: data.buffCategories,
+        judges: data.judges,
+        judgeCategories: data.judgeCategories,
+        attacks: data.attacks,
+        attackCategories: data.attackCategories
     };
 
     try {
-        const json = JSON.stringify(data);
+        const json = JSON.stringify(payload);
 
         // 5MB制限チェック
         if (json.length > 5 * 1024 * 1024) {
@@ -565,16 +564,8 @@ function resetAll() {
 }
 
 function exportData() {
-    const data = {
-        buffs: state.buffs,
-        buffCategories: state.buffCategories,
-        judges: state.judges,
-        judgeCategories: state.judgeCategories,
-        attacks: state.attacks,
-        attackCategories: state.attackCategories,
-        userDictionary: macroState.dictionary
-    };
-    const json = JSON.stringify(data, null, 2);
+    store.setState({ userDictionary: macroState.dictionary });
+    const json = store.exportData();
 
     navigator.clipboard.writeText(json).then(() => {
         showToast('JSONをクリップボードにコピーしました', 'success');
@@ -591,18 +582,7 @@ function importData() {
     }
 
     try {
-        const data = JSON.parse(text);
-
-        if (!data.buffs || !data.judges || !data.attacks) {
-            throw new Error('無効なデータ形式です');
-        }
-
-        state.buffs = normalizeBuffs(data.buffs || []);
-        state.buffCategories = data.buffCategories || [];
-        state.judges = data.judges || [];
-        state.judgeCategories = data.judgeCategories || [];
-        state.attacks = data.attacks || [];
-        state.attackCategories = data.attackCategories || [];
+        const data = store.importData(text);
         macroState.dictionary = data.userDictionary || macroState.dictionary || [];
 
         updateBuffCategorySelect();
@@ -1585,7 +1565,7 @@ function addBuff() {
         const oldTurn = state.buffs[index].turn;
         const oldOriginalTurn = state.buffs[index].originalTurn;
 
-        state.buffs[index] = {
+        store.updateItem('buff', index, {
             name: name,
             effect: effect,
             targets: targets,
@@ -1596,12 +1576,12 @@ function addBuff() {
             memo: memo,
             showSimpleMemo,
             active: state.buffs[index].active
-        };
+        });
 
         showToast('バフを更新しました', 'success');
     } else {
         // 追加モード:
-        state.buffs.push({
+        store.addItem('buff', {
             name: name,
             effect: effect,
             targets: targets,
@@ -1630,75 +1610,7 @@ function bulkAdd(type) {
         'buff': {
             textId: 'bulkAddText',
             areaId: 'bulkAddArea',
-            minParts: 1,
             messageKey: 'バフ',
-            parser: (parts, index, category) => {
-                const name = parts[0];
-                const targetStr = parts[1] || '';
-                const colorPattern = /^#[0-9A-Fa-f]{6}$/;
-                const colorIndex = parts.findIndex((part, idx) => idx >= 2 && colorPattern.test(part));
-                const memoAfterColor = (colorIndex >= 0 && colorIndex + 1 < parts.length) ? (parts[colorIndex + 1] || '') : '';
-                const defaultColor = getDefaultBuffColor();
-                const color = validateColor(colorIndex >= 0 ? (parts[colorIndex] || defaultColor) : (parts[4] || defaultColor));
-
-                const payloadEnd = colorIndex >= 0 ? colorIndex : parts.length;
-                const payload = parts.slice(2, payloadEnd);
-                const hasSimpleMemoField = payload.length >= 3;
-
-                const simpleMemo = hasSimpleMemoField ? (payload[0] || '') : '';
-                const effect = hasSimpleMemoField ? (payload[1] || '') : (payload[0] || '');
-                const turn = hasSimpleMemoField ? (payload[2] ? parseInt(payload[2]) : null) : (payload[1] ? parseInt(payload[1]) : null);
-                const memo = simpleMemo ? `${simpleMemo}${memoAfterColor ? `\n${memoAfterColor}` : ''}` : memoAfterColor;
-                if (!name) throw `行${index + 1}: バフ名が空です`;
-
-                const targetNames = targetStr.split(',').map(t => t.trim());
-                const targets = [];
-
-                targetNames.forEach(tName => {
-                    if (tName.startsWith('>>')) {
-                        const catName = tName.replace(/^>>\s*/, '');
-                        let matched = false;
-                        if (state.judgeCategories.includes(catName)) {
-                            targets.push('judge-category:' + catName);
-                            matched = true;
-                        }
-                        if (state.attackCategories.includes(catName)) {
-                            targets.push('attack-category:' + catName);
-                            matched = true;
-                        }
-                        if (!matched) throw `行${index + 1}: カテゴリ「${catName}」が見つかりません`;
-                        return;
-                    }
-                    if (tName === 'なし') targets.push('none');
-                    else if (tName === '') targets.push('none');
-                    else if (tName === 'すべての判定') targets.push('all-judge');
-                    else if (tName === 'すべての攻撃') targets.push('all-attack');
-                    else {
-                        const judge = state.judges.find(j => j.name === tName);
-                        if (judge) targets.push('judge:' + tName);
-                        else {
-                            const attack = state.attacks.find(a => a.name === tName);
-                            if (attack) targets.push('attack:' + tName);
-                            else throw `行${index + 1}: 効果先「${tName}」が見つかりません`;
-                        }
-                    }
-                });
-
-                if (targets.length === 0) throw `行${index + 1}: 有効な効果先がありません`;
-
-                return {
-                    name,
-                    memo,
-                    showSimpleMemo: Boolean(memo),
-                    effect,
-                    targets,
-                    turn,
-                    originalTurn: turn,
-                    color,
-                    active: true,
-                    category
-                };
-            },
             afterAdd: () => {
                 updateBuffCategorySelect();
                 renderBuffs();
@@ -1709,14 +1621,7 @@ function bulkAdd(type) {
         'judge': {
             textId: 'bulkAddJudgeText',
             areaId: 'bulkAddJudgeArea',
-            minParts: 2,
             messageKey: '判定ラベル',
-            parser: (parts, index, category) => {
-                const name = parts[0];
-                const roll = parts[1];
-                if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
-                return { name, roll, category };
-            },
             afterAdd: () => {
                 renderPackage('judge');
                 updateJudgeCategorySelect();
@@ -1726,14 +1631,7 @@ function bulkAdd(type) {
         'attack': {
             textId: 'bulkAddAttackText',
             areaId: 'bulkAddAttackArea',
-            minParts: 2,
             messageKey: '攻撃ラベル',
-            parser: (parts, index, category) => {
-                const name = parts[0];
-                const roll = parts[1];
-                if (!name || !roll) throw `行${index + 1}: 必須項目が不足しています`;
-                return { name, roll, category };
-            },
             afterAdd: () => {
                 renderPackage('attack');
                 updateAttackCategorySelect();
@@ -1743,8 +1641,7 @@ function bulkAdd(type) {
     };
 
     const config = typeConfig[type];
-    const targetArray = getCollection(type);
-    if (!config || !targetArray) return;
+    if (!config) return;
 
     const text = document.getElementById(config.textId).value.trim();
     if (!text) {
@@ -1752,47 +1649,18 @@ function bulkAdd(type) {
         return;
     }
 
-    const lines = text.split('\n').filter(line => line.trim());
-    let added = 0;
-    let currentCategory = null;
-
-    lines.forEach((line, index) => {
-        const openMatch = line.match(/^<([^\/][^>]*)>$/);
-        const closeMatch = line.match(/^<\/([^>]+)>$/);
-
-        if (openMatch) {
-            currentCategory = openMatch[1].trim();
-            const cats = getCategories(type);
-            if (cats && currentCategory && !cats.includes(currentCategory)) {
-                cats.push(currentCategory);
-            }
-            return;
-        }
-
-        if (closeMatch) {
-            currentCategory = null;
-            return;
-        }
-
-        try {
-            const parts = line.split('|').map(p => p.trim());
-            if (parts.length < config.minParts) return;
-
-            const item = config.parser(parts, index, currentCategory);
-            targetArray.push(item);
-            added++;
-        } catch (error) {
-            showToast(`エラー: ${error}`, 'error');
-        }
+    const result = store.bulkAdd(type, text);
+    result.errors.forEach((error) => {
+        showToast(`エラー: ${error}`, 'error');
     });
 
-    if (added > 0) {
+    if (result.added > 0) {
         const textArea = document.getElementById(config.textId);
         if (textArea) textArea.value = '';
 
         config.afterAdd();
         saveData();
-        showToast(`${added}件の${config.messageKey}を追加しました`, 'success');
+        showToast(`${result.added}件の${config.messageKey}を追加しました`, 'success');
     }
 }
 
@@ -1851,7 +1719,7 @@ function toggleBuff(index) {
 function removeBuff(index) {
     if (index < 0 || index >= state.buffs.length) return;
 
-    state.buffs.splice(index, 1);
+    store.removeItem('buff', index);
     renderBuffs();
     updatePackageOutput('judge');
     updatePackageOutput('attack');
@@ -2355,11 +2223,11 @@ function addJudge() {
     if (state.editMode.active && state.editMode.type === 'judge') {
         // 編集モード
         const index = state.editMode.index;
-        state.judges[index] = { name: name, roll: roll, category };
+        store.updateItem('judge', index, { name: name, roll: roll, category });
         showToast('判定を更新しました', 'success');
     } else {
         // 追加モード
-        state.judges.push({ name: name, roll: roll, category });
+        store.addItem('judge', { name: name, roll: roll, category });
     }
 
     resetJudgeForm();
@@ -2373,7 +2241,7 @@ function addJudge() {
 function removeJudge(index) {
     if (index < 0 || index >= state.judges.length) return;
 
-    state.judges.splice(index, 1);
+    store.removeItem('judge', index);
     renderPackage('judge');
     updateBuffTargetDropdown();
     updatePackageOutput('judge');
@@ -2394,11 +2262,11 @@ function addAttack() {
     if (state.editMode.active && state.editMode.type === 'attack') {
         // 編集モード
         const index = state.editMode.index;
-        state.attacks[index] = { name: name, roll: roll, category };
+        store.updateItem('attack', index, { name: name, roll: roll, category });
         showToast('攻撃を更新しました', 'success');
     } else {
         // 追加モード
-        state.attacks.push({ name: name, roll: roll, category });
+        store.addItem('attack', { name: name, roll: roll, category });
     }
 
     resetAttackForm();
@@ -2412,7 +2280,7 @@ function addAttack() {
 function removeAttack(index) {
     if (index < 0 || index >= state.attacks.length) return;
 
-    state.attacks.splice(index, 1);
+    store.removeItem('attack', index);
     renderPackage('attack');
     updateBuffTargetDropdown();
     updatePackageOutput('attack');
@@ -2593,135 +2461,18 @@ function updatePackageOutput(type, selectedIndex = null) {
 
     if (selectedIndex < 0 || selectedIndex >= array.length) return;
 
-    const item = array[selectedIndex];
-    let command = item.roll;
-
-    const filterKey = type === 'judge' ? 'judge:' : 'attack:';
-    const categoryKey = type === 'judge' ? 'judge-category:' : 'attack-category:';
-    const itemCategory = item.category || null;
-    const activeBuffs = state.buffs.filter(b =>
-        b.active &&
-        b.effect &&
-        (b.targets.includes(type === 'judge' ? 'all-judge' : 'all-attack') ||
-            b.targets.includes(filterKey + item.name) ||
-            (itemCategory && b.targets.includes(categoryKey + itemCategory)))
-    );
-
-    const slotMap = {};
-    const normalEffects = [];
-    const buffColorMap = {};
-
-    activeBuffs.forEach(buff => {
-        const effects = buff.effect.split(',').map(e => e.trim());
-
-        effects.forEach(effect => {
-            const slotMatch = effect.match(/\/\/([^/]+)=(.+)/);
-
-            if (slotMatch) {
-                const slotName = slotMatch[1];
-                const slotValue = slotMatch[2];
-
-                if (!slotMap[slotName]) {
-                    slotMap[slotName] = [];
-                    buffColorMap[slotName] = [];
-                }
-                slotMap[slotName].push(slotValue);
-                buffColorMap[slotName].push(buff.color);
-            } else if (effect) {
-                normalEffects.push({ text: effect, color: buff.color });
-            }
-        });
-    });
-
-    // 基本ロールの部分（色なし）を配列で管理
-    const commandParts = [{ text: command, color: null }];
-
-    // 代入スロットを置換
-    commandParts[0].text = commandParts[0].text.replace(/\/\/([^/]+)\/\//g, (match, slotName) => {
-        if (slotMap[slotName] && slotMap[slotName].length > 0) {
-            // ここで色付きパーツを挿入する印をつける
-            return `__SLOT_${slotName}__`;
-        }
-        return '';
-    });
-
-    // スロット部分を色付きパーツに展開
-    let finalParts = [];
-    const baseText = commandParts[0].text;
-    let lastIndex = 0;
-
-    // スロット位置を探して分割
-    const slotRegex = /__SLOT_([^_]+)__/g;
-    let match;
-
-    while ((match = slotRegex.exec(baseText)) !== null) {
-        // スロット前までのテキスト
-        if (match.index > lastIndex) {
-            finalParts.push({
-                text: baseText.substring(lastIndex, match.index),
-                color: null
-            });
-        }
-
-        // スロット内容を色付きで追加
-        const slotName = match[1];
-        if (slotMap[slotName]) {
-            slotMap[slotName].forEach((value, idx) => {
-                finalParts.push({
-                    text: value,
-                    color: buffColorMap[slotName][idx]
-                });
-            });
-        }
-
-        lastIndex = match.index + match[0].length;
-    }
-
-    // 残りのテキスト
-    if (lastIndex < baseText.length) {
-        finalParts.push({
-            text: baseText.substring(lastIndex),
-            color: null
-        });
-    }
-
-    // 通常のバフ効果を追加（色付き）
-    normalEffects.forEach(effect => {
-        finalParts.push(effect);
-    });
-
-    // 目標値処理
-    let targetSuffix = '';
+    const options = {};
     if (type === 'judge') {
-        const targetType = document.querySelector('input[name="targetType"]:checked')?.value || 'none';
-        const targetValue = document.getElementById('targetValue').value.trim();
-
-        if (targetType === 'gte' && targetValue) {
-            targetSuffix = `>=${targetValue}`;
-        } else if (targetType === 'lte' && targetValue) {
-            targetSuffix = `=<${targetValue}`;
-        }
+        options.targetType = document.querySelector('input[name="targetType"]:checked')?.value || 'none';
+        options.targetValue = document.getElementById('targetValue').value.trim();
     }
 
-    finalParts.push({ text: targetSuffix, color: null });
-    finalParts.push({ text: ` ${item.name}`, color: null });
+    const result = store.generateCommands(type, selectedIndex, options);
+    if (!result) return;
 
-    // HTML化して出力
     const outputElement = document.getElementById(outputId);
-    outputElement.innerHTML = finalParts
-        .map(part => {
-            if (part.color) {
-                const textColor = getContrastColor(part.color);
-                return `<span style="color: ${part.color}">${escapeHtml(part.text)}</span>`;
-            }
-            return escapeHtml(part.text);
-        })
-        .join('');
-
-    // テキスト版も保持（コピー用）
-    outputElement.dataset.plainText = finalParts
-        .map(p => p.text)
-        .join('');
+    outputElement.innerHTML = result.html;
+    outputElement.dataset.plainText = result.text;
 
 }
 // ========================================
