@@ -4,6 +4,10 @@ TRPGオンラインセッションで発生するバフや状態を管理し、B
 
 ### [JET-PALLET（試験版）](https://yytkd.github.io/BUFCON/)
 
+## エンジン設計メモ
+
+- `script.js` からの抽出候補とAPI案: [manual/engine.md](manual/engine.md)
+
 # ツールの動作について
 
 まだまだ開発途上ですので、バグが潜んでいる可能性があります。  
