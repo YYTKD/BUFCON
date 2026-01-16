@@ -1,4 +1,4 @@
-const YSToJETPaletteCore = (() => {
+const JetPaletteConverters = (() => {
   const abilityNames = ['器用', '敏捷', '筋力', '生命', '知力', '精神'];
   const abilitySet = new Set(abilityNames);
 
@@ -109,7 +109,7 @@ const YSToJETPaletteCore = (() => {
     return null;
   };
 
-  const buildPaletteOutput = (input) => {
+  const convertYstToJetPalette = (input) => {
     const normalized = normalizeNewlines(input);
     const lines = normalized.split('\n');
     const assignments = parseAssignments(lines);
@@ -260,8 +260,8 @@ const YSToJETPaletteCore = (() => {
     };
   };
 
-  return {
-    buildPaletteOutput,
+  const api = {
+    convertYstToJetPalette,
     normalizeNewlines,
     parseAssignments,
     createExpander,
@@ -270,4 +270,11 @@ const YSToJETPaletteCore = (() => {
     abilityNames,
     specialVariables
   };
+
+  if (typeof window !== 'undefined') {
+    window.JetPaletteCore = window.JetPaletteCore || {};
+    window.JetPaletteCore.convertYstToJetPalette = convertYstToJetPalette;
+  }
+
+  return api;
 })();
