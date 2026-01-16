@@ -25,7 +25,7 @@ const convert = () => {
   }
 
   try {
-    const data = YSToJETPaletteCore.buildPaletteOutput(paletteInput.value);
+    const data = JetPaletteConverters.convertYstToJetPalette(paletteInput.value);
     jsonOutput.value = JSON.stringify(data, null, 2);
     setStatus('変換が完了しました');
   } catch (error) {
