@@ -29,7 +29,27 @@
 - 判定/攻撃コマンドの生成と、バフ効果の合成（`all-judge` / `judge-category:` 等による絞り込み）: `updatePackageOutput`。【F:script.js†L2578-L2735】
 - スロット記法（`//slot=value` と `//slot//` 置換）、複数効果の色付き合成: `updatePackageOutput` 内の解析ロジック。【F:script.js†L2612-L2735】
 
-> 上記はUI非依存のロジックとしてエンジン化しやすい箇所です。UI要素の更新処理は別レイヤに切り出す想定です。
+> 上記はUI非依存のロジックとしてエンジン化しやすい箇所です。UI要素の更新処理は別レイヤに切り出す想定です。  
+
+---
+
+## 1.5 配布形態（案）
+
+- **ESM 単一ファイル `dist/engine.js` を公式配布物とする**。  
+  - `<script type="module">` から直接 import できる形を想定。
+  - 依存はバンドル内に含め、追加のビルド工程を不要にする。
+
+### `index.html` での読み込み例
+```html
+<script type="module">
+  import { createStore } from "./dist/engine.js";
+
+  const store = createStore();
+  // 例: 判定ラベルの追加
+  const judgeIndex = store.addLabel("judge", { name: "命中", roll: "1d20" });
+  console.log(store.generateCommands("judge", judgeIndex).text);
+</script>
+```
 
 ---
 
@@ -192,3 +212,11 @@ document.getElementById('output').textContent = command.text;
 ## 4. 追加メモ
 - `bulkAdd` で使っている `<カテゴリ>` ブロック構文や `|` 区切りの仕様は、エンジン側でパーサとして提供すると派生アプリで再利用しやすくなります。【F:script.js†L1630-L1822】
 - `formatTargetsForBulk` のようなターゲット表示名変換は、UI表示/エクスポートの両方で必要になるため共通関数化が有効です。【F:script.js†L3036-L3078】
+
+---
+
+## 5. 互換性ポリシー（破壊的変更）
+
+- エンジン API は **Semantic Versioning (MAJOR.MINOR.PATCH)** を採用予定。
+- 破壊的変更は **MAJOR** を更新し、README/マニュアルで告知する。
+- **MINOR** は後方互換の機能追加、**PATCH** は互換性を保つ修正を対象とする。

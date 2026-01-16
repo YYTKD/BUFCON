@@ -8,6 +8,18 @@ TRPGオンラインセッションで発生するバフや状態を管理し、B
 
 - `script.js` からの抽出候補とAPI案: [manual/engine.md](manual/engine.md)
 
+## エンジン配布方針（案）
+
+- 配布形態: **ESM 単一ファイル `dist/engine.js`** を公式配布物とする（バンドル済み）。  
+  - 利用者は `<script type="module">` から直接 import できる形を想定。
+  - 将来的に型定義やサブモジュールを追加する場合は、`dist/` に併置して拡張。
+
+## 互換性ポリシー（破壊的変更）
+
+- エンジン API は **Semantic Versioning (MAJOR.MINOR.PATCH)** を採用予定。
+- 破壊的変更は **MAJOR** を更新し、README/マニュアルで告知する。
+- **MINOR** は後方互換の機能追加、**PATCH** は互換性を保つ修正を対象とする。
+
 # ツールの動作について
 
 まだまだ開発途上ですので、バグが潜んでいる可能性があります。  
