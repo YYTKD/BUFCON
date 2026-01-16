@@ -316,7 +316,7 @@ function applyTheme(theme, persist = true) {
 function updateColorDatalist() {
     const datalist = document.getElementById('buffColor-list');
     if (!datalist) return;
-    
+
     // 現在のテーマに応じたカラーを取得
     const colors = [
         getThemeColorValue('--color-cyan', '#8BE9FD'),
@@ -330,7 +330,7 @@ function updateColorDatalist() {
         getThemeColorValue('--color-background', '#282A36'),
         getThemeColorValue('--color-selection', '#44475A')
     ];
-    
+
     // datalistを更新
     datalist.innerHTML = colors
         .map(color => `<option value="${color}"></option>`)
@@ -526,16 +526,16 @@ function saveData() {
         attacks: state.attacks,
         attackCategories: state.attackCategories
     };
-    
+
     try {
         const json = JSON.stringify(data);
-        
+
         // 5MB制限チェック
         if (json.length > 5 * 1024 * 1024) {
             showToast('データが大きすぎて保存できません', 'error');
             return false;
         }
-        
+
         localStorage.setItem('trpgData', json);
         return true;
     } catch (e) {
@@ -553,7 +553,7 @@ function resetAll() {
     if (!confirm('すべての設定を初期化しますか?この操作は取り消せません。')) {
         return;
     }
-    
+
     try {
         localStorage.removeItem('trpgData');
         localStorage.removeItem('uiState');
@@ -575,7 +575,7 @@ function exportData() {
         userDictionary: macroState.dictionary
     };
     const json = JSON.stringify(data, null, 2);
-    
+
     navigator.clipboard.writeText(json).then(() => {
         showToast('JSONをクリップボードにコピーしました', 'success');
     }).catch(() => {
@@ -589,7 +589,7 @@ function importData() {
         showToast('JSONを貼り付けてください', 'error');
         return;
     }
-    
+
     try {
         const data = JSON.parse(text);
 
@@ -614,9 +614,9 @@ function importData() {
         updateBuffTargetDropdown();
         renderMacroDictionary();
         saveData();
-        
+
         document.getElementById('importText').value = '';
-        
+
         showToast('データを読み込みました', 'success');
     } catch (e) {
         showToast('JSONの解析に失敗しました: ' + e.message, 'error');
@@ -631,61 +631,61 @@ function initFileDropZone() {
         { elementId: 'importText', type: 'data' },
         { elementId: 'macroImportText', type: 'macro' }
     ];
-    
+
     dropZones.forEach(({ elementId, type }) => {
         const dropZone = document.getElementById(elementId);
         if (!dropZone) return;
-        
+
         // ドラッグオーバー時の処理
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.stopPropagation();
             dropZone.classList.add('drop-zone--active');
         });
-        
+
         // ドラッグが離れた時の処理
         dropZone.addEventListener('dragleave', (e) => {
             e.preventDefault();
             e.stopPropagation();
             dropZone.classList.remove('drop-zone--active');
         });
-        
+
         // ドロップ時の処理
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            
+
             // スタイルを元に戻す
             dropZone.classList.remove('drop-zone--active');
-            
+
             // ファイルを取得
             const files = e.dataTransfer.files;
-            
+
             if (files.length === 0) {
                 showToast('ファイルが見つかりません', 'error');
                 return;
             }
-            
+
             const file = files[0];
             const fileName = file.name.toLowerCase();
-            
+
             if (!fileName.endsWith('.txt') && !fileName.endsWith('.json')) {
                 showToast('.txtまたは.jsonファイルのみ対応しています', 'error');
                 return;
             }
-            
+
             const reader = new FileReader();
-            
+
             reader.onload = (event) => {
                 const content = event.target.result;
                 dropZone.value = content;
                 showToast(`${file.name} を読み込みました`, 'success');
             };
-            
+
             reader.onerror = () => {
                 showToast('ファイルの読み込みに失敗しました', 'error');
             };
-            
+
             reader.readAsText(file);
         });
     });
@@ -971,14 +971,14 @@ function renderBuffItems(entries = []) {
         return `
             <details class="list__item buff draggable ${item.active ? 'buff--active' : ''}"
                      style="background-color: ${bgColor}; color: ${textColor};"
-                     data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')}">
-                <summary class="buff__summary">
+                     data-index="${index}" data-type="buff" data-item-index="${index}" data-category="${escapeHtml(item.category || 'none')} "draggable="true">
+                <summary class="buff__summary" draggable="false">
                     <span class="list__item-meta">
                         <span class="list__item-title">${escapeHtml(item.name)}</span>
                         ${simpleMemo ? `<span class="list__item-meta-text">${escapeHtml(simpleMemo)}</span>` : ''}
                     </span>
                     ${turnDisplay}
-                    <span class="buff__actions">
+                    <span class="buff__actions" draggable="false">
                         <button class="toggle ${item.active ? 'toggle--active' : ''}" data-toggle="${index}" data-toggle-type="buff"></button>
                     </span>
                 </summary>
@@ -1113,7 +1113,7 @@ function addOrUpdateMacro() {
     }
 
     // 重複チェック（編集時以外）
-    const isDuplicate = macroState.dictionary.some(item => 
+    const isDuplicate = macroState.dictionary.some(item =>
         item.text === text && item.id !== macroState.editingId
     );
 
@@ -1122,17 +1122,17 @@ function addOrUpdateMacro() {
         return;
     }
 
-if (macroState.editingId) {
-    // 編集モード：`localStorage`から最新データを読み込み直してから更新
-    loadUserDictionary();
-    const index = macroState.dictionary.findIndex(item => item.id === macroState.editingId);
-    if (index !== -1) {
-        macroState.dictionary[index].text = text;
-        macroState.dictionary[index].category = category;
-        saveUserDictionary();
-        showToast('辞書項目を更新しました', 'success');
-    }
-    cancelMacroEdit();
+    if (macroState.editingId) {
+        // 編集モード：`localStorage`から最新データを読み込み直してから更新
+        loadUserDictionary();
+        const index = macroState.dictionary.findIndex(item => item.id === macroState.editingId);
+        if (index !== -1) {
+            macroState.dictionary[index].text = text;
+            macroState.dictionary[index].category = category;
+            saveUserDictionary();
+            showToast('辞書項目を更新しました', 'success');
+        }
+        cancelMacroEdit();
     } else {
         // 追加モード：新規アイテムを作成
         const newItem = {
@@ -1347,7 +1347,7 @@ function importUserDictionary() {
  * UUID生成（簡易版）
  */
 function generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         const r = Math.random() * 16 | 0;
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -1362,7 +1362,7 @@ function resetDictionary() {
     if (!confirm('ユーザー辞書の設定を初期化しますか?この操作は取り消せません。')) {
         return;
     }
-    
+
     try {
         localStorage.removeItem('userDictionary');
         location.reload();
@@ -1404,7 +1404,7 @@ function setupUserDictionaryModal() {
 function initMultiSelect() {
     const select = document.getElementById('buffTargetSelect');
     if (!select) return;
-    
+
     select.addEventListener('change', () => {
         state.selectedBuffTargets = Array.from(select.selectedOptions).map(opt => opt.value);
     });
@@ -1416,7 +1416,7 @@ function updateBuffTargetDropdown() {
 
     // プレースホルダー
     let html = '<option disabled>複数選択可</option>';
-    
+
     // 状態に保持している選択値を使用
     const currentValues = Array.isArray(state.selectedBuffTargets)
         ? [...state.selectedBuffTargets]
@@ -1427,17 +1427,17 @@ function updateBuffTargetDropdown() {
     html += `<option value="all-judge" ${currentValues.includes('all-judge') ? 'selected' : ''}>すべての判定</option>`;
     html += `<option value="all-attack" ${currentValues.includes('all-attack') ? 'selected' : ''}>すべての攻撃</option>`;
     html += `</optgroup>`;
-    
+
     // 判定カテゴリ
     if (state.judges.length > 0) {
         html += `<optgroup label="---判定---">`;
-                if (state.judgeCategories.length > 0) {
+        if (state.judgeCategories.length > 0) {
             state.judgeCategories.forEach(name => {
                 const value = `judge-category:${name}`;
                 html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>&gt;&gt;${escapeHtml(name)}</option>`;
             });
         }
-        
+
         state.judges.forEach(j => {
             const value = 'judge:' + j.name;
             html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(j.name)}</option>`;
@@ -1449,7 +1449,7 @@ function updateBuffTargetDropdown() {
     // 攻撃カテゴリ
     if (state.attacks.length > 0) {
         html += `<optgroup label="---攻撃---">`;
-                if (state.attackCategories.length > 0) {
+        if (state.attackCategories.length > 0) {
             state.attackCategories.forEach(name => {
                 const value = `attack-category:${name}`;
                 html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>&gt;&gt;${escapeHtml(name)}</option>`;
@@ -1462,7 +1462,7 @@ function updateBuffTargetDropdown() {
 
         html += `</optgroup>`;
     }
-    
+
     select.innerHTML = html;
 }
 
@@ -1502,7 +1502,7 @@ function openBuffModal(editIndex = null) {
     const modalTitle = modal.querySelector('.modal__title');
     const addBtn = document.getElementById('addBuffBtn');
     const bulkAddSection = document.getElementById('bulkAddArea').parentElement;
-    
+
     if (editIndex !== null) {
         // 編集モード
         state.editMode = { active: true, type: 'buff', index: editIndex };
@@ -1531,7 +1531,7 @@ function openBuffModal(editIndex = null) {
         bulkAddSection.style.display = 'block';
         resetBuffForm();
     }
-    
+
     modal.showModal();
 }
 
@@ -1544,7 +1544,7 @@ function resetBuffForm() {
     document.getElementById('buffMemo').value = '';
     document.getElementById('buffSimpleMemoToggle').checked = false;
     state.selectedBuffTargets = [];
-    
+
     const buffTargetSelect = document.getElementById('buffTargetSelect');
     if (buffTargetSelect) {
         Array.from(buffTargetSelect.options).forEach(option => {
@@ -1556,7 +1556,7 @@ function resetBuffForm() {
 
 function insertText(text) {
     const textbox = document.getElementById('buffEffect');
-            textbox.value = textbox.value + text;
+    textbox.value = textbox.value + text;
 }
 
 function addBuff() {
@@ -1574,11 +1574,11 @@ function addBuff() {
         showToast('バフ名を入力してください', 'error');
         return;
     }
-    
+
     if (targets.length === 0) {
         targets.push('none');
     }
-    
+
     if (state.editMode.active && state.editMode.type === 'buff') {
         // 編集モード
         const index = state.editMode.index;
@@ -1614,10 +1614,10 @@ function addBuff() {
             active: true
         });
     }
-    
+
     resetBuffForm();
     document.getElementById('buffaddmodal').close();
-    
+
     renderBuffs();
     updatePackageOutput('judge');
     updatePackageOutput('attack');
@@ -1635,7 +1635,7 @@ function bulkAdd(type) {
             parser: (parts, index, category) => {
                 const name = parts[0];
                 const targetStr = parts[1] || '';
-                                const colorPattern = /^#[0-9A-Fa-f]{6}$/;
+                const colorPattern = /^#[0-9A-Fa-f]{6}$/;
                 const colorIndex = parts.findIndex((part, idx) => idx >= 2 && colorPattern.test(part));
                 const memoAfterColor = (colorIndex >= 0 && colorIndex + 1 < parts.length) ? (parts[colorIndex + 1] || '') : '';
                 const defaultColor = getDefaultBuffColor();
@@ -1683,7 +1683,7 @@ function bulkAdd(type) {
                         }
                     }
                 });
-                
+
                 if (targets.length === 0) throw `行${index + 1}: 有効な効果先がありません`;
 
                 return {
@@ -1741,17 +1741,17 @@ function bulkAdd(type) {
             }
         }
     };
-    
+
     const config = typeConfig[type];
     const targetArray = getCollection(type);
     if (!config || !targetArray) return;
-    
+
     const text = document.getElementById(config.textId).value.trim();
     if (!text) {
         showToast(`追加する${config.messageKey}を入力してください`, 'error');
         return;
     }
-    
+
     const lines = text.split('\n').filter(line => line.trim());
     let added = 0;
     let currentCategory = null;
@@ -1785,7 +1785,7 @@ function bulkAdd(type) {
             showToast(`エラー: ${error}`, 'error');
         }
     });
-    
+
     if (added > 0) {
         const textArea = document.getElementById(config.textId);
         if (textArea) textArea.value = '';
@@ -1837,7 +1837,7 @@ function setupBulkAddControls({ toggleId, confirmId, cancelId, areaId, textId, t
 
 function toggleBuff(index) {
     if (index < 0 || index >= state.buffs.length) return;
-    
+
     state.buffs[index].active = !state.buffs[index].active;
     if (state.buffs[index].active && state.buffs[index].turn === 0) {
         state.buffs[index].turn = state.buffs[index].originalTurn;
@@ -1850,7 +1850,7 @@ function toggleBuff(index) {
 
 function removeBuff(index) {
     if (index < 0 || index >= state.buffs.length) return;
-    
+
     state.buffs.splice(index, 1);
     renderBuffs();
     updatePackageOutput('judge');
@@ -1891,7 +1891,7 @@ function progressTurn() {
             }
         }
     });
-    
+
     if (changed) {
         renderBuffs();
         updatePackageOutput('judge');
@@ -1951,7 +1951,7 @@ function renderBuffs() {
 function attachBuffEvents() {
     const buffList = document.getElementById('buffList');
     if (!buffList) return;
-    
+
     buffList.querySelectorAll('[data-type="buff"]').forEach(el => {
         const i = parseInt(el.getAttribute('data-index'));
         if (isNaN(i)) return;
@@ -1975,7 +1975,7 @@ function attachBuffEvents() {
             header.addEventListener('contextmenu', (e) => openCategoryContextMenu(e, 'buff', categoryName));
         }
     });
-    
+
     buffList.querySelectorAll('[data-toggle-type="buff"]').forEach(btn => {
         const i = parseInt(btn.getAttribute('data-toggle'));
         if (isNaN(i)) return;
@@ -2009,12 +2009,12 @@ function handleDragStart(e, index, type) {
 function handleDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    
+
     const rect = e.currentTarget.getBoundingClientRect();
     const midY = rect.top + rect.height / 2;
-    
+
     e.currentTarget.classList.remove('list__item--drag-over-top', 'list__item--drag-over-bottom');
-    
+
     if (e.clientY < midY) {
         e.currentTarget.classList.add('list__item--drag-over-top');
     } else {
@@ -2073,7 +2073,7 @@ function handleDrop(e, targetIndex, type) {
     if (type === 'buff') renderBuffs();
     else if (type === 'judge') renderPackage('judge');
     else if (type === 'attack') renderPackage('attack');
-    
+
     updatePackageOutput('judge');
     updatePackageOutput('attack');
     saveData();
@@ -2267,7 +2267,7 @@ function openJudgeModal(editIndex = null) {
         modalTitle.textContent = '判定ラベル編集';
         addBtn.textContent = '更新';
         bulkAddSection.style.display = 'none';
-        
+
         const judge = state.judges[editIndex];
         document.getElementById('judgeName').value = judge.name;
         document.getElementById('judgeRoll').value = judge.roll;
@@ -2284,7 +2284,7 @@ function openJudgeModal(editIndex = null) {
         bulkAddSection.style.display = 'block';
         resetJudgeForm();
     }
-    
+
     modal.showModal();
 }
 
@@ -2311,7 +2311,7 @@ function openAttackModal(editIndex = null) {
         modalTitle.textContent = '攻撃ラベル編集';
         addBtn.textContent = '更新';
         bulkAddSection.style.display = 'none';
-        
+
         const attack = state.attacks[editIndex];
         document.getElementById('attackName').value = attack.name;
         document.getElementById('attackRoll').value = attack.roll;
@@ -2328,7 +2328,7 @@ function openAttackModal(editIndex = null) {
         bulkAddSection.style.display = 'block';
         resetAttackForm();
     }
-    
+
     modal.showModal();
 }
 
@@ -2351,7 +2351,7 @@ function addJudge() {
         showToast('判定名と判定ロールを入力してください', 'error');
         return;
     }
-    
+
     if (state.editMode.active && state.editMode.type === 'judge') {
         // 編集モード
         const index = state.editMode.index;
@@ -2361,10 +2361,10 @@ function addJudge() {
         // 追加モード
         state.judges.push({ name: name, roll: roll, category });
     }
-    
+
     resetJudgeForm();
     document.getElementById('judgeaddmodal').close();
-    
+
     renderPackage('judge');
     updateBuffTargetDropdown();
     saveData();
@@ -2372,7 +2372,7 @@ function addJudge() {
 
 function removeJudge(index) {
     if (index < 0 || index >= state.judges.length) return;
-    
+
     state.judges.splice(index, 1);
     renderPackage('judge');
     updateBuffTargetDropdown();
@@ -2390,7 +2390,7 @@ function addAttack() {
         showToast('攻撃名と攻撃ロールを入力してください', 'error');
         return;
     }
-    
+
     if (state.editMode.active && state.editMode.type === 'attack') {
         // 編集モード
         const index = state.editMode.index;
@@ -2400,10 +2400,10 @@ function addAttack() {
         // 追加モード
         state.attacks.push({ name: name, roll: roll, category });
     }
-    
+
     resetAttackForm();
     document.getElementById('attackaddmodal').close();
-    
+
     renderPackage('attack');
     updateBuffTargetDropdown();
     saveData();
@@ -2411,7 +2411,7 @@ function addAttack() {
 
 function removeAttack(index) {
     if (index < 0 || index >= state.attacks.length) return;
-    
+
     state.attacks.splice(index, 1);
     renderPackage('attack');
     updateBuffTargetDropdown();
@@ -2423,7 +2423,7 @@ function selectPackage(index, type) {
     const array = getCollection(type);
     if (!array) return;
     if (index < 0 || index >= array.length) return;
-    
+
     document.querySelectorAll(`[data-type="${type}"]`).forEach(el => el.classList.remove('list__item--selected'));
     const target = document.querySelector(`[data-type="${type}"][data-index="${index}"]`);
     if (target) target.classList.add('list__item--selected');
@@ -2506,10 +2506,10 @@ function attachItemEvents(type) {
             onRemove: removeAttack
         }
     };
-    
+
     const config = typeConfig[type];
     if (!config) return;
-    
+
     const listElement = document.getElementById(config.listId);
     if (!listElement) return;
 
@@ -2537,17 +2537,17 @@ function attachItemEvents(type) {
             header.addEventListener('contextmenu', (e) => openCategoryContextMenu(e, type, categoryName));
         }
     });
-    
+
     listElement.querySelectorAll(`[data-edit-type="${type}"]`).forEach(btn => {
         const i = parseInt(btn.getAttribute('data-edit'));
         if (isNaN(i)) return;
-        
+
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             config.onEdit(i);
         });
     });
-    
+
     listElement.querySelectorAll(`[data-copy-type="${type}"]`).forEach(btn => {
         const i = parseInt(btn.getAttribute('data-copy'));
         if (isNaN(i)) return;
@@ -2557,11 +2557,11 @@ function attachItemEvents(type) {
             copyItemData(type, i, btn);
         });
     });
-    
+
     listElement.querySelectorAll(`[data-remove-type="${type}"]`).forEach(btn => {
         const i = parseInt(btn.getAttribute('data-remove'));
         if (isNaN(i)) return;
-        
+
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             config.onRemove(i);
@@ -2590,7 +2590,7 @@ function updatePackageOutput(type, selectedIndex = null) {
         }
         selectedIndex = parseInt(selected.getAttribute('data-index'));
     }
-    
+
     if (selectedIndex < 0 || selectedIndex >= array.length) return;
 
     const item = array[selectedIndex];
@@ -2603,125 +2603,125 @@ function updatePackageOutput(type, selectedIndex = null) {
         b.active &&
         b.effect &&
         (b.targets.includes(type === 'judge' ? 'all-judge' : 'all-attack') ||
-         b.targets.includes(filterKey + item.name) ||
-         (itemCategory && b.targets.includes(categoryKey + itemCategory)))
+            b.targets.includes(filterKey + item.name) ||
+            (itemCategory && b.targets.includes(categoryKey + itemCategory)))
     );
-    
-const slotMap = {};
-const normalEffects = [];
-const buffColorMap = {};
 
-activeBuffs.forEach(buff => {
-    const effects = buff.effect.split(',').map(e => e.trim());
-    
-    effects.forEach(effect => {
-        const slotMatch = effect.match(/\/\/([^/]+)=(.+)/);
-        
-        if (slotMatch) {
-            const slotName = slotMatch[1];
-            const slotValue = slotMatch[2];
-            
-            if (!slotMap[slotName]) {
-                slotMap[slotName] = [];
-                buffColorMap[slotName] = [];
+    const slotMap = {};
+    const normalEffects = [];
+    const buffColorMap = {};
+
+    activeBuffs.forEach(buff => {
+        const effects = buff.effect.split(',').map(e => e.trim());
+
+        effects.forEach(effect => {
+            const slotMatch = effect.match(/\/\/([^/]+)=(.+)/);
+
+            if (slotMatch) {
+                const slotName = slotMatch[1];
+                const slotValue = slotMatch[2];
+
+                if (!slotMap[slotName]) {
+                    slotMap[slotName] = [];
+                    buffColorMap[slotName] = [];
+                }
+                slotMap[slotName].push(slotValue);
+                buffColorMap[slotName].push(buff.color);
+            } else if (effect) {
+                normalEffects.push({ text: effect, color: buff.color });
             }
-            slotMap[slotName].push(slotValue);
-            buffColorMap[slotName].push(buff.color);
-        } else if (effect) {
-            normalEffects.push({ text: effect, color: buff.color });
-        }
-    });
-});
-
-// 基本ロールの部分（色なし）を配列で管理
-const commandParts = [{ text: command, color: null }];
-
-// 代入スロットを置換
-commandParts[0].text = commandParts[0].text.replace(/\/\/([^/]+)\/\//g, (match, slotName) => {
-    if (slotMap[slotName] && slotMap[slotName].length > 0) {
-        // ここで色付きパーツを挿入する印をつける
-        return `__SLOT_${slotName}__`;
-    }
-    return '';
-});
-
-// スロット部分を色付きパーツに展開
-let finalParts = [];
-const baseText = commandParts[0].text;
-let lastIndex = 0;
-
-// スロット位置を探して分割
-const slotRegex = /__SLOT_([^_]+)__/g;
-let match;
-
-while ((match = slotRegex.exec(baseText)) !== null) {
-    // スロット前までのテキスト
-    if (match.index > lastIndex) {
-        finalParts.push({ 
-            text: baseText.substring(lastIndex, match.index), 
-            color: null 
         });
-    }
-    
-    // スロット内容を色付きで追加
-    const slotName = match[1];
-    if (slotMap[slotName]) {
-        slotMap[slotName].forEach((value, idx) => {
-            finalParts.push({ 
-                text: value, 
-                color: buffColorMap[slotName][idx]
+    });
+
+    // 基本ロールの部分（色なし）を配列で管理
+    const commandParts = [{ text: command, color: null }];
+
+    // 代入スロットを置換
+    commandParts[0].text = commandParts[0].text.replace(/\/\/([^/]+)\/\//g, (match, slotName) => {
+        if (slotMap[slotName] && slotMap[slotName].length > 0) {
+            // ここで色付きパーツを挿入する印をつける
+            return `__SLOT_${slotName}__`;
+        }
+        return '';
+    });
+
+    // スロット部分を色付きパーツに展開
+    let finalParts = [];
+    const baseText = commandParts[0].text;
+    let lastIndex = 0;
+
+    // スロット位置を探して分割
+    const slotRegex = /__SLOT_([^_]+)__/g;
+    let match;
+
+    while ((match = slotRegex.exec(baseText)) !== null) {
+        // スロット前までのテキスト
+        if (match.index > lastIndex) {
+            finalParts.push({
+                text: baseText.substring(lastIndex, match.index),
+                color: null
             });
+        }
+
+        // スロット内容を色付きで追加
+        const slotName = match[1];
+        if (slotMap[slotName]) {
+            slotMap[slotName].forEach((value, idx) => {
+                finalParts.push({
+                    text: value,
+                    color: buffColorMap[slotName][idx]
+                });
+            });
+        }
+
+        lastIndex = match.index + match[0].length;
+    }
+
+    // 残りのテキスト
+    if (lastIndex < baseText.length) {
+        finalParts.push({
+            text: baseText.substring(lastIndex),
+            color: null
         });
     }
-    
-    lastIndex = match.index + match[0].length;
-}
 
-// 残りのテキスト
-if (lastIndex < baseText.length) {
-    finalParts.push({ 
-        text: baseText.substring(lastIndex), 
-        color: null 
+    // 通常のバフ効果を追加（色付き）
+    normalEffects.forEach(effect => {
+        finalParts.push(effect);
     });
-}
 
-// 通常のバフ効果を追加（色付き）
-normalEffects.forEach(effect => {
-    finalParts.push(effect);
-});
+    // 目標値処理
+    let targetSuffix = '';
+    if (type === 'judge') {
+        const targetType = document.querySelector('input[name="targetType"]:checked')?.value || 'none';
+        const targetValue = document.getElementById('targetValue').value.trim();
 
-// 目標値処理
-let targetSuffix = '';
-if (type === 'judge') {
-    const targetType = document.querySelector('input[name="targetType"]:checked')?.value || 'none';
-    const targetValue = document.getElementById('targetValue').value.trim();
-    
-    if (targetType === 'gte' && targetValue) {
-        targetSuffix = `>=${targetValue}`;
-    } else if (targetType === 'lte' && targetValue) {
-        targetSuffix = `=<${targetValue}`;
-    }
-}
-
-finalParts.push({ text: targetSuffix, color: null });
-finalParts.push({ text: ` ${item.name}`, color: null });
-
-// HTML化して出力
-const outputElement = document.getElementById(outputId);
-outputElement.innerHTML = finalParts
-    .map(part => {
-        if (part.color) {
-            const textColor = getContrastColor(part.color);
-            return `<span style="color: ${part.color}">${escapeHtml(part.text)}</span>`;
+        if (targetType === 'gte' && targetValue) {
+            targetSuffix = `>=${targetValue}`;
+        } else if (targetType === 'lte' && targetValue) {
+            targetSuffix = `=<${targetValue}`;
         }
-        return escapeHtml(part.text);
-    })
-    .join('');
+    }
 
-// テキスト版も保持（コピー用）
-outputElement.dataset.plainText = finalParts
-    .map(p => p.text)
-    .join('');
+    finalParts.push({ text: targetSuffix, color: null });
+    finalParts.push({ text: ` ${item.name}`, color: null });
+
+    // HTML化して出力
+    const outputElement = document.getElementById(outputId);
+    outputElement.innerHTML = finalParts
+        .map(part => {
+            if (part.color) {
+                const textColor = getContrastColor(part.color);
+                return `<span style="color: ${part.color}">${escapeHtml(part.text)}</span>`;
+            }
+            return escapeHtml(part.text);
+        })
+        .join('');
+
+    // テキスト版も保持（コピー用）
+    outputElement.dataset.plainText = finalParts
+        .map(p => p.text)
+        .join('');
 
 }
 // ========================================
@@ -2756,7 +2756,7 @@ function getAutocompleteSuggestions(input) {
     if (!input || input.length === 0) return [];
 
     const lowerInput = input.toLowerCase();
-    
+
     // 先頭一致と中間一致で分ける
     const exact = [];
     const partial = [];
@@ -2938,7 +2938,7 @@ function setupAutocompleteFields() {
 
         element.addEventListener('input', (e) => {
             console.log(`Input event on ${targetId}, value: "${e.target.value}"`);
-            
+
             if (macroState.dictionary.length === 0) {
                 console.log('Dictionary is empty');
                 hideAutocompleteDropdown();
@@ -2964,7 +2964,7 @@ function setupAutocompleteFields() {
         // キーボード操作（IME対応）
         element.addEventListener('keydown', (e) => {
             console.log(`Keydown on ${targetId}, key: "${e.key}", isOpen: ${autocompleteState.isOpen}`);
-            
+
             if (!autocompleteState.isOpen) return;
 
             const dropdown = autocompleteState.dropdownElement;
@@ -2993,7 +2993,7 @@ function setupAutocompleteFields() {
         // 矢印キーはkeyupで処理（IME干渉を回避）
         element.addEventListener('keyup', (e) => {
             console.log(`Keyup on ${targetId}, key: "${e.key}", isOpen: ${autocompleteState.isOpen}`);
-            
+
             if (!autocompleteState.isOpen) return;
 
             const dropdown = autocompleteState.dropdownElement;
@@ -3109,12 +3109,12 @@ function copyToClipboard(elementId, button) {
     const element = document.getElementById(elementId);
     // HTMLではなくdata属性のプレーンテキストをコピー
     const text = element.dataset.plainText || element.textContent;
-    
+
     if (!text || text.includes('選択') || text.includes('を選択')) {
         showToast('ラベルを選択してください', 'error');
         return;
     }
-    
+
     navigator.clipboard.writeText(text).then(() => {
         button.textContent = 'コピー済み!';
         button.classList.add('button--copied');
@@ -3168,7 +3168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         textId: 'bulkAddText',
         type: 'buff'
     });
-    
+
     document.getElementById('addJudgeBtn')?.addEventListener('click', addJudge);
     document.getElementById('addJudgeCategoryBtn')?.addEventListener('click', () => addCategory('judge', 'judgeCategoryInput'));
     document.getElementById('judgeItemIndex')?.addEventListener('change', (e) => handleCategoryIndexChange('judge', e));
@@ -3176,7 +3176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         radio.addEventListener('change', () => updatePackageOutput('judge'));
     });
     document.getElementById('targetValue')?.addEventListener('input', () => updatePackageOutput('judge'));
-    
+
     const judgeModal = document.getElementById('judgeaddmodal');
     if (judgeModal) {
         judgeModal.addEventListener('close', () => {
@@ -3191,11 +3191,11 @@ document.addEventListener('DOMContentLoaded', () => {
         textId: 'bulkAddJudgeText',
         type: 'judge'
     });
-    
+
     document.getElementById('addAttackBtn')?.addEventListener('click', addAttack);
     document.getElementById('addAttackCategoryBtn')?.addEventListener('click', () => addCategory('attack', 'attackCategoryInput'));
     document.getElementById('attackItemIndex')?.addEventListener('change', (e) => handleCategoryIndexChange('attack', e));
-    
+
     const attackModal = document.getElementById('attackaddmodal');
     if (attackModal) {
         attackModal.addEventListener('close', () => {
@@ -3218,21 +3218,21 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userMacroClose')?.addEventListener('click', () => {
         document.getElementById('userMacroModal')?.close();
     });
-    
-    
+
+
     document.querySelectorAll('.button--copy').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const targetId = this.getAttribute('data-target');
             if (targetId) copyToClipboard(targetId, this);
         });
     });
-    
+
     loadUserDictionary();           // 辞書を先にロード
     setupUserDictionaryModal();     // UI初期化
     renderMacroDictionary();        // 表示
     setupAutocompleteFields();      // 辞書ロード後にオートコンプリート初期化
     setupAutocompleteClickOutside();
-    
+
     initMultiSelect();
     initFileDropZone();
     loadUIState();

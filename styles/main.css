@@ -1208,8 +1208,6 @@ dialog .modal__body {
     color: var(--color-foreground) !important;
     opacity: 30% !important;
     background: none !important;
-    outline: 2px solid var(--color-f-green);
-    cursor: grabbing;
 }
 
 .list__item--drag-over-top::before {
