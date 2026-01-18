@@ -1,13 +1,7 @@
 // ========================================
 // アプリケーション状態
 // ========================================
-const state = {
-    buffs: [],
-    judges: [],
-    attacks: [],
-    buffCategories: [],
-    judgeCategories: [],
-    attackCategories: [],
+const uiState = {
     draggedIndex: null,
     draggedType: null,
     draggedCategory: null,
@@ -18,7 +12,8 @@ const state = {
         active: false,
         type: null,
         index: null
-    }
+    },
+    macroEditingId: null
 };
 
 let store = null;
@@ -30,11 +25,14 @@ const TYPE_CONFIG = {
 };
 
 function getCollection(type) {
-    if (type === 'macro') return macroState.dictionary;
+    if (type === 'macro') {
+        return store?.getState().userDictionary || [];
+    }
     const config = TYPE_CONFIG[type];
     if (!config) return null;
-    return state[config.collection];
-    return null;
+    const data = store?.getState();
+    if (!data) return null;
+    return data[config.collection];
 }
 
 // ========================================
@@ -229,7 +227,8 @@ function setupSettingsMenu() {
 function getCategories(type) {
     if (type === 'macro') {
         const categories = [];
-        macroState.dictionary.forEach(item => {
+        const dictionary = store?.getState().userDictionary || [];
+        dictionary.forEach(item => {
             const name = item.category ? item.category.trim() : '';
             if (name && !categories.includes(name)) {
                 categories.push(name);
@@ -239,7 +238,9 @@ function getCategories(type) {
     }
     const config = TYPE_CONFIG[type];
     if (!config) return null;
-    return state[config.categories];
+    const data = store?.getState();
+    if (!data) return null;
+    return data[config.categories];
 }
 
 // ========================================
@@ -291,7 +292,7 @@ function getSecondaryBuffColor() {
     return getThemeColorValue('--color-orange', '#FFB86C');
 }
 
-store = JetPaletteEngine.createStore(state, {
+store = JetPaletteEngine.createStore({}, {
     validateColor,
     getDefaultBuffColor
 });
@@ -451,15 +452,7 @@ function loadData() {
     try {
         const saved = localStorage.getItem('trpgData');
         if (saved) {
-            const data = JSON.parse(saved);
-            store.setState({
-                buffs: Array.isArray(data.buffs) ? data.buffs : getDefaultBuffs(),
-                buffCategories: Array.isArray(data.buffCategories) ? data.buffCategories : [],
-                judges: Array.isArray(data.judges) ? data.judges : getDefaultJudges(),
-                judgeCategories: Array.isArray(data.judgeCategories) ? data.judgeCategories : [],
-                attacks: Array.isArray(data.attacks) ? data.attacks : getDefaultAttacks(),
-                attackCategories: Array.isArray(data.attackCategories) ? data.attackCategories : []
-            });
+            store.importData(saved);
         } else {
             store.setState({
                 buffs: getDefaultBuffs(),
@@ -516,18 +509,8 @@ function getDefaultAttacks() {
 }
 
 function saveData() {
-    const data = store.getState();
-    const payload = {
-        buffs: data.buffs,
-        buffCategories: data.buffCategories,
-        judges: data.judges,
-        judgeCategories: data.judgeCategories,
-        attacks: data.attacks,
-        attackCategories: data.attackCategories
-    };
-
     try {
-        const json = JSON.stringify(payload);
+        const json = store.exportData();
 
         // 5MB制限チェック
         if (json.length > 5 * 1024 * 1024) {
@@ -564,7 +547,6 @@ function resetAll() {
 }
 
 function exportData() {
-    store.setState({ userDictionary: macroState.dictionary });
     const json = store.exportData();
 
     navigator.clipboard.writeText(json).then(() => {
@@ -583,7 +565,9 @@ function importData() {
 
     try {
         const data = store.importData(text);
-        macroState.dictionary = data.userDictionary || macroState.dictionary || [];
+        if (Array.isArray(data.userDictionary)) {
+            saveUserDictionary();
+        }
 
         updateBuffCategorySelect();
         updateJudgeCategorySelect();
@@ -754,14 +738,14 @@ function replaceBuffTargetsForCategory(type, from, to) {
     const fromKey = prefix + from;
     const toKey = to ? prefix + to : null;
 
-    state.buffs.forEach(buff => {
+    store.getState().buffs.forEach(buff => {
         buff.targets = buff.targets
             .map(target => target === fromKey ? toKey : target)
             .filter(Boolean);
     });
 
-    if (Array.isArray(state.selectedBuffTargets)) {
-        state.selectedBuffTargets = state.selectedBuffTargets
+    if (Array.isArray(uiState.selectedBuffTargets)) {
+        uiState.selectedBuffTargets = uiState.selectedBuffTargets
             .map(target => target === fromKey ? toKey : target)
             .filter(Boolean);
     }
@@ -1012,7 +996,8 @@ function updateCategorySelect(type) {
     const select = document.getElementById(config.selectId);
     if (!select) return;
 
-    select.innerHTML = buildCategorySelectOptions(state[config.categories]);
+    const data = store.getState();
+    select.innerHTML = buildCategorySelectOptions(data[config.categories]);
 }
 
 function updateBuffCategorySelect() {
@@ -1032,11 +1017,6 @@ function updateAttackCategorySelect() {
 // ユーザー辞書管理
 // ========================================
 
-const macroState = {
-    dictionary: [],
-    editingId: null
-};
-
 /**
  * ユーザー辞書をロード
  */
@@ -1044,13 +1024,13 @@ function loadUserDictionary() {
     try {
         const saved = localStorage.getItem('userDictionary');
         if (saved) {
-            macroState.dictionary = JSON.parse(saved);
+            store.setState({ userDictionary: JSON.parse(saved) });
         } else {
-            macroState.dictionary = [];
+            store.setState({ userDictionary: [] });
         }
     } catch (e) {
         console.error('ユーザー辞書の読み込みに失敗:', e);
-        macroState.dictionary = [];
+        store.setState({ userDictionary: [] });
     }
 }
 
@@ -1059,7 +1039,7 @@ function loadUserDictionary() {
  */
 function saveUserDictionary() {
     try {
-        const json = JSON.stringify(macroState.dictionary);
+        const json = JSON.stringify(store.getState().userDictionary);
         if (json.length > 5 * 1024 * 1024) {
             showToast('辞書データが大きすぎて保存できません', 'error');
             return false;
@@ -1081,6 +1061,7 @@ function addOrUpdateMacro() {
     const categoryInput = document.getElementById('macroCategory');
     const text = textInput.value.trim();
     const category = categoryInput.value.trim();
+    const dictionary = store.getState().userDictionary;
 
     if (!text) {
         showToast('文字列を入力してください', 'error');
@@ -1093,8 +1074,8 @@ function addOrUpdateMacro() {
     }
 
     // 重複チェック（編集時以外）
-    const isDuplicate = macroState.dictionary.some(item =>
-        item.text === text && item.id !== macroState.editingId
+    const isDuplicate = dictionary.some(item =>
+        item.text === text && item.id !== uiState.macroEditingId
     );
 
     if (isDuplicate) {
@@ -1102,16 +1083,14 @@ function addOrUpdateMacro() {
         return;
     }
 
-    if (macroState.editingId) {
-        // 編集モード：`localStorage`から最新データを読み込み直してから更新
-        loadUserDictionary();
-        const index = macroState.dictionary.findIndex(item => item.id === macroState.editingId);
-        if (index !== -1) {
-            macroState.dictionary[index].text = text;
-            macroState.dictionary[index].category = category;
-            saveUserDictionary();
-            showToast('辞書項目を更新しました', 'success');
-        }
+    if (uiState.macroEditingId) {
+        const nextDictionary = dictionary.map(item => {
+            if (item.id !== uiState.macroEditingId) return item;
+            return { ...item, text, category };
+        });
+        store.setState({ userDictionary: nextDictionary });
+        saveUserDictionary();
+        showToast('辞書項目を更新しました', 'success');
         cancelMacroEdit();
     } else {
         // 追加モード：新規アイテムを作成
@@ -1121,7 +1100,7 @@ function addOrUpdateMacro() {
             category: category,
             usage: 0
         };
-        macroState.dictionary.push(newItem);
+        store.setState({ userDictionary: [...dictionary, newItem] });
         showToast('辞書に登録しました', 'success');
     }
 
@@ -1135,10 +1114,10 @@ function addOrUpdateMacro() {
  * ユーザー辞書の編集を開始
  */
 function startMacroEdit(id) {
-    const item = macroState.dictionary.find(m => m.id === id);
+    const item = store.getState().userDictionary.find(m => m.id === id);
     if (!item) return;
 
-    macroState.editingId = id;
+    uiState.macroEditingId = id;
     document.getElementById('macroText').value = item.text;
     document.getElementById('macroCategory').value = item.category;
 
@@ -1148,10 +1127,6 @@ function startMacroEdit(id) {
     addBtn.textContent = '更新';
     cancelBtn.style.display = 'flex';
 
-    // 一時削除
-    macroState.dictionary = macroState.dictionary.filter(m => m.id !== id);
-    renderMacroDictionary();
-
     document.getElementById('macroText').focus();
 }
 
@@ -1159,19 +1134,9 @@ function startMacroEdit(id) {
  * ユーザー辞書の編集をキャンセル
  */
 function cancelMacroEdit() {
-    if (!macroState.editingId) return;
+    if (!uiState.macroEditingId) return;
 
-    // 削除されたアイテムを復帰させるため、localStorageから再ロード
-    const saved = localStorage.getItem('userDictionary');
-    if (saved) {
-        try {
-            macroState.dictionary = JSON.parse(saved);
-        } catch (e) {
-            console.error('辞書の復帰に失敗:', e);
-        }
-    }
-
-    macroState.editingId = null;
+    uiState.macroEditingId = null;
     document.getElementById('macroText').value = '';
     document.getElementById('macroCategory').value = '';
 
@@ -1187,14 +1152,15 @@ function cancelMacroEdit() {
  * ユーザー辞書から削除
  */
 function deleteMacro(id) {
-    const item = macroState.dictionary.find(m => m.id === id);
+    const dictionary = store.getState().userDictionary;
+    const item = dictionary.find(m => m.id === id);
     if (!item) return;
 
     if (!confirm(`「${escapeHtml(item.text)}」を削除しますか？`)) {
         return;
     }
 
-    macroState.dictionary = macroState.dictionary.filter(m => m.id !== id);
+    store.setState({ userDictionary: dictionary.filter(m => m.id !== id) });
     saveUserDictionary();
     renderMacroDictionary();
     showToast('辞書項目を削除しました', 'success');
@@ -1228,8 +1194,9 @@ function attachMacroEvents() {
 
 function renderMacroDictionary() {
     const listContainer = document.getElementById('macroDictionaryList');
+    const dictionary = store.getState().userDictionary;
 
-    if (macroState.dictionary.length === 0) {
+    if (dictionary.length === 0) {
         listContainer.innerHTML = '<div class="list__empty">辞書が登録されていません</div>';
         updateCategoryIndexDropdown('macro');
         return;
@@ -1276,7 +1243,7 @@ function renderMacroDictionary() {
  * ユーザー辞書をエクスポート
  */
 function exportUserDictionary() {
-    const json = JSON.stringify(macroState.dictionary, null, 2);
+    const json = JSON.stringify(store.getState().userDictionary, null, 2);
     navigator.clipboard.writeText(json).then(() => {
         showToast('ユーザー辞書をクリップボードにコピーしました', 'success');
     }).catch(() => {
@@ -1313,7 +1280,7 @@ function importUserDictionary() {
             }
         });
 
-        macroState.dictionary = data;
+        store.setState({ userDictionary: data });
         saveUserDictionary();
         document.getElementById('macroImportText').value = '';
         renderMacroDictionary();
@@ -1344,8 +1311,10 @@ function resetDictionary() {
     }
 
     try {
+        store.setState({ userDictionary: [] });
         localStorage.removeItem('userDictionary');
-        location.reload();
+        renderMacroDictionary();
+        showToast('ユーザー辞書を初期化しました', 'success');
     } catch (e) {
         showToast('初期化に失敗しました', 'error');
     }
@@ -1371,7 +1340,7 @@ function setupUserDictionaryModal() {
 
     // キャンセルボタンのEscキー対応
     document.getElementById('macroCategory')?.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && macroState.editingId) {
+        if (e.key === 'Escape' && uiState.macroEditingId) {
             cancelMacroEdit();
         }
     });
@@ -1386,7 +1355,7 @@ function initMultiSelect() {
     if (!select) return;
 
     select.addEventListener('change', () => {
-        state.selectedBuffTargets = Array.from(select.selectedOptions).map(opt => opt.value);
+        uiState.selectedBuffTargets = Array.from(select.selectedOptions).map(opt => opt.value);
     });
 }
 
@@ -1398,8 +1367,8 @@ function updateBuffTargetDropdown() {
     let html = '<option disabled>複数選択可</option>';
 
     // 状態に保持している選択値を使用
-    const currentValues = Array.isArray(state.selectedBuffTargets)
-        ? [...state.selectedBuffTargets]
+    const currentValues = Array.isArray(uiState.selectedBuffTargets)
+        ? [...uiState.selectedBuffTargets]
         : [];
 
     // その他カテゴリ
@@ -1409,16 +1378,17 @@ function updateBuffTargetDropdown() {
     html += `</optgroup>`;
 
     // 判定カテゴリ
-    if (state.judges.length > 0) {
+    const data = store.getState();
+    if (data.judges.length > 0) {
         html += `<optgroup label="---判定---">`;
-        if (state.judgeCategories.length > 0) {
-            state.judgeCategories.forEach(name => {
+        if (data.judgeCategories.length > 0) {
+            data.judgeCategories.forEach(name => {
                 const value = `judge-category:${name}`;
                 html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>&gt;&gt;${escapeHtml(name)}</option>`;
             });
         }
 
-        state.judges.forEach(j => {
+        data.judges.forEach(j => {
             const value = 'judge:' + j.name;
             html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(j.name)}</option>`;
         });
@@ -1427,15 +1397,15 @@ function updateBuffTargetDropdown() {
     }
 
     // 攻撃カテゴリ
-    if (state.attacks.length > 0) {
+    if (data.attacks.length > 0) {
         html += `<optgroup label="---攻撃---">`;
-        if (state.attackCategories.length > 0) {
-            state.attackCategories.forEach(name => {
+        if (data.attackCategories.length > 0) {
+            data.attackCategories.forEach(name => {
                 const value = `attack-category:${name}`;
                 html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>&gt;&gt;${escapeHtml(name)}</option>`;
             });
         }
-        state.attacks.forEach(a => {
+        data.attacks.forEach(a => {
             const value = 'attack:' + a.name;
             html += `<option value="${escapeHtml(value)}" ${currentValues.includes(value) ? 'selected' : ''}>${escapeHtml(a.name)}</option>`;
         });
@@ -1485,12 +1455,12 @@ function openBuffModal(editIndex = null) {
 
     if (editIndex !== null) {
         // 編集モード
-        state.editMode = { active: true, type: 'buff', index: editIndex };
+        uiState.editMode = { active: true, type: 'buff', index: editIndex };
         modalTitle.textContent = 'バフ編集';
         addBtn.textContent = '更新';
         bulkAddSection.style.display = 'none';
 
-        const buff = state.buffs[editIndex];
+        const buff = store.getState().buffs[editIndex];
         updateBuffCategorySelect();
         document.getElementById('buffName').value = buff.name;
         document.getElementById('buffEffect').value = buff.effect || '';
@@ -1501,11 +1471,11 @@ function openBuffModal(editIndex = null) {
         document.getElementById('buffSimpleMemoToggle').checked = buff.showSimpleMemo ?? Boolean(buff.description);
 
         // 効果先の選択状態を復元
-        state.selectedBuffTargets = [...buff.targets];
+        uiState.selectedBuffTargets = [...buff.targets];
         updateBuffTargetDropdown();
     } else {
         // 追加モード
-        state.editMode = { active: false, type: null, index: null };
+        uiState.editMode = { active: false, type: null, index: null };
         modalTitle.textContent = 'バフ追加';
         addBtn.textContent = '追加';
         bulkAddSection.style.display = 'block';
@@ -1523,7 +1493,7 @@ function resetBuffForm() {
     document.getElementById('buffCategorySelect').value = 'none';
     document.getElementById('buffMemo').value = '';
     document.getElementById('buffSimpleMemoToggle').checked = false;
-    state.selectedBuffTargets = [];
+    uiState.selectedBuffTargets = [];
 
     const buffTargetSelect = document.getElementById('buffTargetSelect');
     if (buffTargetSelect) {
@@ -1542,7 +1512,7 @@ function insertText(text) {
 function addBuff() {
     const name = document.getElementById('buffName').value.trim();
     const effect = document.getElementById('buffEffect').value.trim();
-    const targets = [...state.selectedBuffTargets];
+    const targets = [...uiState.selectedBuffTargets];
     const turn = document.getElementById('buffTurn').value.trim();
     const color = validateColor(document.getElementById('buffColor').value);
     const categorySelect = document.getElementById('buffCategorySelect');
@@ -1559,11 +1529,12 @@ function addBuff() {
         targets.push('none');
     }
 
-    if (state.editMode.active && state.editMode.type === 'buff') {
+    if (uiState.editMode.active && uiState.editMode.type === 'buff') {
         // 編集モード
-        const index = state.editMode.index;
-        const oldTurn = state.buffs[index].turn;
-        const oldOriginalTurn = state.buffs[index].originalTurn;
+        const index = uiState.editMode.index;
+        const currentBuff = store.getState().buffs[index];
+        const oldTurn = currentBuff.turn;
+        const oldOriginalTurn = currentBuff.originalTurn;
 
         store.updateItem('buff', index, {
             name: name,
@@ -1575,7 +1546,7 @@ function addBuff() {
             category: category,
             memo: memo,
             showSimpleMemo,
-            active: state.buffs[index].active
+            active: currentBuff.active
         });
 
         showToast('バフを更新しました', 'success');
@@ -1704,12 +1675,15 @@ function setupBulkAddControls({ toggleId, confirmId, cancelId, areaId, textId, t
 }
 
 function toggleBuff(index) {
-    if (index < 0 || index >= state.buffs.length) return;
+    const data = store.getState();
+    if (index < 0 || index >= data.buffs.length) return;
 
-    state.buffs[index].active = !state.buffs[index].active;
-    if (state.buffs[index].active && state.buffs[index].turn === 0) {
-        state.buffs[index].turn = state.buffs[index].originalTurn;
-    }
+    const buff = data.buffs[index];
+    const nextActive = !buff.active;
+    store.updateItem('buff', index, {
+        active: nextActive,
+        turn: nextActive && buff.turn === 0 ? buff.originalTurn : buff.turn
+    });
     renderBuffs();
     updatePackageOutput('judge');
     updatePackageOutput('attack');
@@ -1717,7 +1691,7 @@ function toggleBuff(index) {
 }
 
 function removeBuff(index) {
-    if (index < 0 || index >= state.buffs.length) return;
+    if (index < 0 || index >= store.getState().buffs.length) return;
 
     store.removeItem('buff', index);
     renderBuffs();
@@ -1729,10 +1703,12 @@ function removeBuff(index) {
 function resetBuffsToMaxTurns() {
     let changed = false;
 
-    state.buffs.forEach(buff => {
+    store.getState().buffs.forEach((buff, index) => {
         if (typeof buff.originalTurn === 'number') {
-            buff.turn = buff.originalTurn;
-            buff.active = true;
+            store.updateItem('buff', index, {
+                turn: buff.originalTurn,
+                active: true
+            });
             changed = true;
         }
     });
@@ -1750,13 +1726,15 @@ function resetBuffsToMaxTurns() {
 
 function progressTurn() {
     let changed = false;
-    state.buffs.forEach(buff => {
+    store.getState().buffs.forEach((buff, index) => {
         if (buff.active && buff.turn && buff.turn > 0) {
-            buff.turn--;
+            const nextTurn = buff.turn - 1;
+            const nextActive = nextTurn !== 0;
+            store.updateItem('buff', index, {
+                turn: nextTurn,
+                active: nextActive
+            });
             changed = true;
-            if (buff.turn === 0) {
-                buff.active = false;
-            }
         }
     });
 
@@ -1777,7 +1755,8 @@ function renderBuffs() {
     if (!list) return;
 
     const categoryMap = buildCategoryMap('buff');
-    const hasContent = (state.buffs.length + state.buffCategories.length) > 0;
+    const data = store.getState();
+    const hasContent = (data.buffs.length + data.buffCategories.length) > 0;
 
     if (!hasContent) {
         list.innerHTML = '<div class="list__empty">バフを追加してください</div>';
@@ -1798,7 +1777,7 @@ function renderBuffs() {
         </details>
     `);
 
-    state.buffCategories.forEach(name => {
+    data.buffCategories.forEach(name => {
         sections.push(`
             <details class="list__category" open data-category="${escapeHtml(name)}">
                 <summary class="list__category-header" data-category="${escapeHtml(name)}" draggable="true">
@@ -1861,13 +1840,13 @@ function attachBuffEvents() {
 // ========================================
 
 function handleDragStart(e, index, type) {
-    state.draggedIndex = index;
-    state.draggedType = type;
-    state.draggedCategory = null;
+    uiState.draggedIndex = index;
+    uiState.draggedType = type;
+    uiState.draggedCategory = null;
 
     if (type === 'buff') {
-        const buff = state.buffs[index];
-        state.draggedCategory = buff ? (buff.category || 'none') : null;
+        const buff = store.getState().buffs[index];
+        uiState.draggedCategory = buff ? (buff.category || 'none') : null;
     }
 
     e.target.classList.add('list__item--dragging');
@@ -1898,14 +1877,14 @@ function handleDrop(e, targetIndex, type) {
     e.preventDefault();
     e.currentTarget.classList.remove('list__item--drag-over-top', 'list__item--drag-over-bottom');
 
-    if (state.draggedIndex === null || state.draggedType !== type || state.draggedIndex === targetIndex) {
+    if (uiState.draggedIndex === null || uiState.draggedType !== type || uiState.draggedIndex === targetIndex) {
         return;
     }
 
     const arr = getCollection(type);
     if (!arr) return;
 
-    const draggedItem = arr[state.draggedIndex];
+    const draggedItem = arr[uiState.draggedIndex];
     if (!draggedItem) return;
 
     let targetCategory = null;
@@ -1927,12 +1906,12 @@ function handleDrop(e, targetIndex, type) {
             insertIndex = targetIndex + 1;
         }
 
-        if (state.draggedIndex < insertIndex) {
+        if (uiState.draggedIndex < insertIndex) {
             insertIndex--;
         }
     }
 
-    const item = arr.splice(state.draggedIndex, 1)[0];
+    const item = arr.splice(uiState.draggedIndex, 1)[0];
     if (targetCategory !== null || type === 'buff') {
         item.category = targetCategory;
     }
@@ -1951,8 +1930,8 @@ function handleCategoryHeaderDragStart(e, type) {
     const categoryName = e.currentTarget.getAttribute('data-category');
     if (!categoryName || categoryName === 'none') return;
 
-    state.draggedCategoryType = type;
-    state.draggedCategoryName = categoryName;
+    uiState.draggedCategoryType = type;
+    uiState.draggedCategoryName = categoryName;
 
     e.dataTransfer.effectAllowed = 'move';
     e.currentTarget.classList.add('list__category-header--dragging');
@@ -1963,13 +1942,13 @@ function handleCategoryHeaderDragEnd(e) {
         .forEach(header => header.classList.remove('list__category-header--dragging'));
     document.querySelectorAll('.list__category-header--drag-over')
         .forEach(header => header.classList.remove('list__category-header--drag-over'));
-    state.draggedCategoryType = null;
-    state.draggedCategoryName = null;
+    uiState.draggedCategoryType = null;
+    uiState.draggedCategoryName = null;
 }
 
 function handleCategoryDragOver(e, type) {
-    const isItemDrag = state.draggedType === type;
-    const isCategoryDrag = state.draggedCategoryType === type;
+    const isItemDrag = uiState.draggedType === type;
+    const isCategoryDrag = uiState.draggedCategoryType === type;
     if (!isItemDrag && !isCategoryDrag) return;
 
     e.preventDefault();
@@ -1985,7 +1964,7 @@ function reorderCategory(type, targetCategory, dropAfter) {
     const categories = getCategories(type);
     if (!categories) return false;
 
-    const from = categories.indexOf(state.draggedCategoryName);
+    const from = categories.indexOf(uiState.draggedCategoryName);
     const to = categories.indexOf(targetCategory);
 
     if (from === -1 || to === -1 || from === to) return false;
@@ -2006,7 +1985,7 @@ function handleCategoryDrop(e, type) {
 
     const categoryKey = e.currentTarget.getAttribute('data-category') || 'none';
 
-    const isCategoryDrag = state.draggedCategoryType === type && state.draggedCategoryName;
+    const isCategoryDrag = uiState.draggedCategoryType === type && uiState.draggedCategoryName;
     if (isCategoryDrag) {
         if (categoryKey !== 'none') {
             const rect = e.currentTarget.getBoundingClientRect();
@@ -2024,7 +2003,7 @@ function handleCategoryDrop(e, type) {
         return;
     }
 
-    if (state.draggedType !== type || state.draggedIndex === null) {
+    if (uiState.draggedType !== type || uiState.draggedIndex === null) {
         e.currentTarget.classList.remove('list__category-header--drag-over');
         return;
     }
@@ -2032,7 +2011,7 @@ function handleCategoryDrop(e, type) {
     const targetCategory = categoryKey === 'none' ? null : categoryKey;
 
     const collection = getCollection(type);
-    const item = collection ? collection[state.draggedIndex] : null;
+    const item = collection ? collection[uiState.draggedIndex] : null;
 
     if (!collection || !item) {
         e.currentTarget.classList.remove('list__category-header--drag-over');
@@ -2050,16 +2029,16 @@ function handleCategoryDrop(e, type) {
         saveData();
     }
 
-    state.draggedIndex = null;
-    state.draggedType = null;
-    state.draggedCategory = null;
-    state.draggedCategoryType = null;
-    state.draggedCategoryName = null;
+    uiState.draggedIndex = null;
+    uiState.draggedType = null;
+    uiState.draggedCategory = null;
+    uiState.draggedCategoryType = null;
+    uiState.draggedCategoryName = null;
     e.currentTarget.classList.remove('list__category-header--drag-over');
 }
 
 function handleCategoryBodyDragOver(e, type) {
-    if (state.draggedType !== type) return;
+    if (uiState.draggedType !== type) return;
 
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -2071,7 +2050,7 @@ function handleCategoryBodyDragLeave(e) {
 }
 
 function handleCategoryBodyDrop(e, type) {
-    if (state.draggedType !== type || state.draggedIndex === null) return;
+    if (uiState.draggedType !== type || uiState.draggedIndex === null) return;
 
     e.preventDefault();
     e.stopPropagation();
@@ -2080,12 +2059,12 @@ function handleCategoryBodyDrop(e, type) {
     const targetCategory = categoryKey === 'none' ? null : categoryKey;
     const collection = getCollection(type);
 
-    if (!collection || state.draggedIndex < 0 || state.draggedIndex >= collection.length) {
+    if (!collection || uiState.draggedIndex < 0 || uiState.draggedIndex >= collection.length) {
         e.currentTarget.classList.remove('list__category-body--drag-over');
         return;
     }
 
-    const item = collection.splice(state.draggedIndex, 1)[0];
+    const item = collection.splice(uiState.draggedIndex, 1)[0];
     item.category = targetCategory;
 
     const insertIndex = getCategoryInsertIndex(type, targetCategory);
@@ -2096,9 +2075,9 @@ function handleCategoryBodyDrop(e, type) {
     updatePackageOutput('attack');
     saveData();
 
-    state.draggedIndex = null;
-    state.draggedType = null;
-    state.draggedCategory = null;
+    uiState.draggedIndex = null;
+    uiState.draggedType = null;
+    uiState.draggedCategory = null;
     e.currentTarget.classList.remove('list__category-body--drag-over');
 }
 
@@ -2110,11 +2089,11 @@ function handleDragEnd(e) {
         .forEach(body => body.classList.remove('list__category-body--drag-over'));
     document.querySelectorAll('.list__category-header--dragging')
         .forEach(header => header.classList.remove('list__category-header--dragging'));
-    state.draggedIndex = null;
-    state.draggedType = null;
-    state.draggedCategory = null;
-    state.draggedCategoryType = null;
-    state.draggedCategoryName = null;
+    uiState.draggedIndex = null;
+    uiState.draggedType = null;
+    uiState.draggedCategory = null;
+    uiState.draggedCategoryType = null;
+    uiState.draggedCategoryName = null;
 }
 
 // ========================================
@@ -2131,12 +2110,12 @@ function openJudgeModal(editIndex = null) {
 
     if (editIndex !== null) {
         // 編集モード
-        state.editMode = { active: true, type: 'judge', index: editIndex };
+        uiState.editMode = { active: true, type: 'judge', index: editIndex };
         modalTitle.textContent = '判定ラベル編集';
         addBtn.textContent = '更新';
         bulkAddSection.style.display = 'none';
 
-        const judge = state.judges[editIndex];
+        const judge = store.getState().judges[editIndex];
         document.getElementById('judgeName').value = judge.name;
         document.getElementById('judgeRoll').value = judge.roll;
 
@@ -2146,7 +2125,7 @@ function openJudgeModal(editIndex = null) {
         }
     } else {
         // 追加モード
-        state.editMode = { active: false, type: null, index: null };
+        uiState.editMode = { active: false, type: null, index: null };
         modalTitle.textContent = '判定ラベル追加';
         addBtn.textContent = '追加';
         bulkAddSection.style.display = 'block';
@@ -2175,12 +2154,12 @@ function openAttackModal(editIndex = null) {
 
     if (editIndex !== null) {
         // 編集モード
-        state.editMode = { active: true, type: 'attack', index: editIndex };
+        uiState.editMode = { active: true, type: 'attack', index: editIndex };
         modalTitle.textContent = '攻撃ラベル編集';
         addBtn.textContent = '更新';
         bulkAddSection.style.display = 'none';
 
-        const attack = state.attacks[editIndex];
+        const attack = store.getState().attacks[editIndex];
         document.getElementById('attackName').value = attack.name;
         document.getElementById('attackRoll').value = attack.roll;
 
@@ -2190,7 +2169,7 @@ function openAttackModal(editIndex = null) {
         }
     } else {
         // 追加モード
-        state.editMode = { active: false, type: null, index: null };
+        uiState.editMode = { active: false, type: null, index: null };
         modalTitle.textContent = '攻撃ラベル追加';
         addBtn.textContent = '追加';
         bulkAddSection.style.display = 'block';
@@ -2220,9 +2199,9 @@ function addJudge() {
         return;
     }
 
-    if (state.editMode.active && state.editMode.type === 'judge') {
+    if (uiState.editMode.active && uiState.editMode.type === 'judge') {
         // 編集モード
-        const index = state.editMode.index;
+        const index = uiState.editMode.index;
         store.updateItem('judge', index, { name: name, roll: roll, category });
         showToast('判定を更新しました', 'success');
     } else {
@@ -2239,7 +2218,7 @@ function addJudge() {
 }
 
 function removeJudge(index) {
-    if (index < 0 || index >= state.judges.length) return;
+    if (index < 0 || index >= store.getState().judges.length) return;
 
     store.removeItem('judge', index);
     renderPackage('judge');
@@ -2259,9 +2238,9 @@ function addAttack() {
         return;
     }
 
-    if (state.editMode.active && state.editMode.type === 'attack') {
+    if (uiState.editMode.active && uiState.editMode.type === 'attack') {
         // 編集モード
-        const index = state.editMode.index;
+        const index = uiState.editMode.index;
         store.updateItem('attack', index, { name: name, roll: roll, category });
         showToast('攻撃を更新しました', 'success');
     } else {
@@ -2278,7 +2257,7 @@ function addAttack() {
 }
 
 function removeAttack(index) {
-    if (index < 0 || index >= state.attacks.length) return;
+    if (index < 0 || index >= store.getState().attacks.length) return;
 
     store.removeItem('attack', index);
     renderPackage('attack');
@@ -2512,7 +2491,7 @@ function getAutocompleteSuggestions(input) {
     const exact = [];
     const partial = [];
 
-    macroState.dictionary.forEach(item => {
+    store.getState().userDictionary.forEach(item => {
         const lowerText = item.text.toLowerCase();
         if (lowerText.startsWith(lowerInput)) {
             exact.push(item);
@@ -2690,7 +2669,7 @@ function setupAutocompleteFields() {
         element.addEventListener('input', (e) => {
             console.log(`Input event on ${targetId}, value: "${e.target.value}"`);
 
-            if (macroState.dictionary.length === 0) {
+            if (store.getState().userDictionary.length === 0) {
                 console.log('Dictionary is empty');
                 hideAutocompleteDropdown();
                 return;
@@ -2908,7 +2887,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (buffModal) {
         buffModal.addEventListener('close', () => {
             resetBuffForm();
-            state.editMode = { active: false, type: null, index: null };
+            uiState.editMode = { active: false, type: null, index: null };
         });
     }
 
@@ -2932,7 +2911,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (judgeModal) {
         judgeModal.addEventListener('close', () => {
             resetJudgeForm();
-            state.editMode = { active: false, type: null, index: null };
+            uiState.editMode = { active: false, type: null, index: null };
         });
     }
 
@@ -2951,7 +2930,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (attackModal) {
         attackModal.addEventListener('close', () => {
             resetAttackForm();
-            state.editMode = { active: false, type: null, index: null };
+            uiState.editMode = { active: false, type: null, index: null };
         });
     }
 
