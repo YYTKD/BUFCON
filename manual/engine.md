@@ -41,6 +41,7 @@ type Buff = {
   color: string;
   category?: string | null;
   memo?: string;
+  description?: string; // memo が未指定の場合は description を使用
   showSimpleMemo?: boolean;
   active?: boolean;
 };
@@ -72,6 +73,7 @@ type EngineData = {
 | --- | --- | --- | --- |
 | `JetPaletteEngine.createStore(initial?, options?)` | エンジン状態の生成 | 初期データ / オプション | `store` |
 | `JetPaletteEngine.normalizeBuffs(buffs)` | バフ配列の正規化 | `Buff[]` | `Buff[]` |
+| `JetPaletteEngine.convertYstToJetPalette(input)` | 変換（ゆとシート → JET-PALLET） | 文字列 or オブジェクト | `EngineData` |
 
 #### `createStore` オプション
 | オプション | 役割 | 既定値 |
@@ -133,8 +135,10 @@ type EngineData = {
     targetValue: '12'
   });
 
-  console.log(command.text);
-  // => "1d20+2>=12 命中(ロングソード)"
+  if (command) {
+    console.log(command.text);
+    // => "1d20+2>=12 命中(ロングソード)"
+  }
 </script>
 ```
 
@@ -142,6 +146,11 @@ type EngineData = {
 
 - ブラウザで開くだけで動く最小例を用意しています。
 - `examples/engine-minimal.html` を開き、生成結果を確認してください。
+
+### 4.3 `examples/engine-minimal-snippet.html`
+
+- コピペ向けにHTML+JSだけを抜き出した最小スニペットです。
+- ドキュメントや外部プロジェクトへ流用する場合に活用してください。
 
 ---
 
