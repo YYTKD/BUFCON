@@ -1,6 +1,6 @@
 # エンジンの使い方
 
-このドキュメントは、現在実装されているエンジンAPI（`core/engine/store.js`）の使い方をまとめたものです。
+このドキュメントは、現在実装されているエンジンAPI（`core/engine/store.js` ほか） の使い方をまとめたものです。
 JetPaletteEngine はブラウザ向けのグローバルとして提供され、`createStore` で状態ストアを生成して利用します。
 
 ---
@@ -10,18 +10,22 @@ JetPaletteEngine はブラウザ向けのグローバルとして提供され、
 ### 1.1 `<script>` で読み込む（現状の実装）
 
 ```html
+<script src="core/engine/utils.js"></script>
+<script src="core/engine/buffs.js"></script>
+<script src="core/engine/bulk.js"></script>
+<script src="core/engine/commands.js"></script>
 <script src="core/engine/store.js"></script>
 <script>
   const store = JetPaletteEngine.createStore();
 </script>
 ```
 
-> `store.js` は IIFE で `window.JetPaletteEngine` を公開します。
+> `store.js` は IIFE で `window.JetPaletteEngine` を公開します。`utils.js` などのモジュールファイルを先に読み込んでください。
 
 ### 1.2 配布形態（将来）
 
 - **ESM 単一ファイル `dist/engine.js` を公式配布物とする**想定。
-- 現状は `core/engine/store.js` を読み込んで使用します。
+- 現状は `core/engine/*.js`（`utils.js` など）を読み込んで使用します。
 
 ---
 
@@ -98,6 +102,10 @@ type EngineData = {
 ### 4.1 HTML + JS（コピペ用）
 
 ```html
+<script src="core/engine/utils.js"></script>
+<script src="core/engine/buffs.js"></script>
+<script src="core/engine/bulk.js"></script>
+<script src="core/engine/commands.js"></script>
 <script src="core/engine/store.js"></script>
 <script>
   const store = JetPaletteEngine.createStore();
