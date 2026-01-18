@@ -45,6 +45,6 @@ const engine = createEngine();
 ## 互換性ポリシーと変更方針
 
 - エンジン API は **Semantic Versioning (MAJOR.MINOR.PATCH)** を採用する。
-- 破壊的変更は **MAJOR** を更新し、README/マニュアルで事前告知する。
+- 破壊的変更は **MAJOR** を更新し、API設計.mdで事前告知する。
 - **MINOR** は後方互換の機能追加、**PATCH** は互換性を保つ修正を対象とする。
 - 既存 API の削除・仕様変更は、**非推奨の告知 → 次の MAJOR で削除** の順で進める。
