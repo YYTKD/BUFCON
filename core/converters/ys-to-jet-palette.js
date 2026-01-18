@@ -260,6 +260,11 @@ const JetPaletteConverters = (() => {
     };
   };
 
+  if (typeof window !== 'undefined') {
+    const internal = window.JetPaletteEngineInternal = window.JetPaletteEngineInternal || {};
+    internal.convertYstToJetPalette = convertYstToJetPalette;
+  }
+
   return {
     convertYstToJetPalette,
     normalizeNewlines,

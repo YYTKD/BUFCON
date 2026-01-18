@@ -2,6 +2,15 @@ const JetPaletteEngine = (() => {
     const internal = window.JetPaletteEngineInternal || {};
     const ensureArray = internal.ensureArray || ((value) => (Array.isArray(value) ? value : []));
     const normalizeBuffs = internal.normalizeBuffs || ((buffs = []) => (Array.isArray(buffs) ? buffs : []));
+    const convertYstToJetPalette = (input) => {
+        if (typeof internal.convertYstToJetPalette === 'function') {
+            return internal.convertYstToJetPalette(input);
+        }
+        if (window.JetPaletteConverters?.convertYstToJetPalette) {
+            return window.JetPaletteConverters.convertYstToJetPalette(input);
+        }
+        throw new Error('変換モジュールが読み込まれていません');
+    };
 
     const createStore = (initial = {}, options = {}) => {
         const data = initial || {};
@@ -139,6 +148,7 @@ const JetPaletteEngine = (() => {
 
     return {
         createStore,
-        normalizeBuffs
+        normalizeBuffs,
+        convertYstToJetPalette
     };
 })();
