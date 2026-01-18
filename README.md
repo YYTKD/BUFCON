@@ -4,6 +4,12 @@ TRPGオンラインセッションで発生するバフや状態を管理し、B
 
 ### [JET-PALLET（試験版）](https://yytkd.github.io/JET-PALLET/)
 
+# サンプル・ドキュメント
+
+- エンジンAPIの使い方: [manual/engine.md](manual/engine.md)
+- 最小サンプル（実行可能）: [examples/engine-minimal.html](examples/engine-minimal.html)
+- 最小スニペット（コピペ用）: [examples/engine-minimal-snippet.html](examples/engine-minimal-snippet.html)
+
 # ツールの動作について
 
 まだまだ開発途上ですので、バグが潜んでいる可能性があります。  

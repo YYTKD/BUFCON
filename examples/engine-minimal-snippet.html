@@ -1,0 +1,36 @@
+<script src="../core/engine/utils.js"></script>
+<script src="../core/engine/buffs.js"></script>
+<script src="../core/engine/bulk.js"></script>
+<script src="../core/engine/commands.js"></script>
+<script src="../core/engine/store.js"></script>
+<script>
+  const store = JetPaletteEngine.createStore();
+
+  // 1) 判定ラベルを追加
+  const judgeIndex = store.addItem('judge', {
+    name: '命中(ロングソード)',
+    roll: '1d20'
+  });
+
+  // 2) バフを追加（対象は「すべての判定」）
+  store.addItem('buff', {
+    name: 'フォーカス',
+    effect: '+2',
+    targets: ['all-judge'],
+    color: '#56ccf2',
+    memo: '判定+2',
+    showSimpleMemo: true,
+    active: true
+  });
+
+  // 3) コマンド生成
+  const command = store.generateCommands('judge', judgeIndex, {
+    targetType: 'gte',
+    targetValue: '12'
+  });
+
+  if (command) {
+    console.log(command.text);
+    // => "1d20+2>=12 命中(ロングソード)"
+  }
+</script>
