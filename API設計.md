@@ -16,10 +16,10 @@
 ```html
 <!-- index.html -->
 <script type="module">
-  import { createEngine } from "./dist/engine.js";
+  import { createStore } from "./dist/engine.js";
 
-  const engine = createEngine();
-  // engine.load(data) などの API を利用
+  const store = createStore();
+  // store.getState() / store.setState() などの API を利用
 </script>
 ```
 
@@ -28,19 +28,19 @@
 ```html
 <!-- 例: 派生アプリ側で配布物を同梱する場合 -->
 <script type="module">
-  import { createEngine } from "./vendor/jet-pallet/engine.js";
+  import { createStore } from "./vendor/jet-pallet/engine.js";
 
-  const engine = createEngine();
+  const store = createStore();
   // 派生アプリの UI/状態管理と連携して利用
 </script>
 ```
 
 ```js
 // 例: ビルドツール経由で読み込む場合（任意のバンドラー設定に合わせる）
-import { createEngine } from "./dist/engine.js";
+import { createStore } from "./dist/engine.js";
 
-const engine = createEngine();
-// engine の出力を派生アプリの状態にマッピングする
+const store = createStore();
+// store の出力を派生アプリの状態にマッピングする
 ```
 
 ## 互換性ポリシーと変更方針
