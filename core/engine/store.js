@@ -152,3 +152,7 @@ const JetPaletteEngine = (() => {
         convertYstToJetPalette
     };
 })();
+
+if (typeof globalThis !== 'undefined') {
+    globalThis.JetPaletteEngine = JetPaletteEngine;
+}
