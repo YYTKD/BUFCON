@@ -168,3 +168,58 @@ type EngineData = {
 
 - `bulkAdd` の `<カテゴリ>` ブロック構文や `|` 区切りは、UIからの一括登録に利用しています。
 - `generateCommands` はバフ効果の合成やスロット展開を行い、`text` と `html` を返します。
+
+---
+
+## 6. `script.js` 機能分類と分割方針
+
+現行の `script.js` は UI とデータ処理が混在しているため、以下の5領域に分類して分割します。
+キーワードである「テーマ管理」「コンテキストメニュー」「トースト通知」は **UI** と **ユーティリティ** に跨る前提で整理します。
+
+### 6.1 分類（現状の責務）
+
+| 区分 | 主な役割 | 代表的な責務/機能 |
+| --- | --- | --- |
+| UI | DOM操作・表示更新 | コンテキストメニュー、テーマ管理、トースト通知、モーダル/セクション/リスト描画、ドラッグ&ドロップ、オートコンプリート表示 |
+| 状態管理 | UI状態と永続化 | `uiState`、localStorageのUI状態保存/復元、選択状態の同期 |
+| エンジン連携 | `JetPaletteEngine` との境界 | `createStore`、`store.getState`/`setState`/`addItem`/`bulkAdd`/`generateCommands` 呼び出し、カテゴリ/ラベル更新 |
+| 変換 | 入出力の整形/変換 | JSONインポート/エクスポート、バフ/ラベルの `|` 連結形式の生成、対象ラベルのテキスト化 |
+| ユーティリティ | 共通ロジック | HTMLエスケープ、カラー検証/算出、UUID生成、テーマ色取得、モーダル取得補助 |
+
+### 6.2 分割方針（モジュール境界の例）
+
+> 既存の `script.js` を段階的に分割し、`index.html` からはエントリポイントのみを読み込む形を目標とします。
+
+#### UI (`ui/*`)
+- `ui/context-menu.js`: コンテキストメニュー生成/表示/アクション登録。
+- `ui/theme.js`: テーマ管理（`applyTheme`/`initTheme`/`updateThemeToggle`）、テーマ色に基づくUI更新。
+- `ui/toast.js`: トースト通知 (`showToast`) とスタイル挿入。
+- `ui/sections.js`: 折りたたみセクション管理 (`toggleSection`/`loadUIState`/`saveUIState`)。
+- `ui/renderers/`: `renderBuffs`/`renderPackage`/`renderMacroDictionary` 等の描画ロジック。
+- `ui/modals/`: `openBuffModal`/`openJudgeModal`/`openAttackModal` とフォーム初期化。
+
+#### 状態管理 (`state/*`)
+- `state/ui-state.js`: `uiState` の定義と更新API。
+- `state/persistence.js`: `uiState` と `localStorage` の保存/復元。
+- `state/selection.js`: マルチセレクトや選択状態の同期。
+
+#### エンジン連携 (`engine/*`)
+- `engine/store.js`: `JetPaletteEngine.createStore` の初期化と依存注入（`validateColor`, `getDefaultBuffColor`）。
+- `engine/buff-ops.js`: バフ追加・更新・ターン進行などストア操作に紐づく処理。
+- `engine/package-ops.js`: 判定/攻撃ラベルとカテゴリ操作（追加/更新/削除/並び替え）。
+
+#### 変換 (`convert/*`)
+- `convert/import-export.js`: JSON/テキストの入出力（`importData`/`exportData`/ユーザー辞書入出力）。
+- `convert/formatters.js`: `formatBuffForBulk`/`formatPackageForBulk`/対象テキスト化など変換系関数。
+
+#### ユーティリティ (`utils/*`)
+- `utils/dom.js`: `escapeHtml`/`getActiveModal` などDOMヘルパー。
+- `utils/color.js`: `getContrastColor`/`validateColor`/`getThemeColorValue`/`getDefaultBuffColor`。
+- `utils/uuid.js`: `generateUUID`。
+
+### 6.3 移行の優先順位（推奨）
+
+1. **ユーティリティ** を切り出し、他モジュールから参照できるようにする。
+2. **UI（テーマ管理・コンテキストメニュー・トースト通知）** を `ui/*` に移動して責務を明確化。
+3. **状態管理** と **変換** を切り出し、UIから依存する関数を最小化。
+4. **エンジン連携** をまとめて `engine/*` に集約し、`script.js` には初期化と配線のみ残す。
