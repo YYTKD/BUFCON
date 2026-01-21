@@ -9,6 +9,7 @@
   - 利用者は `<script type="module">` から直接 import できる形を想定。
   - 依存管理の負担を避けるため、**ESM モジュール一式での配布は当面行わない**。
   - 将来的に型定義や補助ツールを追加する場合は、`dist/` に併置して拡張。
+- 生成方法: `npm run build:engine` で `core/engine/*.js` を束ねた `dist/engine.js` を生成する。
 
 ## `index.html` での読み込み例
 

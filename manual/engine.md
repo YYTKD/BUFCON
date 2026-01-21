@@ -22,10 +22,20 @@ JetPaletteEngine はブラウザ向けのグローバルとして提供され、
 
 > `store.js` は IIFE で `window.JetPaletteEngine` を公開します。`utils.js` などのモジュールファイルを先に読み込んでください。
 
-### 1.2 配布形態（将来）
+### 1.2 ESM 配布形態（`dist/engine.js`）
 
 - **ESM 単一ファイル `dist/engine.js` を公式配布物とする**想定。
-- 現状は `core/engine/*.js`（`utils.js` など）を読み込んで使用します。
+- `dist/engine.js` から `createStore` / `normalizeBuffs` / `convertYstToJetPalette` を直接 `import` できます。
+
+```html
+<script type="module">
+  import { createStore } from "./dist/engine.js";
+
+  const store = createStore();
+</script>
+```
+
+> `dist/engine.js` は `npm run build:engine` で生成できます。
 
 ---
 

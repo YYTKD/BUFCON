@@ -1,0 +1,10 @@
+{
+  "name": "jet-pallet",
+  "private": true,
+  "scripts": {
+    "build:engine": "esbuild core/engine/engine-entry.js --bundle --format=esm --outfile=dist/engine.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
