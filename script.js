@@ -27,6 +27,7 @@ const TYPE_CONFIG = {
     attack: { collection: 'attacks', categories: 'attackCategories' }
 };
 
+// グローバル：タイプ別の配列参照を取得
 function getCollection(type) {
     if (type === 'macro') return macroState.dictionary;
     const config = TYPE_CONFIG[type];
@@ -40,6 +41,7 @@ function getCollection(type) {
 // ========================================
 let contextMenuElement = null;
 
+// UI：コンテキストメニュー要素の生成・取得
 function getContextMenu() {
     if (contextMenuElement) return contextMenuElement;
 
@@ -55,12 +57,14 @@ function getContextMenu() {
     return contextMenuElement;
 }
 
+// UI：コンテキストメニューを非表示
 function hideContextMenu() {
     if (contextMenuElement) {
         contextMenuElement.classList.add('u-hidden');
     }
 }
 
+// UI：コンテキストメニューを表示
 function showContextMenu(x, y, actions = []) {
     if (!actions.length) return;
 
@@ -139,11 +143,13 @@ const ITEM_CONTEXT_ACTION_BUILDERS = {
     ])
 };
 
+// ロジック：アイテム種別ごとのメニュー項目を取得
 function getItemContextActions(type, index) {
     const builder = ITEM_CONTEXT_ACTION_BUILDERS[type];
     return builder ? builder(index) : [];
 }
 
+// UI：アイテム用コンテキストメニューを開く
 function openItemContextMenu(event, type, index) {
     event.preventDefault();
     const actions = getItemContextActions(type, index);
@@ -152,6 +158,7 @@ function openItemContextMenu(event, type, index) {
     showContextMenu(event.pageX, event.pageY, actions);
 }
 
+// UI：カテゴリ用コンテキストメニューを開く
 function openCategoryContextMenu(event, type, categoryName) {
     event.preventDefault();
 
@@ -169,6 +176,7 @@ function openCategoryContextMenu(event, type, categoryName) {
 // 設定メニュー
 // ========================================
 
+// UI：設定モーダルを表示
 function openSettingsModal(targetId) {
     const modal = document.getElementById(targetId);
     if (modal?.showModal) {
@@ -176,6 +184,7 @@ function openSettingsModal(targetId) {
     }
 }
 
+// UI：設定メニューのイベントを初期化
 function setupSettingsMenu() {
     const toggle = document.getElementById('settingsToggle');
     const dropdown = document.getElementById('settingsDropdown');
@@ -224,6 +233,7 @@ function setupSettingsMenu() {
     });
 }
 
+// ロジック：種別ごとのカテゴリ配列を取得
 function getCategories(type) {
     if (type === 'macro') {
         const categories = [];
@@ -247,6 +257,7 @@ function getCategories(type) {
 /**
  * 16進数カラーコードから適切なテキストカラーを計算
  */
+// ロジック：背景色に合わせた文字色を算出
 function getContrastColor(hexColor) {
     const r = parseInt(hexColor.slice(1, 3), 16);
     const g = parseInt(hexColor.slice(3, 5), 16);
@@ -258,6 +269,7 @@ function getContrastColor(hexColor) {
 /**
  * HTMLエスケープ処理(XSS対策)
  */
+// ロジック：HTMLエスケープ
 function escapeHtml(text) {
     if (typeof text !== 'string') return '';
     const div = document.createElement('div');
@@ -268,12 +280,14 @@ function escapeHtml(text) {
 /**
  * カラーコードバリデーション
  */
+// ロジック：カラーコードの検証と補正
 function validateColor(color) {
     const hexPattern = /^#[0-9A-Fa-f]{6}$/;
     if (hexPattern.test(color)) return color;
     return getThemeColorValue('--color-red', '#FF5555');
 }
 
+// UI：テーマ変数の色を取得
 function getThemeColorValue(variable, fallback) {
     const value = getComputedStyle(document.documentElement)
         .getPropertyValue(variable)
@@ -281,10 +295,12 @@ function getThemeColorValue(variable, fallback) {
     return value || fallback;
 }
 
+// ロジック：バフの既定色を取得
 function getDefaultBuffColor() {
     return getThemeColorValue('--color-purple', '#BD93F9');
 }
 
+// ロジック：バフのサブ色を取得
 function getSecondaryBuffColor() {
     return getThemeColorValue('--color-orange', '#FFB86C');
 }
@@ -298,6 +314,7 @@ const THEME_OPTIONS = {
     alucard: { label: 'Alucard', icon: 'light_mode' }
 };
 
+// UI：テーマの適用と永続化
 function applyTheme(theme, persist = true) {
     const normalized = theme === 'alucard' ? 'alucard' : 'dracula';
     document.documentElement.setAttribute('data-theme', normalized);
@@ -313,6 +330,7 @@ function applyTheme(theme, persist = true) {
     updateColorDatalist();
 }
 
+// UI：テーマに応じたカラー候補を更新
 function updateColorDatalist() {
     const datalist = document.getElementById('buffColor-list');
     if (!datalist) return;
@@ -337,6 +355,7 @@ function updateColorDatalist() {
         .join('');
 }
 
+// UI：テーマ切替ボタンの表示を更新
 function updateThemeToggle(theme) {
     const toggle = document.getElementById('themeToggle');
     if (!toggle) return;
@@ -348,6 +367,7 @@ function updateThemeToggle(theme) {
     toggle.setAttribute('aria-pressed', String(theme === 'alucard'));
 }
 
+// UI：初期テーマの読み込み
 function initTheme() {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
     applyTheme(stored || 'dracula', false);
@@ -356,11 +376,13 @@ function initTheme() {
 /**
  * トースト通知を表示(alert代替)
  */
+// UI：最前面のモーダル要素を取得
 function getActiveModal() {
     const openDialogs = Array.from(document.querySelectorAll('dialog[open]'));
     return openDialogs[openDialogs.length - 1] || null;
 }
 
+// UI：トースト通知を表示
 function showToast(message, type = 'info') {
     const activeModal = getActiveModal();
     const parent = activeModal || document.body;
@@ -400,6 +422,7 @@ if (!document.getElementById('toast-styles')) {
 // セクション管理
 // ========================================
 
+// UI：セクションの開閉を切り替え
 function toggleSection(header) {
     header.classList.toggle('collapsed');
     const body = header.nextElementSibling;
@@ -407,6 +430,7 @@ function toggleSection(header) {
     saveUIState();
 }
 
+// ロジック：UIの開閉状態を保存
 function saveUIState() {
     try {
         const states = {};
@@ -419,6 +443,7 @@ function saveUIState() {
     }
 }
 
+// ロジック：UIの開閉状態を復元
 function loadUIState() {
     try {
         const saved = localStorage.getItem('uiState');
@@ -440,6 +465,7 @@ function loadUIState() {
 // データ管理
 // ========================================
 
+// ロジック：バフデータを正規化
 function normalizeBuff(buff) {
     const memoText = typeof buff.memo === 'string'
         ? buff.memo
@@ -456,11 +482,13 @@ function normalizeBuff(buff) {
     };
 }
 
+// ロジック：バフ配列を正規化
 function normalizeBuffs(buffs = []) {
     if (!Array.isArray(buffs)) return [];
     return buffs.map(normalizeBuff);
 }
 
+// ロジック：ローカルデータを読み込んでUIへ反映
 function loadData() {
     try {
         const saved = localStorage.getItem('trpgData');
@@ -494,6 +522,7 @@ function loadData() {
     updateBuffTargetDropdown();
 }
 
+// ロジック：初期バフを生成
 function getDefaultBuffs() {
     const primaryColor = getDefaultBuffColor();
     const secondaryColor = getSecondaryBuffColor();
@@ -504,6 +533,7 @@ function getDefaultBuffs() {
 }
 
 
+// ロジック：初期判定ラベルを生成
 function getDefaultJudges() {
     return [
         { name: '命中(武器A)　SAMPLE', roll: '1d20' },
@@ -511,12 +541,14 @@ function getDefaultJudges() {
     ];
 }
 
+// ロジック：初期攻撃ラベルを生成
 function getDefaultAttacks() {
     return [
         { name: '武器A　SAMPLE', roll: '2d6' }
     ];
 }
 
+// ロジック：データをローカルストレージへ保存
 function saveData() {
     const data = {
         buffs: state.buffs,
@@ -549,6 +581,7 @@ function saveData() {
     }
 }
 
+// UI：全データ初期化の確認と実行
 function resetAll() {
     if (!confirm('すべての設定を初期化しますか?この操作は取り消せません。')) {
         return;
@@ -564,6 +597,7 @@ function resetAll() {
     }
 }
 
+// UI：全データをJSONとしてコピー
 function exportData() {
     const data = {
         buffs: state.buffs,
@@ -583,6 +617,7 @@ function exportData() {
     });
 }
 
+// UI：貼り付けJSONを取り込み
 function importData() {
     const text = document.getElementById('importText').value.trim();
     if (!text) {
@@ -626,6 +661,7 @@ function importData() {
 /**
  * ファイルドロップ機能の初期化
  */
+// UI：インポート欄のファイルドロップを初期化
 function initFileDropZone() {
     const dropZones = [
         { elementId: 'importText', type: 'data' },
@@ -695,6 +731,7 @@ function initFileDropZone() {
 // カテゴリ管理
 // ========================================
 
+// ロジック：カテゴリを追加
 function addCategory(type, inputId) {
     const categories = getCategories(type);
     if (!categories) return;
@@ -758,6 +795,7 @@ function addCategory(type, inputId) {
     saveData();
 }
 
+// ロジック：カテゴリ名変更をアイテムへ反映
 function replaceCategoryOnItems(type, from, to) {
     const items = getCollection(type) || [];
     items.forEach(item => {
@@ -767,6 +805,7 @@ function replaceCategoryOnItems(type, from, to) {
     });
 }
 
+// ロジック：バフの対象カテゴリ名を置換
 function replaceBuffTargetsForCategory(type, from, to) {
     if (type !== 'judge' && type !== 'attack') return;
 
@@ -787,6 +826,7 @@ function replaceBuffTargetsForCategory(type, from, to) {
     }
 }
 
+// UI：カテゴリ変更後の表示を更新
 function refreshCategoryViews(type) {
     if (type === 'buff') {
         renderBuffs();
@@ -805,6 +845,7 @@ function refreshCategoryViews(type) {
     saveData();
 }
 
+// UI：カテゴリ名の編集ダイアログ
 function editCategory(type, oldName) {
     const categories = getCategories(type);
     if (!categories || !categories.includes(oldName)) return;
@@ -832,6 +873,7 @@ function editCategory(type, oldName) {
     showToast('カテゴリ名を変更しました', 'success');
 }
 
+// UI：カテゴリ削除の確認と反映
 function removeCategory(type, name) {
     const categories = getCategories(type);
     if (!categories || !categories.includes(name)) return;
@@ -846,6 +888,7 @@ function removeCategory(type, name) {
     showToast('カテゴリを削除しました', 'success');
 }
 
+// UI：カテゴリ名をコピー
 function copyCategoryName(name) {
     if (!name) return;
 
@@ -855,6 +898,7 @@ function copyCategoryName(name) {
 }
 
 
+// ロジック：カテゴリごとのアイテム一覧を構築
 function buildCategoryMap(type) {
     const map = { 'none': [] };
     const categories = getCategories(type) || [];
@@ -880,6 +924,7 @@ const categoryIndexConfig = {
     macro: { selectId: 'macroItemIndex', listId: 'macroDictionaryList' }
 };
 
+// UI：カテゴリジャンプ用ドロップダウンを更新
 function updateCategoryIndexDropdown(type) {
     const config = categoryIndexConfig[type];
     if (!config) return;
@@ -906,6 +951,7 @@ function updateCategoryIndexDropdown(type) {
     select.value = '';
 }
 
+// UI：カテゴリ位置へスクロール
 function scrollToCategory(type, category) {
     const config = categoryIndexConfig[type];
     if (!config || !category) return;
@@ -929,6 +975,7 @@ function scrollToCategory(type, category) {
     list.scrollTo({ top: offset, behavior: 'smooth' });
 }
 
+// UI：カテゴリジャンプの変更処理
 function handleCategoryIndexChange(type, event) {
     const category = event.target.value;
     if (!category) return;
@@ -937,6 +984,7 @@ function handleCategoryIndexChange(type, event) {
     event.target.value = '';
 }
 
+// ロジック：カテゴリ内の挿入位置を算出
 function getCategoryInsertIndex(type, categoryKey) {
     const arr = getCollection(type) || [];
     const normalizedKey = categoryKey || 'none';
@@ -949,6 +997,7 @@ function getCategoryInsertIndex(type, categoryKey) {
     return Math.max(...indices) + 1;
 }
 
+// UI：バフ項目のHTMLを生成
 function renderBuffItems(entries = []) {
     if (!Array.isArray(entries) || entries.length === 0) return '';
 
@@ -998,6 +1047,7 @@ function renderBuffItems(entries = []) {
     }).join('');
 }
 
+// UI：判定/攻撃項目のHTMLを生成
 function renderPackageItems(type, entries = []) {
     if (!Array.isArray(entries) || entries.length === 0) return '';
 
@@ -1017,6 +1067,7 @@ const CATEGORY_SELECT_CONFIG = {
     attack: { selectId: 'attackCategorySelect', categories: 'attackCategories' }
 };
 
+// UI：カテゴリセレクトの選択肢を生成
 function buildCategorySelectOptions(categories = []) {
     const options = ['<option value="none">なし</option>'];
     categories.forEach(name => {
@@ -1025,6 +1076,7 @@ function buildCategorySelectOptions(categories = []) {
     return options.join('');
 }
 
+// UI：カテゴリセレクトを更新
 function updateCategorySelect(type) {
     const config = CATEGORY_SELECT_CONFIG[type];
     if (!config) return;
@@ -1035,14 +1087,17 @@ function updateCategorySelect(type) {
     select.innerHTML = buildCategorySelectOptions(state[config.categories]);
 }
 
+// UI：バフカテゴリセレクトを更新
 function updateBuffCategorySelect() {
     updateCategorySelect('buff');
 }
 
+// UI：判定カテゴリセレクトを更新
 function updateJudgeCategorySelect() {
     updateCategorySelect('judge');
 }
 
+// UI：攻撃カテゴリセレクトを更新
 function updateAttackCategorySelect() {
     updateCategorySelect('attack');
 }
@@ -1060,6 +1115,7 @@ const macroState = {
 /**
  * ユーザー辞書をロード
  */
+// ロジック：ユーザー辞書を読み込み
 function loadUserDictionary() {
     try {
         const saved = localStorage.getItem('userDictionary');
@@ -1077,6 +1133,7 @@ function loadUserDictionary() {
 /**
  * ユーザー辞書をセーブ
  */
+// ロジック：ユーザー辞書を保存
 function saveUserDictionary() {
     try {
         const json = JSON.stringify(macroState.dictionary);
@@ -1096,6 +1153,7 @@ function saveUserDictionary() {
 /**
  * ユーザー辞書に登録（追加または更新）
  */
+// UI：辞書登録/更新の入力処理
 function addOrUpdateMacro() {
     const textInput = document.getElementById('macroText');
     const categoryInput = document.getElementById('macroCategory');
@@ -1154,6 +1212,7 @@ function addOrUpdateMacro() {
 /**
  * ユーザー辞書の編集を開始
  */
+// UI：辞書編集を開始
 function startMacroEdit(id) {
     const item = macroState.dictionary.find(m => m.id === id);
     if (!item) return;
@@ -1178,6 +1237,7 @@ function startMacroEdit(id) {
 /**
  * ユーザー辞書の編集をキャンセル
  */
+// UI：辞書編集をキャンセル
 function cancelMacroEdit() {
     if (!macroState.editingId) return;
 
@@ -1206,6 +1266,7 @@ function cancelMacroEdit() {
 /**
  * ユーザー辞書から削除
  */
+// UI：辞書項目を削除
 function deleteMacro(id) {
     const item = macroState.dictionary.find(m => m.id === id);
     if (!item) return;
@@ -1223,6 +1284,7 @@ function deleteMacro(id) {
 /**
  * ユーザー辞書を一覧表示
  */
+// UI：辞書項目のHTMLを生成
 function renderMacroItems(entries = []) {
     if (!Array.isArray(entries) || entries.length === 0) return '';
 
@@ -1235,6 +1297,7 @@ function renderMacroItems(entries = []) {
     `).join('');
 }
 
+// UI：辞書項目のイベントを付与
 function attachMacroEvents() {
     const listContainer = document.getElementById('macroDictionaryList');
     if (!listContainer) return;
@@ -1246,6 +1309,7 @@ function attachMacroEvents() {
     });
 }
 
+// UI：辞書一覧を描画
 function renderMacroDictionary() {
     const listContainer = document.getElementById('macroDictionaryList');
 
@@ -1295,6 +1359,7 @@ function renderMacroDictionary() {
 /**
  * ユーザー辞書をエクスポート
  */
+// UI：ユーザー辞書をJSONでコピー
 function exportUserDictionary() {
     const json = JSON.stringify(macroState.dictionary, null, 2);
     navigator.clipboard.writeText(json).then(() => {
@@ -1307,6 +1372,7 @@ function exportUserDictionary() {
 /**
  * ユーザー辞書をインポート
  */
+// UI：ユーザー辞書をJSONから取り込み
 function importUserDictionary() {
     const text = document.getElementById('macroImportText').value.trim();
     if (!text) {
@@ -1346,6 +1412,7 @@ function importUserDictionary() {
 /**
  * UUID生成（簡易版）
  */
+// ロジック：UUIDの簡易生成
 function generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         const r = Math.random() * 16 | 0;
@@ -1358,6 +1425,7 @@ function generateUUID() {
  * ユーザー辞書の初期化
  */
 
+// UI：ユーザー辞書の初期化
 function resetDictionary() {
     if (!confirm('ユーザー辞書の設定を初期化しますか?この操作は取り消せません。')) {
         return;
@@ -1374,6 +1442,7 @@ function resetDictionary() {
 /**
  * ユーザー辞書モーダルのイベント初期化
  */
+// UI：ユーザー辞書モーダルのイベント初期化
 function setupUserDictionaryModal() {
     document.getElementById('macroAddBtn')?.addEventListener('click', addOrUpdateMacro);
     document.getElementById('macroCancelBtn')?.addEventListener('click', cancelMacroEdit);
@@ -1401,6 +1470,7 @@ function setupUserDictionaryModal() {
 // マルチセレクト
 // ========================================
 
+// UI：複数選択の初期化
 function initMultiSelect() {
     const select = document.getElementById('buffTargetSelect');
     if (!select) return;
@@ -1410,6 +1480,7 @@ function initMultiSelect() {
     });
 }
 
+// UI：バフ対象セレクトを更新
 function updateBuffTargetDropdown() {
     const select = document.getElementById('buffTargetSelect');
     if (!select) return;
@@ -1469,6 +1540,7 @@ function updateBuffTargetDropdown() {
 /**
  * 対象の表示名を取得
  */
+// ロジック：対象IDから表示名を取得
 function getTargetText(target) {
     if (target === 'all-judge') return 'すべての判定';
     if (target === 'all-attack') return 'すべての攻撃';
@@ -1483,6 +1555,7 @@ function getTargetText(target) {
 // バフ管理
 // ========================================
 
+// ロジック：バフメモ本文を取得
 function getBuffMemoText(buff) {
     if (!buff) return '';
     if (typeof buff.memo === 'string') return buff.memo;
@@ -1490,6 +1563,7 @@ function getBuffMemoText(buff) {
     return '';
 }
 
+// ロジック：バフメモの簡易表示文を取得
 function getBuffSimpleMemo(buff) {
     if (!buff || buff.showSimpleMemo === false) return '';
     const memoText = getBuffMemoText(buff);
@@ -1497,6 +1571,7 @@ function getBuffSimpleMemo(buff) {
     return firstLine;
 }
 
+// UI：バフ追加/編集モーダルを開く
 function openBuffModal(editIndex = null) {
     const modal = document.getElementById('buffaddmodal');
     const modalTitle = modal.querySelector('.modal__title');
@@ -1535,6 +1610,7 @@ function openBuffModal(editIndex = null) {
     modal.showModal();
 }
 
+// UI：バフ入力フォームを初期化
 function resetBuffForm() {
     document.getElementById('buffName').value = '';
     document.getElementById('buffEffect').value = '';
@@ -1554,11 +1630,13 @@ function resetBuffForm() {
     updateBuffTargetDropdown();
 }
 
+// UI：バフ効果入力へテキスト挿入
 function insertText(text) {
     const textbox = document.getElementById('buffEffect');
     textbox.value = textbox.value + text;
 }
 
+// ロジック：バフ追加/更新を反映
 function addBuff() {
     const name = document.getElementById('buffName').value.trim();
     const effect = document.getElementById('buffEffect').value.trim();
@@ -1625,6 +1703,7 @@ function addBuff() {
 }
 
 /* 汎用一括追加関数（バフ、判定、攻撃に対応） */
+// ロジック：バフ/判定/攻撃の一括追加を処理
 function bulkAdd(type) {
     const typeConfig = {
         'buff': {
@@ -1796,6 +1875,7 @@ function bulkAdd(type) {
     }
 }
 
+// UI：一括追加エリアの操作イベントを設定
 function setupBulkAddControls({ toggleId, confirmId, cancelId, areaId, textId, type }) {
     const toggleButton = document.getElementById(toggleId);
     const confirmButton = document.getElementById(confirmId);
@@ -1835,6 +1915,7 @@ function setupBulkAddControls({ toggleId, confirmId, cancelId, areaId, textId, t
     }
 }
 
+// UI：バフ有効/無効を切り替え
 function toggleBuff(index) {
     if (index < 0 || index >= state.buffs.length) return;
 
@@ -1848,6 +1929,7 @@ function toggleBuff(index) {
     saveData();
 }
 
+// UI：バフを削除
 function removeBuff(index) {
     if (index < 0 || index >= state.buffs.length) return;
 
@@ -1858,6 +1940,7 @@ function removeBuff(index) {
     saveData();
 }
 
+// ロジック：全バフを最大ターンにリセット
 function resetBuffsToMaxTurns() {
     let changed = false;
 
@@ -1880,6 +1963,7 @@ function resetBuffsToMaxTurns() {
     }
 }
 
+// ロジック：バフのターン経過を処理
 function progressTurn() {
     let changed = false;
     state.buffs.forEach(buff => {
@@ -1904,6 +1988,7 @@ function progressTurn() {
 }
 
 
+// UI：バフ一覧を描画
 function renderBuffs() {
     const list = document.getElementById('buffList');
     if (!list) return;
@@ -1948,6 +2033,7 @@ function renderBuffs() {
     attachBuffEvents();
 }
 
+// UI：バフ一覧のイベントを付与
 function attachBuffEvents() {
     const buffList = document.getElementById('buffList');
     if (!buffList) return;
@@ -1992,6 +2078,7 @@ function attachBuffEvents() {
 // ドラッグ&ドロップ
 // ========================================
 
+// UI：ドラッグ開始時の処理
 function handleDragStart(e, index, type) {
     state.draggedIndex = index;
     state.draggedType = type;
@@ -2006,6 +2093,7 @@ function handleDragStart(e, index, type) {
     e.dataTransfer.effectAllowed = 'move';
 }
 
+// UI：ドラッグ中のハイライト処理
 function handleDragOver(e) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -2022,10 +2110,12 @@ function handleDragOver(e) {
     }
 }
 
+// UI：ドラッグ離脱時のハイライト解除
 function handleDragLeave(e) {
     e.currentTarget.classList.remove('list__item--drag-over-top', 'list__item--drag-over-bottom');
 }
 
+// UI：アイテムドロップ時の並び替え処理
 function handleDrop(e, targetIndex, type) {
     e.preventDefault();
     e.currentTarget.classList.remove('list__item--drag-over-top', 'list__item--drag-over-bottom');
@@ -2079,6 +2169,7 @@ function handleDrop(e, targetIndex, type) {
     saveData();
 }
 
+// UI：カテゴリ見出しのドラッグ開始
 function handleCategoryHeaderDragStart(e, type) {
     const categoryName = e.currentTarget.getAttribute('data-category');
     if (!categoryName || categoryName === 'none') return;
@@ -2090,6 +2181,7 @@ function handleCategoryHeaderDragStart(e, type) {
     e.currentTarget.classList.add('list__category-header--dragging');
 }
 
+// UI：カテゴリ見出しのドラッグ終了
 function handleCategoryHeaderDragEnd(e) {
     document.querySelectorAll('.list__category-header--dragging')
         .forEach(header => header.classList.remove('list__category-header--dragging'));
@@ -2099,6 +2191,7 @@ function handleCategoryHeaderDragEnd(e) {
     state.draggedCategoryName = null;
 }
 
+// UI：カテゴリ見出しへのドラッグオーバー
 function handleCategoryDragOver(e, type) {
     const isItemDrag = state.draggedType === type;
     const isCategoryDrag = state.draggedCategoryType === type;
@@ -2109,10 +2202,12 @@ function handleCategoryDragOver(e, type) {
     e.currentTarget.classList.add('list__category-header--drag-over');
 }
 
+// UI：カテゴリ見出しのドラッグ離脱
 function handleCategoryDragLeave(e) {
     e.currentTarget.classList.remove('list__category-header--drag-over');
 }
 
+// ロジック：カテゴリ順序を並び替え
 function reorderCategory(type, targetCategory, dropAfter) {
     const categories = getCategories(type);
     if (!categories) return false;
@@ -2132,6 +2227,7 @@ function reorderCategory(type, targetCategory, dropAfter) {
     return true;
 }
 
+// UI：カテゴリ見出しへのドロップ処理
 function handleCategoryDrop(e, type) {
     e.preventDefault();
     e.stopPropagation();
@@ -2190,6 +2286,7 @@ function handleCategoryDrop(e, type) {
     e.currentTarget.classList.remove('list__category-header--drag-over');
 }
 
+// UI：カテゴリ本文のドラッグオーバー
 function handleCategoryBodyDragOver(e, type) {
     if (state.draggedType !== type) return;
 
@@ -2198,10 +2295,12 @@ function handleCategoryBodyDragOver(e, type) {
     e.currentTarget.classList.add('list__category-body--drag-over');
 }
 
+// UI：カテゴリ本文のドラッグ離脱
 function handleCategoryBodyDragLeave(e) {
     e.currentTarget.classList.remove('list__category-body--drag-over');
 }
 
+// UI：カテゴリ本文へのドロップ処理
 function handleCategoryBodyDrop(e, type) {
     if (state.draggedType !== type || state.draggedIndex === null) return;
 
@@ -2234,6 +2333,7 @@ function handleCategoryBodyDrop(e, type) {
     e.currentTarget.classList.remove('list__category-body--drag-over');
 }
 
+// UI：ドラッグ終了時の後片付け
 function handleDragEnd(e) {
     e.target.classList.remove('list__item--dragging');
     document.querySelectorAll('.list__category-header--drag-over')
@@ -2253,6 +2353,7 @@ function handleDragEnd(e) {
 // 判定・攻撃ラベル管理
 // ========================================
 
+// UI：判定ラベルのモーダルを開く
 function openJudgeModal(editIndex = null) {
     const modal = document.getElementById('judgeaddmodal');
     const modalTitle = modal.querySelector('.modal__title');
@@ -2288,6 +2389,7 @@ function openJudgeModal(editIndex = null) {
     modal.showModal();
 }
 
+// UI：判定フォームを初期化
 function resetJudgeForm() {
     document.getElementById('judgeName').value = '';
     document.getElementById('judgeRoll').value = '';
@@ -2297,6 +2399,7 @@ function resetJudgeForm() {
     }
 }
 
+// UI：攻撃ラベルのモーダルを開く
 function openAttackModal(editIndex = null) {
     const modal = document.getElementById('attackaddmodal');
     const modalTitle = modal.querySelector('.modal__title');
@@ -2332,6 +2435,7 @@ function openAttackModal(editIndex = null) {
     modal.showModal();
 }
 
+// UI：攻撃フォームを初期化
 function resetAttackForm() {
     document.getElementById('attackName').value = '';
     document.getElementById('attackRoll').value = '';
@@ -2341,6 +2445,7 @@ function resetAttackForm() {
     }
 }
 
+// ロジック：判定ラベルの追加/更新
 function addJudge() {
     const name = document.getElementById('judgeName').value.trim();
     const roll = document.getElementById('judgeRoll').value.trim();
@@ -2370,6 +2475,7 @@ function addJudge() {
     saveData();
 }
 
+// UI：判定ラベルを削除
 function removeJudge(index) {
     if (index < 0 || index >= state.judges.length) return;
 
@@ -2380,6 +2486,7 @@ function removeJudge(index) {
     saveData();
 }
 
+// ロジック：攻撃ラベルの追加/更新
 function addAttack() {
     const name = document.getElementById('attackName').value.trim();
     const roll = document.getElementById('attackRoll').value.trim();
@@ -2409,6 +2516,7 @@ function addAttack() {
     saveData();
 }
 
+// UI：攻撃ラベルを削除
 function removeAttack(index) {
     if (index < 0 || index >= state.attacks.length) return;
 
@@ -2419,6 +2527,7 @@ function removeAttack(index) {
     saveData();
 }
 
+// UI：判定/攻撃の選択状態を更新
 function selectPackage(index, type) {
     const array = getCollection(type);
     if (!array) return;
@@ -2430,6 +2539,7 @@ function selectPackage(index, type) {
     updatePackageOutput(type, index);
 }
 
+// UI：判定/攻撃ラベルを描画
 function renderPackage(type) {
     const typeConfig = {
         'judge': {
@@ -2491,6 +2601,7 @@ function renderPackage(type) {
     attachItemEvents(type);
 }
 
+// UI：判定/攻撃一覧のイベントを付与
 function attachItemEvents(type) {
     const typeConfig = {
         'judge': {
@@ -2575,6 +2686,7 @@ function attachItemEvents(type) {
     });
 }
 
+// UI：判定/攻撃の出力テキストを更新
 function updatePackageOutput(type, selectedIndex = null) {
     const array = getCollection(type);
     const outputId = type === 'judge' ? 'judgeOutput' : 'attackOutput';
@@ -2752,6 +2864,7 @@ const autocompleteTargets = [
 /**
  * 辞書から検索候補を取得
  */
+// ロジック：辞書から候補を抽出
 function getAutocompleteSuggestions(input) {
     if (!input || input.length === 0) return [];
 
@@ -2777,6 +2890,7 @@ function getAutocompleteSuggestions(input) {
 /**
  * キャレット位置の単語断片を取得
  */
+// ロジック：キャレット位置のトークンを抽出
 function getTokenAtCaret(value, caretPos) {
     const length = value.length;
     const safeCaret = Math.max(0, Math.min(caretPos ?? 0, length));
@@ -2802,6 +2916,7 @@ function getTokenAtCaret(value, caretPos) {
 /**
  * オートコンプリートドロップダウンを作成・取得
  */
+// UI：オートコンプリートのドロップダウン取得
 function getAutocompleteDropdown() {
     if (autocompleteState.dropdownElement) {
         return autocompleteState.dropdownElement;
@@ -2819,6 +2934,7 @@ function getAutocompleteDropdown() {
 /**
  * オートコンプリートドロップダウンを表示
  */
+// UI：オートコンプリート候補を表示
 function showAutocompleteDropdown(inputElement, suggestions) {
     if (suggestions.length === 0) {
         hideAutocompleteDropdown();
@@ -2869,6 +2985,7 @@ function showAutocompleteDropdown(inputElement, suggestions) {
 /**
  * オートコンプリートドロップダウンを非表示
  */
+// UI：オートコンプリート候補を非表示
 function hideAutocompleteDropdown() {
     const dropdown = autocompleteState.dropdownElement;
     if (dropdown) {
@@ -2882,6 +2999,7 @@ function hideAutocompleteDropdown() {
 /**
  * オートコンプリート項目を選択
  */
+// UI：候補選択を入力欄へ反映
 function selectAutocompleteItem(inputElement, text) {
     const value = inputElement.value;
     const caretPos = inputElement.selectionStart ?? value.length;
@@ -2906,6 +3024,7 @@ function selectAutocompleteItem(inputElement, text) {
 /**
  * オートコンプリート選択インデックスを設定
  */
+// UI：候補選択インデックスを更新
 function setSelectedAutocompleteIndex(index) {
     const dropdown = autocompleteState.dropdownElement;
     if (!dropdown) return;
@@ -2928,6 +3047,7 @@ function setSelectedAutocompleteIndex(index) {
 /**
  * オートコンプリート対象フィールドを初期化
  */
+// UI：オートコンプリート対象入力の初期化
 function setupAutocompleteFields() {
     autocompleteTargets.forEach(targetId => {
         const element = document.getElementById(targetId);
@@ -3026,6 +3146,7 @@ function setupAutocompleteFields() {
 /**
  * ドキュメント全体のクリックでドロップダウンを閉じる
  */
+// UI：外側クリックで候補を閉じる
 function setupAutocompleteClickOutside() {
     document.addEventListener('click', (e) => {
         const dropdown = autocompleteState.dropdownElement;
@@ -3038,6 +3159,7 @@ function setupAutocompleteClickOutside() {
 // ========================================
 // コピー機能
 // ========================================
+// ロジック：一括コピー用に効果先を整形
 function formatTargetsForBulk(targets) {
     if (!Array.isArray(targets) || targets.length === 0) return 'なし';
 
@@ -3055,6 +3177,7 @@ function formatTargetsForBulk(targets) {
     return labels.join(',');
 }
 
+// ロジック：バフを一括コピー形式に整形
 function formatBuffForBulk(buff) {
     const targetText = formatTargetsForBulk(buff.targets);
     const turnText = buff.originalTurn ?? buff.turn ?? '';
@@ -3070,10 +3193,12 @@ function formatBuffForBulk(buff) {
     ].join('|');
 }
 
+// ロジック：判定/攻撃を一括コピー形式に整形
 function formatPackageForBulk(item) {
     return `${item.name}|${item.roll}`;
 }
 
+// UI：アイテムデータをクリップボードへコピー
 function copyItemData(type, index, button) {
     const array = getCollection(type);
     if (!array || index < 0 || index >= array.length) return;
@@ -3105,6 +3230,7 @@ function copyItemData(type, index, button) {
     });
 }
 
+// UI：出力テキストをコピー
 function copyToClipboard(elementId, button) {
     const element = document.getElementById(elementId);
     // HTMLではなくdata属性のプレーンテキストをコピー
@@ -3131,6 +3257,7 @@ function copyToClipboard(elementId, button) {
 // 初期化
 // ========================================
 
+// UI：画面初期化のエントリポイント
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     updateColorDatalist();
